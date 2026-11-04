@@ -105,6 +105,7 @@
 					AutomationProperties.Name="{helpers:ResourceString Name=TabActions}"
 					Background="Transparent"
 					BorderThickness="0"
+					ToolTipService.Placement="Bottom"
 					ToolTipService.ToolTip="{helpers:ResourceString Name=TabActions}"
 					Visibility="{x:Bind ShowTabActionsButton, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
 
@@ -218,7 +219,8 @@
 						IconSource="{x:Bind IconSource, Mode=OneWay}"
 						Loaded="TabViewItem_Loaded"
 						Style="{StaticResource TabBarItemStyle}"
-						Tag="{x:Bind AccentBrush, Mode=OneWay}">
+						Tag="{x:Bind AccentBrush, Mode=OneWay}"
+						ToolTipService.Placement="Bottom">
 						<ToolTipService.ToolTip>
 							<ToolTip
 								MaxWidth="500"
@@ -273,6 +275,7 @@
 						Command="{x:Bind Commands.NewTab}"
 						DragOver="TabBarAddNewTabButton_DragOver"
 						Drop="TabBarAddNewTabButton_Drop"
+						ToolTipService.Placement="Bottom"
 						ToolTipService.ToolTip="{x:Bind Commands.NewTab.LabelWithHotKey, Mode=OneWay}">
 						<Button.Content>
 							<FontIcon FontSize="12" Glyph="&#xE710;" />

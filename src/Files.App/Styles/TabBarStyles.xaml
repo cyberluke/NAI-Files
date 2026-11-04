@@ -199,7 +199,8 @@
 								HighContrastAdjustment="None"
 								IsTabStop="False"
 								IsTextScaleFactorEnabled="False"
-								Style="{ThemeResource TabBarCloseButtonStyle}" />
+								Style="{ThemeResource TabBarCloseButtonStyle}"
+								ToolTipService.Placement="Bottom" />
 						</Grid>
 
 						<!--  Keep the path accent visible in every state, including compact tabs.  -->
