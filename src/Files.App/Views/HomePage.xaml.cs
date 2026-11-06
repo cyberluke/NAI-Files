@@ -63,7 +63,9 @@ namespace Files.App.Views
 			AppInstance.ToolbarViewModel.CanNavigateToParent = false;
 
 			// Set path of working directory empty
+			NaiLanguageBridge.StartupStage("home-set-working-dir");
 			await shellViewModel.SetWorkingDirectoryAsync("Home");
+			NaiLanguageBridge.StartupStage("home-set-working-dir-done");
 			shellViewModel.CheckForBackgroundImage();
 
 			AppInstance.SlimContentPage?.StatusBarViewModel.UpdateGitInfo(false, string.Empty, null);

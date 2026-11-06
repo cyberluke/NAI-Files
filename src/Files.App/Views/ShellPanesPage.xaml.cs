@@ -45,6 +45,7 @@ namespace Files.App.Views
 		private bool _wasRightPaneVisible;
 		private NavigationParams? _savedNavParamsRight;
 		private readonly PointerEventHandler _panePointerPressedHandler;
+		private bool _isDisposed;
 
 		// Properties
 
@@ -416,6 +417,10 @@ namespace Files.App.Views
 		/// <inheritdoc/>
 		public void FocusActivePane()
 		{
+			// Enumeration continuations can arrive after the tab was unloaded.
+			// Do not query destroyed XAML Children or try to focus them.
+			if (_isDisposed)
+				return;
 			var activePane = ActivePane == (IShellPage)GetPane(0)! ? GetPane(0) : GetPane(1);
 
 			// Skip when the file list is empty and no text input currently has focus:
@@ -442,6 +447,8 @@ namespace Files.App.Views
 
 		private ModernShellPage? GetPane(int index = -1)
 		{
+			if (_isDisposed)
+				return null;
 			if (index is -1 || RootGrid.Children.Count - 1 < index)
 				return null;
 
@@ -1061,6 +1068,9 @@ namespace Files.App.Views
 
 		public void Dispose()
 		{
+			if (_isDisposed)
+				return;
+			_isDisposed = true;
 			App.Logger.LogInformation($"ShellPanesPage.Dispose: PaneCount={GetPaneCount()}, ActivePane={LogPathHelper.RedactPath(ActivePane?.TabBarItemParameter?.NavigationParameter?.ToString())}");
 
 			TabBar.TabDragStarted -= TabBar_TabDragStarted;

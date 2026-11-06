@@ -47,9 +47,9 @@ namespace Files.App.Helpers
 						StartInfo = startInfo
 					};
 
-					process.Start();
-
-					return true;
+					var started = process.Start();
+					if (started) await RecordLaunchedDocumentsAsync(application);
+					return started;
 				}
 				catch (Exception)
 				{
@@ -58,8 +58,10 @@ namespace Files.App.Helpers
 			}
 			else
 			{
-				return await LaunchHelper.LaunchAppAsync(application
+				var started = await LaunchHelper.LaunchAppAsync(application
 					?? throw new InvalidOperationException("No application path was provided."), arguments, workingDirectory);
+				if (started) await RecordLaunchedDocumentsAsync(application);
+				return started;
 			}
 		}
 
@@ -133,6 +135,14 @@ namespace Files.App.Helpers
 			}
 
 			return processes;
+		}
+
+		private static async Task RecordLaunchedDocumentsAsync(string applications)
+		{
+			// Files' shell launcher encodes a multi-selection as pipe-delimited
+			// paths. A pipe is not a valid Windows filename character.
+			foreach (var path in applications.Split('|', StringSplitOptions.RemoveEmptyEntries).Take(1000))
+				await NaiDocumentHistory.RecordOpenedAsync(path);
 		}
 	}
 }

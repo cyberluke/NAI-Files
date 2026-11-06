@@ -37,8 +37,13 @@ namespace Files.App.Controls
 
 		internal void RaiseItemInvoked(SidebarItem item, PointerUpdateKind pointerUpdateKind)
 		{
-			// Only true group headers (e.g. Pinned, Drives) suppress selection; leaves-with-children (tree-view folder rows) navigate AND get selected.
-			if (item.Item is null || (item.IsGroupHeader && item.Item.IsLeafWithChildren != true)) return;
+			// Pure section headers (Pinned, Drives, Library, ...) carry no navigation target and
+			// suppress selection. Drive letters, Home, folder rows (leaves-with-children), file tags
+			// and NAI routes are real navigation targets and must select + navigate on row click.
+			if (item.Item is null)
+				return;
+			if (!item.Item.SelectsOnInvoked)
+				return;
 
 			SelectedItem = item.Item;
 			ItemInvoked?.Invoke(item, new(pointerUpdateKind));

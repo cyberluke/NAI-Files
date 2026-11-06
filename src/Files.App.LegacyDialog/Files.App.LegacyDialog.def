@@ -1,0 +1,4 @@
+LIBRARY Files.App.LegacyDialog32
+EXPORTS
+    InstallLegacyHook
+    UninstallLegacyHook

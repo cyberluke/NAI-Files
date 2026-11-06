@@ -14,6 +14,18 @@ namespace Files.App.Controls
 		{
 			// Popup width has to be set manually because it doesn't stretch with the parent
 			_textBoxSuggestionsContainerBorder.Width = ActualWidth;
+
+			// Clip the underline sweep to the pill (CSS overflow:hidden equivalent
+			// for the LTR travelling line) and keep its path in sync with the width.
+			if (_underlineHost is not null)
+			{
+				_underlineHost.Clip = new Microsoft.UI.Xaml.Media.RectangleGeometry
+				{
+					Rect = new Windows.Foundation.Rect(0, 0, _underlineHost.ActualWidth, _underlineHost.ActualHeight),
+				};
+				if (IsFocused)
+					StartSweep();
+			}
 		}
 
 		[DynamicWindowsRuntimeCast(typeof(UIElement))]

@@ -64,7 +64,7 @@ namespace Files.App.Helpers
 
 			// Set the system default language as the first item in the Languages collection
 			var systemLanguage = new AppLanguageItem(CultureInfo.InstalledUICulture.Name, systemDefault: true);
-			if (appLanguages.Select(lang => lang.Name.Contains(systemLanguage.Name)).Any())
+			if (appLanguages.Any(lang => lang.Code.Equals(systemLanguage.Code, StringComparison.OrdinalIgnoreCase)))
 				appLanguages[0] = systemLanguage;
 			else
 				appLanguages[0] = new("en-US", systemDefault: true);
@@ -81,7 +81,7 @@ namespace Files.App.Helpers
 		/// <returns>True if the language was successfully changed; otherwise, false.</returns>
 		public static bool TryChange(int index)
 		{
-			if (index >= SupportedLanguages.Count || PreferredLanguage == SupportedLanguages[index])
+			if (index < 0 || index >= SupportedLanguages.Count || PreferredLanguage == SupportedLanguages[index])
 				return false;
 
 			PreferredLanguage = SupportedLanguages[index];
@@ -99,28 +99,15 @@ namespace Files.App.Helpers
 		/// <returns>True if the language was successfully changed; otherwise, false.</returns>
 		public static bool TryChange(string code)
 		{
-			var lang = new AppLanguageItem(code);
-			var find = SupportedLanguages.FirstOrDefault(dl => dl.Name == lang.Name);
-			if (find is null)
-				return false;
+			if (string.IsNullOrEmpty(code))
+				return TryChange(0);
 
-			var index = SupportedLanguages
-				.Skip(1) // Skip first (default) language
-				.ToList()
-				.IndexOf(find ?? SupportedLanguages.First());
-
-			// Adjusts the index to match the correct index
-			index = index == 0 ? index : index + 1;
-
-			if (PreferredLanguage == SupportedLanguages[index])
-				return false;
-
-			PreferredLanguage = SupportedLanguages[index];
-
-			// Update the primary language override
-			ApplicationLanguages.PrimaryLanguageOverride = index == 0 ? _defaultCode : PreferredLanguage.Code;
-			StringExtensions.ResetLocalizedResources();
-			return true;
+			var find = SupportedLanguages.Skip(1).FirstOrDefault(language =>
+				language.Code.Equals(code, StringComparison.OrdinalIgnoreCase));
+			// Windows may expand a neutral manifest qualifier (vi) to vi-VN.
+			find ??= SupportedLanguages.Skip(1).FirstOrDefault(language =>
+				language.Code.Split('-')[0].Equals(code.Split('-')[0], StringComparison.OrdinalIgnoreCase));
+			return find is not null && TryChange(SupportedLanguages.IndexOf(find));
 		}
 	}
 }

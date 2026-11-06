@@ -29,7 +29,17 @@ namespace Files.App.Utils
 
 		public bool IsHiddenItem { get; set; } = false;
 
-		public StorageItemTypes PrimaryItemAttribute { get; set; }
+		private StorageItemTypes primaryItemAttribute;
+		public StorageItemTypes PrimaryItemAttribute
+		{
+			get => primaryItemAttribute;
+			set
+			{
+				if (!SetProperty(ref primaryItemAttribute, value)) return;
+				OnPropertyChanged(nameof(IsFolder));
+				RefreshNaiDocumentStatus();
+			}
+		}
 
 		public byte[]? PreloadedIconData { get; set; }
 
@@ -220,7 +230,29 @@ namespace Files.App.Utils
 		public string? ItemPath
 		{
 			get => itemPath;
-			set => SetProperty(ref itemPath, value);
+			set
+			{
+				if (SetProperty(ref itemPath, value)) RefreshNaiDocumentStatus();
+			}
+		}
+
+		public bool HasNaiDocumentStatus => !IsFolder && NaiDocumentHistory.IsDocument(ItemPath);
+		public bool IsNaiDocumentOpened => NaiDocumentHistory.Get(ItemPath) is not null;
+		public string NaiDocumentStatus => !HasNaiDocumentStatus ? string.Empty :
+			NaiDocumentHistory.Get(ItemPath) is { } entry
+				? string.Format("NaiOpenedAt".GetLocalizedResource(), entry.LastOpened.LocalDateTime, entry.Count)
+				: "NaiUnopened".GetLocalizedResource();
+		public Microsoft.UI.Xaml.Media.Brush NaiDocumentMarkerBrush =>
+			new Microsoft.UI.Xaml.Media.SolidColorBrush(IsNaiDocumentOpened
+				? Windows.UI.Color.FromArgb(255, 74, 222, 128)
+				: Windows.UI.Color.FromArgb(255, 56, 189, 248));
+
+		public void RefreshNaiDocumentStatus()
+		{
+			OnPropertyChanged(nameof(HasNaiDocumentStatus));
+			OnPropertyChanged(nameof(IsNaiDocumentOpened));
+			OnPropertyChanged(nameof(NaiDocumentStatus));
+			OnPropertyChanged(nameof(NaiDocumentMarkerBrush));
 		}
 
 		private string? itemNameRaw;
@@ -458,7 +490,7 @@ namespace Files.App.Utils
 			}
 			else
 			{
-				suffix = PrimaryItemAttribute == StorageItemTypes.File ? Strings.Folder.GetLocalizedResource() : "FolderItemAutomation".GetLocalizedResource();
+				suffix = PrimaryItemAttribute == StorageItemTypes.File ? Strings.File.GetLocalizedResource() : "FolderItemAutomation".GetLocalizedResource();
 			}
 
 			return $"{Name}, {suffix}";

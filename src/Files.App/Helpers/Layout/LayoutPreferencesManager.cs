@@ -233,6 +233,7 @@ namespace Files.App.Helpers
 				FolderLayoutModes.CardsView => typeof(GridLayoutPage),
 				FolderLayoutModes.GridView => typeof(GridLayoutPage),
 				FolderLayoutModes.ColumnView => typeof(ColumnsLayoutPage),
+				FolderLayoutModes.PulseView => typeof(PulseLayoutPage),
 				_ => typeof(DetailsLayoutPage)
 			};
 		}
@@ -312,6 +313,16 @@ namespace Files.App.Helpers
 			LayoutModeChangeRequested?.Invoke(this, new LayoutModeEventArgs(FolderLayoutModes.DetailsView));
 		}
 
+		public void ToggleLayoutModePulseView(bool manuallySet)
+		{
+			IsAdaptiveLayoutEnabled &= !manuallySet;
+
+			// Pulse View
+			LayoutMode = FolderLayoutModes.PulseView;
+
+			LayoutModeChangeRequested?.Invoke(this, new LayoutModeEventArgs(FolderLayoutModes.PulseView));
+		}
+
 		public void ToggleLayoutModeAdaptive()
 		{
 			// Adaptive
@@ -387,6 +398,11 @@ namespace Files.App.Helpers
 
 		public static void SetLayoutPreferencesForPath(string? path, LayoutPreferencesItem preferencesItem)
 		{
+			if (App.IsDialogMode && DialogSession.Current is { } dialog)
+			{
+				dialog.State.Layout = DialogSession.CloneLayout(preferencesItem);
+				return;
+			}
 			if (!UserSettingsService.LayoutSettingsService.SyncFolderPreferencesAcrossDirectories)
 			{
 				var folderFRN = Win32Helper.GetFolderFRN(path);
@@ -499,6 +515,11 @@ namespace Files.App.Helpers
 		private static LayoutPreferencesItem? GetLayoutPreferencesForPath(string? path, out bool? isDefaultLayout)
 		{
 			isDefaultLayout = null;
+			if (App.IsDialogMode && DialogSession.Current is { } dialog)
+			{
+				isDefaultLayout = dialog.State.Layout is null;
+				return dialog.State.Layout is { } layout ? DialogSession.CloneLayout(layout) : new LayoutPreferencesItem();
+			}
 
 			// Guard against null
 			if (path is null)

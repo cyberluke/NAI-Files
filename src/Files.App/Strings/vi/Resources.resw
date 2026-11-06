@@ -4615,7 +4615,7 @@
     <value>Khi dùng chuột</value>
   </data>
   <data name="CreateNewFile" xml:space="preserve">
-    <value>New {0}</value>
+    <value>Tạo {0} mới</value>
   </data>
   <data name="EnableSmoothScrolling" xml:space="preserve">
     <value>Làm mịn chuyển động cuộn trang</value>
@@ -4740,4 +4740,175 @@
   <data name="ConfirmRemoveTagsDialogContent" xml:space="preserve">
     <value>Bạn có chắc chắn muốn gỡ bỏ nhãn khỏi khoản mục đã chọn không?</value>
   </data>
+  <data name="SearchForQuery" xml:space="preserve">
+    <value>Tìm kiếm “{0}”</value>
+  </data>
+  <data name="NaiAssistantTitle" xml:space="preserve"><value>Trợ lý NAI Files</value></data>
+  <data name="NaiOpened" xml:space="preserve"><value>Đã mở bằng Files</value></data>
+  <data name="NaiUnopened" xml:space="preserve"><value>Chưa mở bằng Files</value></data>
+  <data name="NaiOpenedAt" xml:space="preserve"><value>Lần mở gần nhất: {0} · Số lần mở: {1}</value></data>
+  <data name="NaiMarkUnopened" xml:space="preserve"><value>Đánh dấu là chưa mở</value></data>
+  <data name="NaiActionSummary" xml:space="preserve"><value>Tóm tắt tài liệu</value></data>
+  <data name="NaiActionQuestion" xml:space="preserve"><value>Hỏi về tài liệu đã chọn</value></data>
+  <data name="NaiActionKeyPoints" xml:space="preserve"><value>Trích xuất các ý chính</value></data>
+  <data name="NaiActionTasks" xml:space="preserve"><value>Trích xuất công việc và thời hạn</value></data>
+  <data name="NaiActionExplain" xml:space="preserve"><value>Giải thích bằng ngôn ngữ dễ hiểu</value></data>
+  <data name="NaiActionTranslate" xml:space="preserve"><value>Dịch văn bản đã chọn</value></data>
+  <data name="NaiActionCompare" xml:space="preserve"><value>So sánh tài liệu</value></data>
+  <data name="NaiActionName" xml:space="preserve"><value>Gợi ý tên tệp dễ hiểu</value></data>
+  <data name="NaiActionTags" xml:space="preserve"><value>Gợi ý thẻ và danh mục</value></data>
+  <data name="NaiActionOrganize" xml:space="preserve"><value>Lập kế hoạch sắp xếp thư mục</value></data>
+  <data name="NaiActionSearch" xml:space="preserve"><value>Chuyển câu hỏi thành truy vấn tìm kiếm theo chỉ mục</value></data>
+  <data name="NaiAiConsent" xml:space="preserve"><value>Tôi cho phép gửi nội dung đã chọn và câu hỏi đang hiển thị tới nhà cung cấp AI đã cấu hình thông qua Kelvin AI Workstation. Nội dung tài liệu không bao giờ được gửi tự động.</value></data>
+  <data name="NaiAiReview" xml:space="preserve"><value>Chỉ là gợi ý. Không có tệp nào được tự động đổi tên, di chuyển, xóa hoặc thực thi. Hãy kiểm tra kết quả AI trước khi sử dụng.</value></data>
+  <data name="NaiAiGenerate" xml:space="preserve"><value>Tạo kết quả</value></data>
+  <data name="NaiAiPrompt" xml:space="preserve"><value>Câu hỏi, hướng dẫn hoặc ngôn ngữ đích…</value></data>
+  <data name="NaiAiConnect" xml:space="preserve"><value>Kết nối với Kelvin AI Workstation</value></data>
+  <data name="NaiAiUnavailable" xml:space="preserve"><value>Cổng AI không khả dụng hoặc ứng dụng Files này chưa được ghép nối. Tìm kiếm và lịch sử tài liệu cục bộ vẫn hoạt động.</value></data>
+  <data name="NaiAiNoSelection" xml:space="preserve"><value>Trước tiên hãy chọn tài liệu. Văn bản, Markdown, DOCX, ODT và PPTX được đọc cục bộ dưới dạng trích đoạn có giới hạn. Tài liệu không được hỗ trợ, không khả dụng hoặc quá lớn chỉ sử dụng tên và siêu dữ liệu.</value></data>
+  <data name="NaiAiPreview" xml:space="preserve"><value>Nội dung sẽ được gửi</value></data>
+  <data name="NaiAiModel" xml:space="preserve"><value>Mô hình</value></data>
+  <data name="NaiAiResult" xml:space="preserve"><value>Kết quả AI</value></data>
+  <data name="NaiAiFailure" xml:space="preserve"><value>Yêu cầu không thành công. Không có tệp nào bị thay đổi. {0}</value></data>
+  <data name="NaiAiApplySearch" xml:space="preserve"><value>Kiểm tra và chạy tìm kiếm</value></data>
+  <data name="NaiAiPairCode" xml:space="preserve"><value>Mã ghép nối</value></data>
+  <data name="NaiAiPair" xml:space="preserve"><value>Ghép nối Files</value></data>
+  <data name="NaiAiDisconnect" xml:space="preserve"><value>Ngắt kết nối Files khỏi AI</value></data>
+  <data name="NaiAiConnected" xml:space="preserve"><value>Đã kết nối với Kelvin AI Workstation. Mô hình đã chọn quyết định nơi thực hiện suy luận.</value></data>
+  <data name="NaiSearchHint" xml:space="preserve"><value>Fuzzy search · files: tên · unread: tên · read: tên · content: từ khóa · $AQS</value></data>
+  <data name="NaiLanguageRestart" xml:space="preserve"><value>Ngôn ngữ hiện theo NAI OS. Hãy mở lại Files để cập nhật các trang đang hiển thị; các thẻ sẽ được khôi phục.</value></data>
+  <data name="NaiLanguageManaged" xml:space="preserve"><value>Ngôn ngữ theo cài đặt NAI OS. Các trang đang mở có thể cần khởi động lại; các thẻ của bạn sẽ được giữ nguyên.</value></data>
+  <data name="NaiAiInvalidResponse" xml:space="preserve"><value>Mô hình không trả về đề xuất có thể xác minh. Không có tệp nào bị thay đổi. Hãy điều chỉnh yêu cầu hoặc chọn mô hình khác.</value></data>
+  <data name="NaiFuzzySearch" xml:space="preserve"><value>Fuzzy search</value></data>
+  <data name="NaiAssistantShortTitle" xml:space="preserve"><value>Trợ lý AI</value></data>
+  <data name="NaiProductName" xml:space="preserve"><value>NAI Trình quản lý tệp</value></data>
+  <data name="NaiConnectionSettings" xml:space="preserve"><value>Mô hình và kết nối Kelvin AI Workstation</value></data>
+  <data name="NaiChooseAction" xml:space="preserve"><value>Bạn muốn làm gì với các tệp?</value></data>
+  <data name="NaiNoCompatibleModel" xml:space="preserve"><value>Kelvin AI Workstation không cung cấp mô hình hội thoại tương thích. Các mô hình giọng nói và embedding không được hiển thị tại đây.</value></data>
+  <data name="NaiPinnedModelUnavailable" xml:space="preserve"><value>Mô hình đã chọn không khả dụng hoặc không tương thích: {0}. Hãy chủ động chọn mô hình khác.</value></data>
+  <data name="NaiSortDirection" xml:space="preserve"><value>Đổi thứ tự tăng dần / giảm dần</value></data>
+  <data name="NaiAttributeFilterHint" xml:space="preserve"><value>Lọc danh sách hiện tại theo thuộc tính tệp. Fuzzy search tìm tên gần giống, AI vision tìm nội dung hình ảnh.</value></data>
+  <data name="NaiThumbnailProgress" xml:space="preserve"><value>Ảnh xem trước: {0} sẵn sàng · {1} chờ · {2} đang tải · {3} cần tải tệp trước · {4} lỗi</value></data>
+  <data name="NaiVisionTitle" xml:space="preserve"><value>Hình ảnh với AI</value></data>
+  <data name="NaiVisionDescription" xml:space="preserve"><value>Tìm ảnh đã phân tích theo nội dung nhìn thấy, mô tả, OCR và thẻ. Khi nhập, chỉ tìm trong bộ nhớ đệm cục bộ; phân tích ảnh cần sự đồng ý của bạn.</value></data>
+  <data name="NaiVisionFolder" xml:space="preserve"><value>Thư mục hiện tại</value></data>
+  <data name="NaiChooseFolder" xml:space="preserve"><value>Chọn thư mục</value></data>
+  <data name="NaiVisionSearchHint" xml:space="preserve"><value>Fuzzy search — mô tả ảnh hoặc ảnh chụp màn hình…</value></data>
+  <data name="NaiVisionAllCache" xml:space="preserve"><value>Tất cả ảnh đã phân tích</value></data>
+  <data name="NaiVisionTags" xml:space="preserve"><value>Thẻ được tạo</value></data>
+  <data name="NaiVisionAnalyze" xml:space="preserve"><value>Phân tích thư mục này</value></data>
+  <data name="NaiVisionConsent" xml:space="preserve"><value>Tôi đồng ý phân tích ảnh trong thư mục này bằng mô hình được chọn rõ ràng qua Kelvin AI Workstation. Chỉ đọc ảnh có sẵn cục bộ; bỏ qua tệp chỉ có trên mạng và thư mục con. Không tự chuyển sang đám mây hoặc CPU.</value></data>
+  <data name="NaiVisionResults" xml:space="preserve"><value>{0} ảnh phù hợp · {1} phân tích trong bộ nhớ đệm</value></data>
+  <data name="NaiVisionProgress" xml:space="preserve"><value>{0} đã phân tích · {1} đã lưu · {2} bỏ qua · {3} lỗi / {4} ảnh · {5}</value></data>
+  <data name="NaiAllTags" xml:space="preserve"><value>Tất cả thẻ</value></data>
+  <data name="NaiVisionTranslate" xml:space="preserve"><value>Tìm kiếm đa ngôn ngữ</value></data>
+  <data name="NaiVisionChooseModel" xml:space="preserve"><value>Chọn rõ ràng một mô hình tương thích</value></data>
+  <data name="NaiVisionQueryConsent" xml:space="preserve"><value>Chỉ gửi cụm từ tìm kiếm này đến {0} qua Kelvin AI Workstation? Không gửi ảnh, tên tệp hay mô tả đã lưu. Không chuyển sang mô hình khác.&#10;&#10;{1}</value></data>
+  <data name="NaiVisionInterpreted" xml:space="preserve"><value>Cách hiểu truy vấn: {0} · {1}</value></data>
+  <data name="NaiVisionLiteralSearch" xml:space="preserve"><value>Không thể dịch; kết quả hiển thị vẫn dùng truy vấn gốc. {0}</value></data>
+  <data name="NaiVisionStale" xml:space="preserve"><value>Phân tích đã lưu: tệp nguồn đã thay đổi hoặc không còn khả dụng. Đây không phải bằng chứng về nội dung hiện tại.</value></data>
+  <data name="NaiOpenSource" xml:space="preserve"><value>Mở tệp nguồn</value></data>
+  <data name="NaiRevealSource" xml:space="preserve"><value>Hiển thị trong thư mục</value></data>
+  <data name="NaiWorkspaceTitle" xml:space="preserve"><value>Không gian làm việc tệp</value></data>
+  <data name="NaiWorkspaceDescription" xml:space="preserve"><value>Lưu bộ thẻ, theo dõi thao tác thực, xem dung lượng, lịch sử mở và so sánh thư mục. Các bước kiểm tra không di chuyển hay xóa tệp.</value></data>
+  <data name="NaiWorkspaceSaved" xml:space="preserve"><value>Không gian đã lưu</value></data>
+  <data name="NaiWorkspaceSave" xml:space="preserve"><value>Lưu các thẻ hiện tại</value></data>
+  <data name="NaiWorkspaceRestore" xml:space="preserve"><value>Khôi phục thành thẻ mới</value></data>
+  <data name="NaiWorkspaceForget" xml:space="preserve"><value>Bỏ mục đã lưu</value></data>
+  <data name="NaiWorkspaceName" xml:space="preserve"><value>Tên (thay thế tên đã có)</value></data>
+  <data name="NaiWorkspaceStorage" xml:space="preserve"><value>Tệp lớn nhất</value></data>
+  <data name="NaiWorkspaceDuplicates" xml:space="preserve"><value>Kiểm tra tệp trùng chính xác</value></data>
+  <data name="NaiWorkspaceHistory" xml:space="preserve"><value>Lịch sử mở tài liệu</value></data>
+  <data name="NaiWorkspaceCompare" xml:space="preserve"><value>So sánh với thư mục…</value></data>
+  <data name="NaiWorkspaceChanges" xml:space="preserve"><value>Thay đổi và phân tích cũ</value></data>
+  <data name="NaiWorkspaceGroups" xml:space="preserve"><value>Đề xuất nhóm từ AI</value></data>
+  <data name="NaiWorkspaceOperations" xml:space="preserve"><value>Thao tác tệp và tiến độ thực</value></data>
+  <data name="NaiWorkspaceCancelled" xml:space="preserve"><value>Đã hủy kiểm tra. Không tệp nào bị thay đổi.</value></data>
+  <data name="NaiWorkspaceResults" xml:space="preserve"><value>Hiển thị {0}/{1} kết quả. Chọn tệp để hiện trong thư mục.</value></data>
+  <data name="NaiWorkspaceScope" xml:space="preserve"><value>Chỉ mục trực tiếp: {0} mục · {1} không truy cập được · {2}</value></data>
+  <data name="NaiWorkspaceTruncated" xml:space="preserve"><value>Đạt giới hạn 10.000 mục; kết quả chưa đầy đủ</value></data>
+  <data name="NaiWorkspaceOnlineOnly" xml:space="preserve"><value>Không đủ điều kiện đọc nội dung cục bộ</value></data>
+  <data name="NaiWorkspaceComparisonNote" xml:space="preserve"><value>Chỉ so sánh siêu dữ liệu, không đệ quy hay đồng bộ. Siêu dữ liệu giống nhau không chứng minh nội dung giống nhau. Thư mục kia:</value></data>
+  <data name="NaiCompareOnlyLeft" xml:space="preserve"><value>Chỉ có trong thư mục hiện tại</value></data>
+  <data name="NaiCompareOnlyRight" xml:space="preserve"><value>Chỉ có trong thư mục so sánh</value></data>
+  <data name="NaiCompareTypeChanged" xml:space="preserve"><value>Khác loại tệp/thư mục</value></data>
+  <data name="NaiCompareMetadataChanged" xml:space="preserve"><value>Khác kích thước hoặc thời gian sửa</value></data>
+  <data name="NaiCompareMetadataEqual" xml:space="preserve"><value>Siêu dữ liệu khớp; chưa so sánh nội dung</value></data>
+  <data name="NaiWorkspaceHashConsent" xml:space="preserve"><value>Đọc các tệp cục bộ trong thư mục này để xác minh ứng viên cùng kích thước bằng SHA-256? Bỏ qua tệp chỉ có trên mạng, liên kết, thư mục con và tệp trên 512 MiB. Có thể hủy. Không xóa gì.</value></data>
+  <data name="NaiWorkspaceHashProgress" xml:space="preserve"><value>Đã kiểm tra {0}/{1} ứng viên · bỏ qua {2}</value></data>
+  <data name="NaiWorkspaceDuplicateGroup" xml:space="preserve"><value>{0} tệp giống hệt · mỗi tệp {1:N0} byte</value></data>
+  <data name="NaiWorkspaceOpened" xml:space="preserve"><value>Mở gần nhất qua Files: {0} · {1} lần được ghi nhận</value></data>
+  <data name="NaiWorkspaceNotOpened" xml:space="preserve"><value>Files chưa ghi nhận lần mở</value></data>
+  <data name="NaiWorkspaceChangedSinceOpen" xml:space="preserve"><value>Đã sửa sau lần mở gần nhất được ghi nhận</value></data>
+  <data name="NaiWorkspaceChangesNote" xml:space="preserve"><value>Chỉ dựa trên siêu dữ liệu hiện tại, lịch sử mở của Files và nguồn phân tích đã lưu. Không khẳng định thay đổi nội dung trong quá khứ.</value></data>
+  <data name="NaiWorkspaceGroupsNote" xml:space="preserve"><value>Nhóm để xem xét theo thẻ AI tiếng Anh chính của phân tích mới nhất; mỗi nguồn ghi rõ mô hình. Bộ nhớ đệm có thể cũ. Không tạo thư mục hay di chuyển tệp.</value></data>
+  <data name="NaiVisionLenses" xml:space="preserve"><value>Tìm kiếm ngữ nghĩa đã lưu</value></data>
+  <data name="NaiVisionSaveLens" xml:space="preserve"><value>Lưu truy vấn và phạm vi</value></data>
+  <data name="NaiVisionLoadLens" xml:space="preserve"><value>Tải truy vấn đã lưu</value></data>
+  <data name="NaiVisionDuplicates" xml:space="preserve"><value>Ảnh trùng trong bộ nhớ đệm</value></data>
+  <data name="NaiVisionRelated" xml:space="preserve"><value>Ảnh đã phân tích liên quan</value></data>
+  <data name="NaiVisionSharedTags" xml:space="preserve"><value>Thẻ AI chung: {0}. Giống thẻ, không phải giống điểm ảnh hay byte.</value></data>
+  <data name="NaiVisionRelatedResults" xml:space="preserve"><value>{0} ảnh liên quan đến {1} trong phạm vi bộ nhớ đệm hiện tại</value></data>
+  <data name="NaiVisionCachedDuplicatesNote" xml:space="preserve"><value>{0} ảnh có cùng mã băm nguồn đã lưu. Chưa đọc lại nguồn; hãy kiểm tra trùng chính xác để xác minh tệp hiện tại.</value></data>
+  <data name="NaiResourcesTitle" xml:space="preserve"><value>Tài nguyên hệ thống</value></data>
+  <data name="NaiTelemetryUnknown" xml:space="preserve"><value>Không khả dụng</value></data>
+  <data name="NaiTelemetryDisk" xml:space="preserve"><value>Ổ hệ thống trống/tổng</value></data>
+  <data name="NaiTelemetryObserved" xml:space="preserve"><value>Đo lúc {0}</value></data>
+  <data name="NaiTelemetrySource" xml:space="preserve"><value>Bộ đếm thời gian nhóm CPU Windows, RAM vật lý, dung lượng ổ hệ thống và tín hiệu Wi-Fi. Dung lượng không phải mức sử dụng I/O. Không ước lượng GPU/NPU từ phần tài nguyên được đặt trước.</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Cấu trúc và hàng đợi Kelvin</value></data>
+  <data name="NaiRuntimeDescription" xml:space="preserve"><value>Ảnh chụp trạng thái chỉ đọc từ Kelvin AI Workstation bằng ghép nối riêng của Files. Không khởi động mô hình. Hiển thị quan hệ nhà cung cấp và phân công thiết bị thực, không suy diễn lưu lượng hay hiệu năng.</value></data>
+  <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Làm mới trạng thái</value></data>
+  <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Không lấy được trạng thái trực tiếp. Trạng thái đang hiển thị đã cũ; kết nối Kelvin AI Workstation qua NAI Assistant. {0}</value></data>
+  <data name="NaiRuntimeSnapshotAt" xml:space="preserve"><value>Trạng thái được ghi lúc: {0}</value></data>
+  <data name="NaiRuntimeQueue" xml:space="preserve"><value>Bộ điều phối Kelvin: {0} phiên hoạt động · {1} chờ. Không bao gồm yêu cầu chat trực tiếp.</value></data>
+  <data name="NaiRuntimeQueueUnknown" xml:space="preserve"><value>Hàng đợi bộ điều phối không khả dụng, không có nghĩa là trống.</value></data>
+  <data name="NaiRuntimeAssignments" xml:space="preserve"><value>Phân công (khả năng · trạng thái · nhà cung cấp → thiết bị)</value></data>
+  <data name="NaiRuntimeRelationships" xml:space="preserve"><value>Quan hệ cấu trúc được quan sát</value></data>
+  <data name="NaiRuntimeTruncated" xml:space="preserve"><value>Đạt giới hạn; tổng quan chưa đầy đủ.</value></data>
+  <data name="NaiRuntimeReadOnly" xml:space="preserve"><value>Chỉ đọc. Làm mới mỗi năm giây khi trang hiển thị.</value></data>
+  <data name="NaiEmailTitle" xml:space="preserve"><value>Tổng quan NAI E-MAIL</value></data>
+  <data name="NaiEmailDescription" xml:space="preserve"><value>Siêu dữ liệu chỉ đọc trực tiếp từ cửa sổ NAI E-Mail đang chạy và tài khoản chủ sở hữu được duyệt rõ ràng. Giữ cả hai ứng dụng mở; trang này thử lại mỗi năm giây. Tệp đính kèm và cuộc họp mở trong NAI E-Mail. Files không đọc cơ sở dữ liệu hộp thư, nội dung thư, bản ghi hay đường dẫn đính kèm.</value></data>
+  <data name="NaiEmailInbox" xml:space="preserve"><value>Mở hộp thư đến</value></data>
+  <data name="NaiEmailAttachments" xml:space="preserve"><value>Tệp đính kèm gần đây</value></data>
+  <data name="NaiEmailCalendar" xml:space="preserve"><value>Cuộc họp hôm nay</value></data>
+  <data name="NaiEmailTasks" xml:space="preserve"><value>Mở công việc</value></data>
+  <data name="NaiEmailGrantMissing" xml:space="preserve"><value>Giữ NAI E-Mail mở. Tổng quan Files mặc định dùng mọi hộp thư chủ sở hữu; quyền riêng của người dùng Windows được tìm tự động. Chỉ mở Cài đặt → AI để thu hẹp hoặc thu hồi quyền.</value></data>
+  <data name="NaiEmailUnavailable" xml:space="preserve"><value>Tổng quan thư không khả dụng. Xóa hàng cũ thay vì trình bày là dữ liệu trực tiếp. {0}</value></data>
+  <data name="NaiEmailSummary" xml:space="preserve"><value>Hôm nay: {0} chuỗi thư đến chưa đọc · {1} công việc cấp cao đến hạn · {2} cuộc họp · {3} tài khoản được duyệt</value></data>
+  <data name="NaiEmailProvenance" xml:space="preserve"><value>Bộ nhớ đệm trực tiếp NAI E-Mail · ghi lúc {0} · ngày {1} ({2}). Làm mới mỗi năm giây khi trang này và NAI E-Mail đang mở.</value></data>
+  <data name="NaiEmailAllDay" xml:space="preserve"><value>Cả ngày</value></data>
+  <data name="NaiEmailHasRecord" xml:space="preserve"><value>Có bản ghi cuộc họp trong E-Mail</value></data>
+  <data name="NaiEmailOpenFailed" xml:space="preserve"><value>Không mở được NAI E-Mail. Cài đặt hoặc sửa đăng ký giao thức ứng dụng.</value></data>
+  <data name="NaiTelemetryGpuSource" xml:space="preserve"><value>GPU/NPU dùng engine được đo bận nhất của bộ điều hợp trong Windows PDH. ID là LUID/nút vật lý Windows, không phải chỉ số OpenVINO suy đoán. Bộ đếm không có nhà cung cấp luôn là không khả dụng.</value></data>
+  <data name="NaiEmailTimeout" xml:space="preserve"><value>NAI E-Mail chưa hoàn tất phản hồi trước thời hạn yêu cầu.</value></data>
+  <data name="NaiEmailWaiting" xml:space="preserve"><value>Đang chờ cửa sổ NAI E-Mail đang chạy với quyền Files đã duyệt. Trang này thử lại mỗi năm giây khi cả hai ứng dụng đang mở.</value></data>
+  <data name="NaiRequestTimeout" xml:space="preserve"><value>Dịch vụ yêu cầu đã hết thời gian. Không dùng nhà cung cấp thay thế.</value></data>
+  <data name="NaiWorkspaceSection" xml:space="preserve"><value>NAI OS</value></data>
+  <data name="NaiAiPairingCapabilities" xml:space="preserve"><value>Kelvin trả về đăng ký Files cũ thiếu embeddings, rerank và chat. Chỉ thu hồi nai-files trong mục tích hợp Kelvin rồi kết nối lại Files. Không dùng thông tin xác thực của ứng dụng khác.</value></data>
+  <data name="NaiSearchMode" xml:space="preserve"><value>Chế độ tìm kiếm</value></data>
+  <data name="NaiSearchLocal" xml:space="preserve"><value>Fuzzy / AQS cục bộ</value></data>
+  <data name="NaiSearchSemantic" xml:space="preserve"><value>Ngữ nghĩa · NPU</value></data>
+  <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Chỉ mục</value></data>
+  <data name="NaiSemanticTitle" xml:space="preserve"><value>Tìm tệp theo ngữ nghĩa</value></data>
+  <data name="NaiSemanticDescription" xml:space="preserve"><value>Tìm nội dung tài liệu đã duyệt qua chỉ mục NPU cục bộ của Kelvin, tách khỏi tìm tên tệp fuzzy/AQS. Lập chỉ mục phải được duyệt, có giới hạn và có thể hủy; loại bỏ phiên bản nguồn đã cũ.</value></data>
+  <data name="NaiSemanticRecursive" xml:space="preserve"><value>Bao gồm thư mục con (không theo liên kết)</value></data>
+  <data name="NaiSemanticConsent" xml:space="preserve"><value>Cho phép đọc tài liệu cục bộ đã xem xét và lưu đoạn trích cùng vector có giới hạn trong Kelvin. Không đọc tệp chỉ trực tuyến, liên kết hay chuyển sang đám mây. Tôi sẽ xem danh sách tệp trước khi lập chỉ mục.</value></data>
+  <data name="NaiSemanticIndex" xml:space="preserve"><value>Xem xét và lập chỉ mục</value></data>
+  <data name="NaiSemanticApprove" xml:space="preserve"><value>Lập chỉ mục tệp đã duyệt</value></data>
+  <data name="NaiSemanticForget" xml:space="preserve"><value>Xóa chỉ mục này</value></data>
+  <data name="NaiSemanticForgetConfirm" xml:space="preserve"><value>Chỉ xóa chỉ mục thư mục của Files và đúng ID đoạn trích đã ghi? Không thay đổi tệp nguồn hay chỉ mục ứng dụng khác.</value></data>
+  <data name="NaiSemanticQueryHint" xml:space="preserve"><value>Mô tả ý nghĩa cần tìm; gửi truy vấn để dùng NPU</value></data>
+  <data name="NaiSemanticChooseFolder" xml:space="preserve"><value>Chọn thư mục cục bộ. Không tự lập chỉ mục toàn ổ đĩa hay chạy nền.</value></data>
+  <data name="NaiSemanticIndexRequired" xml:space="preserve"><value>Thư mục chưa có chỉ mục ngữ nghĩa được duyệt. Mở Chỉ mục, xem phạm vi và lập chỉ mục tài liệu đã chọn.</value></data>
+  <data name="NaiSemanticIndexState" xml:space="preserve"><value>{0} tài liệu được theo dõi · cập nhật {1} · {2} · {3} ID chờ dọn</value></data>
+  <data name="NaiSemanticPartial" xml:space="preserve"><value>Phạm vi một phần / có giới hạn</value></data>
+  <data name="NaiSemanticReady" xml:space="preserve"><value>Đã hoàn tất lượt được duyệt</value></data>
+  <data name="NaiSemanticRetrievalUnavailable" xml:space="preserve"><value>Kelvin đã được ghép nối, nhưng dịch vụ truy xuất NPU cục bộ không khả dụng. Hãy khởi động dịch vụ OpenVINO NPU trong Kelvin rồi thử lại.</value></data>
+  <data name="NaiSemanticReviewPlan" xml:space="preserve"><value>Duyệt {0} tài liệu này? Đã bỏ qua {1} mục không hỗ trợ hoặc không khả dụng. {2} Giới hạn: 256 tệp, 32 MiB mỗi tệp, 512 MiB mỗi lượt, 24.000 ký tự đầu và tối đa 16 đoạn mỗi tài liệu. Không sửa tệp nguồn. Đoạn trích và embedding ở trong NPU cục bộ đã ghép nối rõ ràng.</value></data>
+  <data name="NaiSemanticProgress" xml:space="preserve"><value>Đã xem {0}/{1} · lập chỉ mục {2} · không đổi {3} · bỏ qua {4} · lỗi {5}</value></data>
+  <data name="NaiSemanticCancelled" xml:space="preserve"><value>Đã hủy lập chỉ mục hoặc truy vấn. Giữ checkpoint tài liệu hoàn tất và ghi lại ID cần dọn.</value></data>
+  <data name="NaiSemanticSearchFailure" xml:space="preserve"><value>Tìm kiếm/chỉ mục ngữ nghĩa không khả dụng — không chuyển sang tìm cục bộ hay nhà cung cấp khác: {0}</value></data>
+  <data name="NaiSemanticResults" xml:space="preserve"><value>Theo độ liên quan NPU: {0} kết quả · {1} tài liệu hiện hành · loại {2} tài liệu cũ/không khả dụng</value></data>
+  <data name="NaiSemanticEvidence" xml:space="preserve"><value>Điểm rerank {0:F4} · lập chỉ mục {1} · đoạn đã lưu, không phải đọc mới tài liệu</value></data>
+  <data name="NaiSemanticFullResults" xml:space="preserve"><value>Mở kết quả trong Files</value></data>
 </root>

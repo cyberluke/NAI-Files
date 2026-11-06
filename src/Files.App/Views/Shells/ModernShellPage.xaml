@@ -168,6 +168,7 @@
 		<uc:StatusBar
 			x:Name="StatusBar"
 			Grid.Row="3"
+			ThumbnailSource="{x:Bind ShellViewModel, Mode=OneWay}"
 			ShowInfoText="{x:Bind IsStatusBarVisible, Mode=OneWay}"
 			Visibility="{x:Bind IsStatusBarVisible, Mode=OneWay}" />
 

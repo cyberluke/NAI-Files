@@ -114,11 +114,12 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<!--  Background Image  -->
 		<Image
-			Grid.RowSpan="3"
+			Grid.RowSpan="4"
 			HorizontalAlignment="{x:Bind ViewModel.AppThemeBackgroundImageHorizontalAlignment, Mode=OneWay}"
 			VerticalAlignment="{x:Bind ViewModel.AppThemeBackgroundImageVerticalAlignment, Mode=OneWay}"
 			Opacity="{x:Bind ViewModel.AppThemeBackgroundImageOpacity, Mode=OneWay}"
@@ -301,6 +302,7 @@
 			<!--  Footer  -->
 			<controls:SidebarView.Footer>
 				<StackPanel Padding="4,2,4,2" Spacing="2">
+					<uc:NaiResourcesPanel AutomationProperties.AutomationId="NaiResourcesPanel" />
 					<Border
 						Height="1"
 						HorizontalAlignment="Stretch"
@@ -337,10 +339,106 @@
 			</controls:SidebarView.Footer>
 		</controls:SidebarView>
 
+		<!--  Native open/save dialog footer: path/filename + Cancel | Open/Save. Always realized so the
+		     filename box is reliably focusable; shown only in dialog mode by MainPage.  -->
+		<Grid
+			x:Name="DialogFooter"
+			Grid.Row="3"
+			MinHeight="56"
+			Padding="12,8,12,10"
+			Visibility="Collapsed"
+			Background="{ThemeResource App.Theme.AddressBar.BackgroundBrush}"
+			BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+			BorderThickness="0,1,0,0"
+			ColumnSpacing="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<TextBlock
+				VerticalAlignment="Center"
+				Style="{StaticResource BodyStrongTextBlockStyle}"
+				Text="{x:Bind ViewModel.DialogPathLabel, Mode=OneWay}" />
+
+			<TextBox
+				x:Name="DialogFileNameBox"
+				Grid.Column="1"
+				MinHeight="34"
+				VerticalAlignment="Center"
+				AutomationProperties.Name="{x:Bind ViewModel.DialogPathLabel, Mode=OneWay}"
+				PlaceholderText="{x:Bind ViewModel.DialogPathLabel, Mode=OneWay}"
+				Text="{x:Bind ViewModel.DialogFileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+				KeyDown="DialogFileNameBox_KeyDown" />
+
+			<Button
+				x:Name="DialogCancelButton"
+				Grid.Column="2"
+				MinWidth="92"
+				MinHeight="34"
+				Padding="16,0"
+				VerticalAlignment="Center"
+				AutomationProperties.Name="{helpers:ResourceString Name=Cancel}"
+				Click="DialogCancel_Click"
+				Content="{helpers:ResourceString Name=Cancel}" />
+
+			<Button
+				x:Name="DialogConfirmButton"
+				Grid.Column="3"
+				MinWidth="104"
+				MinHeight="34"
+				Padding="16,0"
+				VerticalAlignment="Center"
+				AutomationProperties.Name="{x:Bind ViewModel.DialogConfirmLabel, Mode=OneWay}"
+				Click="DialogConfirm_Click"
+				Content="{x:Bind ViewModel.DialogConfirmLabel, Mode=OneWay}"
+				IsEnabled="{x:Bind ViewModel.CanConfirmDialog, Mode=OneWay}"
+				Style="{StaticResource AccentButtonStyle}" />
+
+			<TextBlock x:Name="DialogFileTypeLabel" Grid.Row="1" VerticalAlignment="Center" Text="{helpers:ResourceString Name=Type}"
+				x:Load="{x:Bind ViewModel.HasDialogFileTypes, Mode=OneWay}" />
+			<ComboBox Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" HorizontalAlignment="Stretch"
+				x:Load="{x:Bind ViewModel.HasDialogFileTypes, Mode=OneWay}" x:Name="DialogFileTypeBox"
+				ItemsSource="{x:Bind ViewModel.DialogFileTypes}" DisplayMemberPath="Name"
+				SelectedIndex="{x:Bind ViewModel.DialogFileTypeIndex, Mode=TwoWay}" />
+			<Button
+				x:Name="DialogFooterNewFolderButton"
+				Grid.Row="1"
+				Grid.ColumnSpan="2"
+				Margin="0,6,0,0"
+				MinHeight="34"
+				HorizontalAlignment="Left"
+				x:Load="{x:Bind ViewModel.IsDialogFolderMode, Mode=OneWay}"
+				AutomationProperties.AutomationId="DialogFooterNewFolderButton"
+				AutomationProperties.Name="{helpers:ResourceString Name=NewFolder}"
+				AutomationProperties.FullDescription="{x:Bind Commands.CreateFolder.Description, Mode=OneWay}"
+				Command="{x:Bind Commands.CreateFolder, Mode=OneWay}"
+				ToolTipService.ToolTip="{x:Bind Commands.CreateFolder.LabelWithHotKey, Mode=OneWay}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<FontIcon FontSize="14" Glyph="{x:Bind Commands.CreateFolder.Glyph.BaseGlyph}" />
+					<TextBlock Text="{helpers:ResourceString Name=NewFolder}" />
+				</StackPanel>
+			</Button>
+			<InfoBar
+				Grid.Row="2"
+				Grid.ColumnSpan="4"
+				IsClosable="False"
+				IsOpen="{x:Bind ViewModel.HasDialogFeedback, Mode=OneWay}"
+				Message="{x:Bind ViewModel.DialogFeedback, Mode=OneWay}"
+				Severity="{x:Bind ViewModel.DialogFeedbackSeverity, Mode=OneWay}" />
+		</Grid>
+
 		<!--  Review Files Prompt  -->
 		<TeachingTip
 			Title="{helpers:ResourceString Name=Hello}"
-			Grid.RowSpan="3"
+			Grid.RowSpan="4"
 			HorizontalAlignment="Center"
 			VerticalAlignment="Bottom"
 			ActionButtonCommand="{x:Bind ViewModel.ReviewAppCommand}"
@@ -352,7 +450,7 @@
 		<!--  Sponsor Prompt  -->
 		<TeachingTip
 			Title="{helpers:ResourceString Name=Hello}"
-			Grid.RowSpan="3"
+			Grid.RowSpan="4"
 			HorizontalAlignment="Center"
 			VerticalAlignment="Bottom"
 			ActionButtonCommand="{x:Bind ViewModel.SponsorCommand}"

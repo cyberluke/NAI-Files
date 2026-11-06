@@ -1,0 +1,125 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<ContentDialog
+	x:Class="Files.App.Dialogs.PulseSplitDialog"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	x:Name="SplitDialog"
+	Title="{helpers:ResourceString Name=PulseSplitDialogTitle}"
+	CloseButtonText="{helpers:ResourceString Name=PulseSplitClose}"
+	CornerRadius="{StaticResource OverlayCornerRadius}"
+	DefaultButton="Primary"
+	HighContrastAdjustment="None"
+	MaxWidth="560"
+	PrimaryButtonClick="PrimaryButton_Click"
+	PrimaryButtonStyle="{StaticResource AccentButtonStyle}"
+	PrimaryButtonText="{helpers:ResourceString Name=PulseSplitRun}"
+	RequestedTheme="{x:Bind RootAppElement.RequestedTheme, Mode=OneWay}"
+	SecondaryButtonClick="SecondaryButton_Click"
+	SecondaryButtonText="{helpers:ResourceString Name=PulseSplitCancel}"
+	Style="{StaticResource DefaultContentDialogStyle}"
+	mc:Ignorable="d">
+
+	<Grid MinWidth="480" RowSpacing="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<!--  Source file + runtime  -->
+		<StackPanel Grid.Row="0" Orientation="Vertical" Spacing="2">
+			<TextBlock
+				x:Name="FileNameText"
+				FontSize="13"
+				FontWeight="SemiBold"
+				TextTrimming="CharacterEllipsis"
+				TextWrapping="NoWrap" />
+			<TextBlock
+				x:Name="ModelText"
+				FontSize="11"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+		</StackPanel>
+
+		<!--  Stem count  -->
+		<Grid Grid.Row="1" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<TextBlock
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				Width="110"
+				FontSize="12"
+				Text="{helpers:ResourceString Name=PulseSplitModeLabel}" />
+			<ComboBox
+				x:Name="ModeComboBox"
+				Grid.Column="1"
+				MaxWidth="320"
+				HorizontalAlignment="Left"
+				SelectedIndex="0">
+				<ComboBoxItem Content="{helpers:ResourceString Name=PulseSplitModeTwoStems}" />
+				<ComboBoxItem Content="{helpers:ResourceString Name=PulseSplitModeFourStems}" />
+			</ComboBox>
+		</Grid>
+
+		<!--  Output format  -->
+		<Grid Grid.Row="2" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<TextBlock
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				Width="110"
+				FontSize="12"
+				Text="{helpers:ResourceString Name=PulseSplitFormatLabel}" />
+			<ComboBox
+				x:Name="FormatComboBox"
+				Grid.Column="1"
+				MinWidth="130"
+				HorizontalAlignment="Left"
+				SelectedIndex="0">
+				<ComboBoxItem Content="WAV" />
+				<ComboBoxItem Content="FLAC" />
+				<ComboBoxItem Content="MP3" />
+			</ComboBox>
+		</Grid>
+
+		<!--  Output location hint  -->
+		<TextBlock
+			Grid.Row="3"
+			FontSize="11"
+			Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+			Text="{helpers:ResourceString Name=PulseSplitOutputInfo}" />
+
+		<!--  Progress + status  -->
+		<Grid Grid.Row="4" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<TextBlock
+				x:Name="ExportStatusText"
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				FontSize="12"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+				TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+			<ProgressRing
+				x:Name="ExportRing"
+				Grid.Column="1"
+				Width="22"
+				Height="22"
+				IsActive="False"
+				Maximum="100" />
+		</Grid>
+	</Grid>
+</ContentDialog>

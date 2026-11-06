@@ -44,5 +44,8 @@ namespace Files.App.Controls
 		/// Expansion participant that keeps the regular row appearance (icon + normal text) instead of the section-header style.
 		/// </summary>
 		bool IsLeafWithChildren => false;
+
+		/// <summary>Row activation navigates; expansion remains on the chevron.</summary>
+		bool SelectsOnInvoked => Children is null || IsLeafWithChildren;
 	}
 }

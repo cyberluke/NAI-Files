@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using System.Diagnostics;
 
 namespace Files.App.Utils.CommandLine
 {
@@ -17,7 +18,7 @@ namespace Files.App.Utils.CommandLine
 		/// <returns>A collection of parsed command.</returns>
 		public static ParsedCommands ParseUntrustedCommands(string cmdLineString)
 		{
-			var parsedArgs = Parse(SplitArguments(cmdLineString.TrimEnd(), true));
+			var parsedArgs = Parse(SplitArguments(cmdLineString.TrimEnd()));
 
 			return ParseSplitArguments(parsedArgs);
 		}
@@ -61,6 +62,17 @@ namespace Files.App.Utils.CommandLine
 
 					case string s when "Select".Equals(s, StringComparison.OrdinalIgnoreCase):
 						command.Type = ParsedCommandType.SelectItem;
+						break;
+
+					case string s when "Mode".Equals(s, StringComparison.OrdinalIgnoreCase):
+						command.Type = ParsedCommandType.DialogMode;
+						break;
+
+					case string s when "DialogTrace".Equals(s, StringComparison.OrdinalIgnoreCase):
+						command.Type = ParsedCommandType.DialogTrace;
+						break;
+					case string s when "DialogRequest".Equals(s, StringComparison.OrdinalIgnoreCase):
+						command.Type = ParsedCommandType.DialogRequest;
 						break;
 
 					case string s when "Tag".Equals(s, StringComparison.OrdinalIgnoreCase):
@@ -167,7 +179,7 @@ namespace Files.App.Utils.CommandLine
 			{
 				ArgumentNullException.ThrowIfNull(args);
 				if (args.Length >= 2)
-					parsedArgs.Add(new KeyValuePair<string, string[]>("Cmdless", [string.Join(' ', args.Skip(1)).TrimStart()]));
+					parsedArgs.Add(new KeyValuePair<string, string[]>("Cmdless", [string.Join(' ', args.Skip(1)).Trim().Trim('"')]));
 			}
 
 			return parsedArgs;
@@ -198,7 +210,7 @@ namespace Files.App.Utils.CommandLine
 
 					if (valueStart < argument.Length)
 					{
-						val.Add(argument[valueStart..]);
+						val.Add(argument[valueStart..].Trim('"'));
 					}
 				}
 				else
@@ -210,7 +222,9 @@ namespace Files.App.Utils.CommandLine
 
 				while (argIndex < args.Length && !(args[argIndex].StartsWith('-') || args[argIndex].StartsWith('/')))
 				{
-					val.Add(args[argIndex++]);
+					var value = args[argIndex++];
+					if (!string.IsNullOrWhiteSpace(value))
+						val.Add(value.Trim('"'));
 				}
 			}
 

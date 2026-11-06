@@ -93,8 +93,19 @@ namespace Files.App.Helpers
 
 		public static async Task CreateFileFromDialogResultTypeAsync(AddItemDialogItemType itemType, ShellNewEntry? itemInfo, IShellPage associatedInstance)
 		{
-			await CreateFileFromDialogResultTypeForResult(itemType, itemInfo, associatedInstance);
+			var originalDirectory = associatedInstance.ShellViewModel?.WorkingDirectory;
+			var created = await CreateFileFromDialogResultTypeForResult(itemType, itemInfo, associatedInstance);
+			if (App.AppModel.IsMainWindowClosed) return;
 			await associatedInstance.RefreshIfNoWatcherExistsAsync();
+			if (App.AppModel.IsMainWindowClosed) return;
+			if (App.DialogMode == "folder" && itemType == AddItemDialogItemType.Folder
+				&& created?.Path is { Length: > 0 } path
+				&& ReferenceEquals(Ioc.Default.GetRequiredService<IContentPageContext>().ShellPage, associatedInstance)
+				&& string.Equals(associatedInstance.ShellViewModel?.WorkingDirectory, originalDirectory, StringComparison.OrdinalIgnoreCase))
+			{
+				associatedInstance.NavigateToPath(path);
+				Ioc.Default.GetRequiredService<MainPageViewModel>().DialogFileName = path;
+			}
 		}
 
 		private static async Task<IStorageItem?> CreateFileFromDialogResultTypeForResult(AddItemDialogItemType itemType, ShellNewEntry? itemInfo, IShellPage associatedInstance)
@@ -159,7 +170,7 @@ namespace Files.App.Helpers
 				);
 			}
 
-			return created.Item;
+			return created.Status == ReturnResult.Success ? created.Item : null;
 		}
 
 		public static async Task CreateFolderWithSelectionAsync(IShellPage associatedInstance)

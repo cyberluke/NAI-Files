@@ -42,13 +42,13 @@ namespace Files.App.Data.Contexts
 
 		private void Page_CurrentInstanceChanged(object? sender, ShellPanesPage? modifiedPage)
 		{
-			if (_mainPanesPage is not null && !_mainPanesPage.IsCurrentInstance)
-			{
-				UpdatePage(null);
-			}
-			else if (modifiedPage is not null && modifiedPage.IsCurrentInstance)
+			if (modifiedPage is not null && modifiedPage.IsCurrentInstance)
 			{
 				UpdatePage(modifiedPage);
+			}
+			else if (_mainPanesPage is not null && !_mainPanesPage.IsCurrentInstance)
+			{
+				UpdatePage(null);
 			}
 		}
 

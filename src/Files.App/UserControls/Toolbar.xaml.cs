@@ -19,6 +19,15 @@ namespace Files.App.UserControls
 {
 	public sealed partial class Toolbar : UserControl
 	{
+		private void ToggleSortDirection_Click(object sender, RoutedEventArgs e)
+		{
+			if (Commands.SortDescending.IsOn) Commands.SortAscending.IsOn = true;
+			else Commands.SortDescending.IsOn = true;
+		}
+
+		private string GetSortDirectionGlyph(bool descending) => descending ? "\uE70D" : "\uE70E";
+		private string GetSortDirectionLabel(bool descending) => descending ? Commands.SortAscending.Label : Commands.SortDescending.Label;
+
 		private readonly IUserSettingsService UserSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
 		private readonly ICommandManager Commands = Ioc.Default.GetRequiredService<ICommandManager>();
 		private readonly IModifiableCommandManager ModifiableCommands = Ioc.Default.GetRequiredService<IModifiableCommandManager>();

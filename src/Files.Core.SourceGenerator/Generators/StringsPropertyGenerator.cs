@@ -100,19 +100,26 @@ namespace Files.Core.SourceGenerator.Generators
 				_ = buffer.AppendLine($"{tabString}/// <summary>");
 
 				if (comment is not null)
-					_ = buffer.AppendLine($@"{tabString}/// {comment}");
+					AppendDocumentation(buffer, tabString, comment);
 
 				_ = buffer.AppendLine($"{tabString}/// </summary>");
 
 				if (exampleValue is not null)
 				{
 					_ = buffer.AppendLine($"{tabString}/// <remarks>");
-					_ = buffer.AppendLine($"{tabString}/// e.g.: <b>{exampleValue}</b>");
+					AppendDocumentation(buffer, tabString, "e.g.: <b>" + exampleValue + "</b>");
 					_ = buffer.AppendLine($"{tabString}/// </remarks>");
 				}
 			}
 
 			_ = buffer.AppendLine($@"{tabString}public const string {KeyNameValidator(key)} = ""{value ?? key}"";");
+		}
+
+		private static void AppendDocumentation(StringBuilder buffer, string indent, string text)
+		{
+			foreach (var line in text.Replace("\r\n", "\n").Replace('\r', '\n')
+				.Replace('\u0085', '\n').Replace('\u2028', '\n').Replace('\u2029', '\n').Split('\n'))
+				_ = buffer.AppendLine($"{indent}/// {line}");
 		}
 
 		/// <summary>

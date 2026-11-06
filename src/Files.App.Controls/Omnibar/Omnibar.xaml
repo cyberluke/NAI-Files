@@ -12,12 +12,13 @@
 	<x:Double x:Key="OmnibarModeSeparatorHeight">20</x:Double>
 
 	<Thickness x:Key="OmnibarBorderThicknessUnfocused">1</Thickness>
-	<Thickness x:Key="OmnibarBorderThicknessFocused">2</Thickness>
-	<Thickness x:Key="OmnibarBorderMarginUnfocused">-1</Thickness>
+	<Thickness x:Key="OmnibarBorderThicknessFocused">1</Thickness>
+	<Thickness x:Key="OmnibarBorderMarginUnfocused">0</Thickness>
 	<Thickness x:Key="OmnibarModeSeparatorPadding">4,0,4,0</Thickness>
 
-	<CornerRadius x:Key="OmnibarDefaultCornerRadius">19</CornerRadius>
-	<CornerRadius x:Key="OmnibarModeDefaultCornerRadius">17</CornerRadius>
+	<!--  NAI OS launcher search lane geometry: pill shell, floating line  -->
+	<CornerRadius x:Key="OmnibarDefaultCornerRadius">14</CornerRadius>
+	<CornerRadius x:Key="OmnibarModeDefaultCornerRadius">12</CornerRadius>
 
 	<Style BasedOn="{StaticResource DefaultOmnibarStyle}" TargetType="local:Omnibar" />
 	<Style BasedOn="{StaticResource DefaultOmnibarModeStyle}" TargetType="local:OmnibarMode" />
@@ -25,10 +26,10 @@
 
 	<Style x:Key="DefaultOmnibarStyle" TargetType="local:Omnibar">
 
-		<Setter Property="Foreground" Value="{ThemeResource TextControlForeground}" />
-		<Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}" />
+		<Setter Property="Foreground" Value="{ThemeResource App.Theme.Nai.TextBrush}" />
+		<Setter Property="Background" Value="{ThemeResource App.Theme.Nai.SearchShellBackgroundBrush}" />
 		<Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
-		<Setter Property="BorderBrush" Value="{ThemeResource CircleElevationBorderBrush}" />
+		<Setter Property="BorderBrush" Value="{ThemeResource App.Theme.Nai.SearchShellBorderBrush}" />
 		<Setter Property="BorderThickness" Value="{StaticResource OmnibarBorderThicknessUnfocused}" />
 		<Setter Property="CornerRadius" Value="{StaticResource OmnibarDefaultCornerRadius}" />
 
@@ -49,6 +50,29 @@
 							<RowDefinition Height="*" />
 						</Grid.RowDefinitions>
 
+						<!--  Launcher-style search shell: glassy gradient surface with an
+						     inset top highlight and a soft floating shadow. The ring is a
+						     separate layer so focus can glow around the pill without
+						     touching the input.  -->
+						<Border
+							x:Name="PART_ShellSurface"
+							Grid.Row="0"
+							Height="{TemplateBinding Height}"
+							Background="{TemplateBinding Background}"
+							BackgroundSizing="{TemplateBinding BackgroundSizing}"
+							BorderBrush="{TemplateBinding BorderBrush}"
+							BorderThickness="{TemplateBinding BorderThickness}"
+							CornerRadius="{TemplateBinding CornerRadius}" />
+						<Border
+							x:Name="PART_ShellRing"
+							Grid.Row="0"
+							Height="{TemplateBinding Height}"
+							BorderBrush="{ThemeResource App.Theme.Nai.SearchShellFocusRingBrush}"
+							BorderThickness="3"
+							CornerRadius="{TemplateBinding CornerRadius}"
+							IsHitTestVisible="False"
+							Opacity="0" />
+
 						<TextBox
 							x:Name="PART_TextBox"
 							Grid.Row="0"
@@ -57,10 +81,10 @@
 							Padding="{TemplateBinding AutoSuggestBoxPadding}"
 							HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
 							VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-							Background="{TemplateBinding Background}"
+							Background="Transparent"
 							BackgroundSizing="{TemplateBinding BackgroundSizing}"
-							BorderBrush="{TemplateBinding BorderBrush}"
-							BorderThickness="{TemplateBinding BorderThickness}"
+							BorderBrush="Transparent"
+							BorderThickness="0"
 							CornerRadius="{TemplateBinding CornerRadius}"
 							DesiredCandidateWindowAlignment="BottomEdge"
 							FontFamily="{TemplateBinding FontFamily}"
@@ -70,7 +94,32 @@
 							Foreground="{TemplateBinding Foreground}"
 							ScrollViewer.BringIntoViewOnFocusChange="False"
 							Style="{StaticResource DefaultOmnibarTextBoxStyle}"
-							UseSystemFocusVisuals="{TemplateBinding UseSystemFocusVisuals}" />
+							UseSystemFocusVisuals="False" />
+
+						<!--  Copilot+ style bottom line: base track + active gradient with a
+						     white sweep travelling left to right while focused.  -->
+						<Grid
+							x:Name="PART_UnderlineHost"
+							Grid.Row="0"
+							Height="2"
+							Margin="16,0"
+							VerticalAlignment="Bottom"
+							IsHitTestVisible="False">
+							<Border
+								x:Name="PART_Underline"
+								CornerRadius="1"
+								Background="{ThemeResource App.Theme.Nai.UnderlineBaseBrush}" />
+							<Border
+								x:Name="PART_UnderlineActive"
+								CornerRadius="1"
+								Background="{ThemeResource App.Theme.Nai.UnderlineActiveBrush}"
+								Opacity="0" />
+							<Border
+								x:Name="PART_UnderlineSweep"
+								CornerRadius="1"
+								Background="{ThemeResource App.Theme.Nai.SweepBrush}"
+								Opacity="0" />
+						</Grid>
 
 						<Grid
 							x:Name="PART_ModesHostGrid"
@@ -104,6 +153,22 @@
 							</Border>
 						</Popup>
 
+						<!--  Shell visual states: focus ring + underline layers are shown by
+						     the control's IsFocused property; the LTR sweep translation is
+						     driven by Composition in code-behind so it scales with width
+						     and respects the system animations setting.  -->
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="ShellStates">
+								<VisualState x:Name="ShellUnfocused" />
+								<VisualState x:Name="ShellFocused">
+									<VisualState.Setters>
+										<Setter Target="PART_ShellRing.Opacity" Value="1" />
+										<Setter Target="PART_UnderlineActive.Opacity" Value="1" />
+										<Setter Target="PART_UnderlineSweep.Opacity" Value="1" />
+									</VisualState.Setters>
+								</VisualState>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
 					</Grid>
 				</ControlTemplate>
 			</Setter.Value>
@@ -254,10 +319,10 @@
 		BasedOn="{StaticResource AutoSuggestBoxTextBoxStyle}"
 		TargetType="TextBox">
 
-		<Setter Property="Foreground" Value="{ThemeResource TextControlForeground}" />
-		<Setter Property="Background" Value="{ThemeResource TextControlBackground}" />
-		<Setter Property="BorderBrush" Value="{ThemeResource TextControlBorderBrush}" />
-		<Setter Property="BorderThickness" Value="{ThemeResource TextControlBorderThemeThickness}" />
+		<Setter Property="Foreground" Value="{ThemeResource App.Theme.Nai.TextBrush}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="Transparent" />
+		<Setter Property="BorderThickness" Value="0" />
 
 		<Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
 		<Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
@@ -407,18 +472,18 @@
 									<VisualState.Setters>
 										<Setter Target="PlaceholderTextContentPresenter.Foreground" Value="{ThemeResource TextControlPlaceholderForegroundPointerOver}" />
 										<Setter Target="HeaderContentPresenter.Foreground" Value="{ThemeResource TextControlHeaderForegroundDisabled}" />
-										<Setter Target="BorderElement.Background" Value="{ThemeResource TextControlBackgroundPointerOver}" />
-										<Setter Target="BorderElement.BorderBrush" Value="{ThemeResource CircleElevationBorderBrush}" />
+										<Setter Target="BorderElement.Background" Value="Transparent" />
+										<Setter Target="BorderElement.BorderBrush" Value="Transparent" />
 										<Setter Target="ContentElement.Foreground" Value="{ThemeResource TextControlForegroundPointerOver}" />
 									</VisualState.Setters>
 								</VisualState>
 								<VisualState x:Name="Focused">
 									<VisualState.Setters>
 										<Setter Target="PlaceholderTextContentPresenter.Foreground" Value="{ThemeResource TextControlPlaceholderForegroundFocused}" />
-										<Setter Target="BorderElement.Background" Value="{ThemeResource TextControlBackgroundFocused}" />
-										<Setter Target="BorderElement.BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
-										<Setter Target="BorderElement.BorderThickness" Value="{ThemeResource OmnibarBorderThicknessFocused}" />
-										<Setter Target="BorderElement.Margin" Value="{StaticResource OmnibarBorderMarginUnfocused}" />
+										<Setter Target="BorderElement.Background" Value="Transparent" />
+										<Setter Target="BorderElement.BorderBrush" Value="Transparent" />
+										<Setter Target="BorderElement.BorderThickness" Value="0" />
+										<Setter Target="BorderElement.Margin" Value="0" />
 										<Setter Target="ContentElement.Foreground" Value="{ThemeResource TextControlForegroundFocused}" />
 									</VisualState.Setters>
 								</VisualState>

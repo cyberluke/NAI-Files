@@ -47,6 +47,9 @@ namespace Files.App.Helpers
 				FolderLayoutModes.GridView when LayoutSettingsService.GridViewSize <= GridViewSizeKind.Small => 96,
 				FolderLayoutModes.GridView when LayoutSettingsService.GridViewSize <= GridViewSizeKind.Large => 128,
 
+				// Pulse: edge-to-edge previews, so the thumbnail is the card
+				FolderLayoutModes.PulseView => 256,
+
 				_ => 256,
 			};
 		}

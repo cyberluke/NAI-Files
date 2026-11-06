@@ -145,6 +145,11 @@ namespace Files.App.Controls
 			Text = presentation?.Text;
 			ToolTip = presentation?.ToolTip;
 			Icon = presentation?.IconElement;
+			// TemplateBinding is one-time in WinUI: rows realized before an async
+			// icon resolves (theme load, pinned items) would keep a null icon
+			// forever. Push the resolved IconElement straight into the presenter.
+			if (GetTemplateChild("IconPresenter") is ContentPresenter iconPresenter)
+				iconPresenter.Content = Icon;
 			Decorator = presentation?.ItemDecorator;
 			IsExpanded = Item?.IsExpanded ?? true;
 		}
@@ -228,10 +233,15 @@ namespace Files.App.Controls
 					if (UseItemPresentation)
 						ToolTip = (Item as ISidebarItemPresentationModel)?.ToolTip;
 					break;
-				case nameof(ISidebarItemPresentationModel.IconElement):
-					if (UseItemPresentation)
-						Icon = (Item as ISidebarItemPresentationModel)?.IconElement;
-					break;
+case nameof(ISidebarItemPresentationModel.IconElement):
+				if (UseItemPresentation)
+				{
+					Icon = (Item as ISidebarItemPresentationModel)?.IconElement;
+					// TemplateBinding is one-time: push late async icons into the presenter.
+					if (GetTemplateChild("IconPresenter") is ContentPresenter iconPresenter)
+						iconPresenter.Content = Icon;
+				}
+				break;
 				case nameof(ISidebarItemPresentationModel.ItemDecorator):
 					if (UseItemPresentation)
 						Decorator = (Item as ISidebarItemPresentationModel)?.ItemDecorator;
@@ -362,8 +372,13 @@ namespace Files.App.Controls
 
 		internal void Clicked(PointerUpdateKind pointerUpdateKind)
 		{
-			// Section headers (Pinned, Drives, ...) toggle expansion on row click since they have no navigation target. Tree-view folder rows (leaves-with-children) only navigate — their expansion is reserved for the chevron click target.
-			if (IsGroupHeader && Item?.IsLeafWithChildren != true)
+			// Pure section headers (Pinned, Drives, Library, ...) toggle expansion on row click since
+			// they have no navigation target. Drive letters, Home and other navigable leaves only
+			// navigate — their expansion is reserved for the chevron click target.
+			bool isPureSectionHeader =
+				IsGroupHeader && Item?.SelectsOnInvoked == false;
+
+			if (isPureSectionHeader)
 			{
 				if (CollapseEnabled)
 				{
@@ -526,6 +541,7 @@ namespace Files.App.Controls
 			VisualStateManager.GoToState(this, IsExpanded ? "ExpandedIconPressed" : "CollapsedIconPressed", true);
 		}
 
+		[WinRT.DynamicWindowsRuntimeCast(typeof(UIElement))]
 		private void Item_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
 		{
 			if (!isClicking)

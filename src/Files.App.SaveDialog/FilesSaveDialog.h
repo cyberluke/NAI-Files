@@ -4,11 +4,11 @@
 #include "resource.h"       // simboli principali
 
 
-#define DEBUGLOG
-
 
 #include "CustomSaveDialog_i.h"
 #include "UndefInterfaces.h"
+#include "../Files.App.OpenDialog/DialogControlSelections.h"
+#include "../Files.App.OpenDialog/DialogOptions.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -26,7 +26,6 @@ using namespace ATL;
 class ATL_NO_VTABLE CFilesSaveDialog :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CFilesSaveDialog, &CLSID_FilesSaveDialog>,
-	public IFileDialog,
 	public IFileDialog2,
 	public IFileSaveDialog,
 	public IFileDialogCustomize,
@@ -40,13 +39,12 @@ public:
 DECLARE_REGISTRY_RESOURCEID(106)
 
 CUSTOM_BEGIN_COM_MAP(CFilesSaveDialog)
-	COM_INTERFACE_ENTRY(IFileDialog)
+	COM_INTERFACE_ENTRY2(IFileDialog, IFileSaveDialog)
 	COM_INTERFACE_ENTRY(IFileDialog2)
 	COM_INTERFACE_ENTRY(IFileSaveDialog)
+	COM_INTERFACE_ENTRY2(IModalWindow, IFileSaveDialog)
 	COM_INTERFACE_ENTRY(IFileDialogCustomize)
 	COM_INTERFACE_ENTRY(IObjectWithSite)
-	COM_INTERFACE_ENTRY(IFileDialogPrivate)
-	COM_INTERFACE_ENTRY(IOleWindow)
 END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -60,15 +58,18 @@ END_COM_MAP()
 
 	CComPtr<IFileSaveDialog> _systemDialog;
 
-	FILEOPENDIALOGOPTIONS _fos;
+	FILEOPENDIALOGOPTIONS _fos = FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_OVERWRITEPROMPT;
 
-	std::vector<DWORD> _ctrlItems;
+	DialogControlSelections _controlSelections;
+	UINT _fileTypeIndex = 1;
 
 	std::wstring _selectedItem;
-	std::wstring _outputPath;
 	std::wstring _initName;
 	CComPtr<IShellItem> _initFolder;
-	CComPtr<IFileDialogEvents> _dialogEvents;
+	CComPtr<IShellItem> _defaultFolder;
+	DialogOptions _request;
+	DialogEventSubscriptions _events;
+	CComPtr<IUnknown> _site;
 
 	FILE* _debugStream;
 

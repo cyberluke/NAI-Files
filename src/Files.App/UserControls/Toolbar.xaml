@@ -1,4 +1,4 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <UserControl
 	x:Class="Files.App.UserControls.Toolbar"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -91,65 +91,6 @@
 			Grid.Column="1"
 			DefaultLabelPosition="Right">
 
-			<!--  Toggle filter header  -->
-			<AppBarToggleButton
-				x:Name="FilterHeader"
-				Width="Auto"
-				MinWidth="40"
-				AccessKey="F"
-				AccessKeyInvoked="AppBarButton_AccessKeyInvoked"
-				AutomationProperties.Name="{x:Bind Commands.ToggleFilterHeader.AutomationName}"
-				IsChecked="{x:Bind Commands.ToggleFilterHeader.IsOn, Mode=TwoWay}"
-				Label="{x:Bind Commands.ToggleFilterHeader.Label}"
-				LabelPosition="Collapsed"
-				ToolTipService.ToolTip="{x:Bind Commands.ToggleFilterHeader.LabelWithHotKey, Mode=OneWay}">
-				<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.Filter}" />
-			</AppBarToggleButton>
-
-			<!--  Selection Commands  -->
-			<AppBarButton
-				x:Name="SelectionOptions"
-				Width="Auto"
-				MinWidth="46"
-				x:Load="{x:Bind ViewModel.InstanceViewModel.IsPageTypeNotHome, Mode=OneWay}"
-				AccessKey="S"
-				AccessKeyInvoked="AppBarButton_AccessKeyInvoked"
-				AutomationProperties.Name="{helpers:ResourceString Name=SelectionOptions}"
-				Label="{helpers:ResourceString Name=NavToolbarSelectionOptions/Label}"
-				LabelPosition="Collapsed"
-				Style="{StaticResource ToolBarAppBarButtonFlyoutStyle}"
-				ToolTipService.ToolTip="{helpers:ResourceString Name=SelectionOptions}">
-
-				<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.SelectMode}" />
-
-				<AppBarButton.Flyout>
-					<MenuFlyout Placement="Bottom">
-						<local:MenuFlyoutItemWithThemedIcon
-							x:Name="SelectAllMFI"
-							AccessKey="A"
-							Command="{x:Bind Commands.SelectAll}"
-							KeyboardAcceleratorTextOverride="{x:Bind Commands.SelectAll.HotKeyText, Mode=OneWay}"
-							Text="{x:Bind Commands.SelectAll.Label}"
-							ThemedIconStyle="{x:Bind Commands.SelectAll.ThemedIconStyle}" />
-						<local:MenuFlyoutItemWithThemedIcon
-							x:Name="InvertSelectionMFI"
-							AccessKey="I"
-							Command="{x:Bind Commands.InvertSelection}"
-							KeyboardAcceleratorTextOverride="{x:Bind Commands.InvertSelection.HotKeyText, Mode=OneWay}"
-							Text="{x:Bind Commands.InvertSelection.Label}"
-							ThemedIconStyle="{x:Bind Commands.InvertSelection.ThemedIconStyle}" />
-						<local:MenuFlyoutItemWithThemedIcon
-							x:Name="ClearSelectionMFI"
-							AccessKey="C"
-							Command="{x:Bind Commands.ClearSelection}"
-							KeyboardAcceleratorTextOverride="{x:Bind Commands.ClearSelection.HotKeyText, Mode=OneWay}"
-							Text="{x:Bind Commands.ClearSelection.Label}"
-							ThemedIconStyle="{x:Bind Commands.ClearSelection.ThemedIconStyle}" />
-					</MenuFlyout>
-				</AppBarButton.Flyout>
-
-			</AppBarButton>
-
 			<!--  Sort Commands  -->
 			<AppBarButton
 				x:Name="ArrangementOptions"
@@ -168,10 +109,6 @@
 
 				<AppBarButton.Flyout>
 					<MenuFlyout contract8Present:ShouldConstrainToRootBounds="False" Placement="Bottom">
-						<MenuFlyoutSubItem
-							AccessKey="S"
-							AccessKeyInvoked="SortGroup_AccessKeyInvoked"
-							Text="{helpers:ResourceString Name=SortBy}">
 							<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortByName.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortByName.Label}" />
 							<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortByDateModified.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortByDateModified.Label}" />
 							<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortByDateCreated.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortByDateCreated.Label}" />
@@ -195,19 +132,31 @@
 								IsEnabled="{x:Bind Commands.SortByDateDeleted.IsExecutable, Mode=OneWay}"
 								Text="{x:Bind Commands.SortByDateDeleted.Label}" />
 							<MenuFlyoutSeparator />
-							<ToggleMenuFlyoutItem
-								AccessKey="A"
-								IsChecked="{x:Bind Commands.SortAscending.IsOn, Mode=TwoWay}"
-								Text="{x:Bind Commands.SortAscending.Label}" />
-							<ToggleMenuFlyoutItem
-								AccessKey="D"
-								IsChecked="{x:Bind Commands.SortDescending.IsOn, Mode=TwoWay}"
-								Text="{x:Bind Commands.SortDescending.Label}" />
-						</MenuFlyoutSubItem>
-						<MenuFlyoutSubItem
-							AccessKey="G"
-							AccessKeyInvoked="SortGroup_AccessKeyInvoked"
-							Text="{helpers:ResourceString Name=GroupBy}">
+						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFoldersFirst.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFoldersFirst.Label}" />
+						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFilesFirst.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFilesFirst.Label}" />
+						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFilesAndFoldersTogether.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFilesAndFoldersTogether.Label}" />
+					</MenuFlyout>
+				</AppBarButton.Flyout>
+			</AppBarButton>
+
+			<AppBarToggleButton x:Name="SortDirectionButton" Width="Auto" MinWidth="40"
+				x:Load="{x:Bind ViewModel.InstanceViewModel.IsPageTypeNotHome, Mode=OneWay}"
+				IsChecked="{x:Bind Commands.SortDescending.IsOn, Mode=OneWay}" Click="ToggleSortDirection_Click"
+				AutomationProperties.Name="{helpers:ResourceString Name=NaiSortDirection}"
+				Label="{helpers:ResourceString Name=NaiSortDirection}" LabelPosition="Collapsed"
+				ToolTipService.ToolTip="{x:Bind GetSortDirectionLabel(Commands.SortDescending.IsOn), Mode=OneWay}">
+				<FontIcon Glyph="{x:Bind GetSortDirectionGlyph(Commands.SortDescending.IsOn), Mode=OneWay}" />
+			</AppBarToggleButton>
+
+			<AppBarButton x:Name="GroupingOptions" Width="Auto" MinWidth="46"
+				x:Load="{x:Bind ViewModel.InstanceViewModel.IsPageTypeNotHome, Mode=OneWay}"
+				AutomationProperties.Name="{helpers:ResourceString Name=GroupBy}"
+				Label="{helpers:ResourceString Name=GroupBy}" LabelPosition="Collapsed"
+				Style="{StaticResource ToolBarAppBarButtonFlyoutStyle}"
+				ToolTipService.ToolTip="{helpers:ResourceString Name=GroupBy}">
+				<SymbolIcon Symbol="AllApps" />
+				<AppBarButton.Flyout>
+					<MenuFlyout Placement="Bottom">
 							<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.GroupByNone.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.GroupByNone.Label}" />
 							<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.GroupByName.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.GroupByName.Label}" />
 							<MenuFlyoutSubItem Text="{x:Bind Commands.GroupByDateModified.Label}">
@@ -251,11 +200,6 @@
 								IsChecked="{x:Bind Commands.GroupDescending.IsOn, Mode=TwoWay}"
 								IsEnabled="{x:Bind Commands.GroupDescending.IsExecutable, Mode=OneWay}"
 								Text="{x:Bind Commands.GroupDescending.Label}" />
-						</MenuFlyoutSubItem>
-						<MenuFlyoutSeparator />
-						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFoldersFirst.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFoldersFirst.Label}" />
-						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFilesFirst.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFilesFirst.Label}" />
-						<ToggleMenuFlyoutItem IsChecked="{x:Bind Commands.SortFilesAndFoldersTogether.IsOn, Mode=TwoWay}" Text="{x:Bind Commands.SortFilesAndFoldersTogether.Label}" />
 					</MenuFlyout>
 				</AppBarButton.Flyout>
 
@@ -288,10 +232,22 @@
 							<TextBlock FontWeight="Medium" Text="{helpers:ResourceString Name=Layout}" />
 
 							<!--  Layout  -->
-							<StackPanel Orientation="Horizontal" Spacing="8">
+							<!--  Six layouts in two rows of three: a single row no longer fits beside the window's caption buttons  -->
+							<Grid ColumnSpacing="8" RowSpacing="8">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
+								</Grid.RowDefinitions>
 
 								<!--  Details  -->
 								<RadioButton
+									Grid.Row="0"
+									Grid.Column="0"
 									AutomationProperties.Name="{x:Bind Commands.LayoutDetails.AutomationName}"
 									Click="LayoutButton_Click"
 									Command="{x:Bind Commands.LayoutDetails}"
@@ -316,6 +272,8 @@
 
 								<!--  List  -->
 								<RadioButton
+									Grid.Row="0"
+									Grid.Column="1"
 									AutomationProperties.Name="{x:Bind Commands.LayoutList.AutomationName}"
 									Click="LayoutButton_Click"
 									Command="{x:Bind Commands.LayoutList}"
@@ -341,6 +299,8 @@
 
 								<!--  Cards  -->
 								<RadioButton
+									Grid.Row="0"
+									Grid.Column="2"
 									AutomationProperties.Name="{x:Bind Commands.LayoutCards.AutomationName}"
 									Click="LayoutButton_Click"
 									Command="{x:Bind Commands.LayoutCards}"
@@ -366,6 +326,8 @@
 
 								<!--  Grid  -->
 								<RadioButton
+									Grid.Row="1"
+									Grid.Column="0"
 									AutomationProperties.Name="{x:Bind Commands.LayoutGrid.AutomationName}"
 									Click="LayoutButton_Click"
 									Command="{x:Bind Commands.LayoutGrid}"
@@ -391,6 +353,8 @@
 
 								<!--  Columns  -->
 								<RadioButton
+									Grid.Row="1"
+									Grid.Column="1"
 									AutomationProperties.Name="{x:Bind Commands.LayoutColumns.AutomationName}"
 									Click="LayoutButton_Click"
 									Command="{x:Bind Commands.LayoutColumns}"
@@ -413,7 +377,35 @@
 											TextWrapping="NoWrap" />
 									</StackPanel>
 								</RadioButton>
-							</StackPanel>
+
+								<!--  Pulse  -->
+								<RadioButton
+									Grid.Row="1"
+									Grid.Column="2"
+									AutomationProperties.Name="{x:Bind Commands.LayoutPulse.AutomationName}"
+									Click="LayoutButton_Click"
+									Command="{x:Bind Commands.LayoutPulse}"
+									GroupName="LayoutRadio"
+									IsChecked="{x:Bind ViewModel.IsPulseLayout, Mode=OneWay}"
+									IsEnabled="{x:Bind Commands.LayoutPulse.IsExecutable, Mode=OneWay}"
+									Style="{StaticResource Local.RadioToggleButtonStyle}"
+									ToolTipService.ToolTip="{x:Bind Commands.LayoutPulse.LabelWithHotKey, Mode=OneWay}">
+
+									<StackPanel Spacing="4">
+										<controls:ThemedIcon
+											Width="28"
+											Height="28"
+											Style="{StaticResource App.ThemedIcons.IconLayout.Pulse.28}" />
+
+										<TextBlock
+											HorizontalAlignment="Center"
+											FontSize="12"
+											Text="{x:Bind Commands.LayoutPulse.Label}"
+											TextTrimming="CharacterEllipsis"
+											TextWrapping="NoWrap" />
+									</StackPanel>
+								</RadioButton>
+							</Grid>
 
 							<!--  (Divider)  -->
 							<Border
@@ -775,6 +767,7 @@
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
+									<RowDefinition Height="Auto" />
 								</Grid.RowDefinitions>
 
 								<!--  Show Hidden Files  -->
@@ -833,6 +826,25 @@
 									IsOn="{x:Bind Commands.LayoutAdaptive.IsOn, Mode=TwoWay}"
 									Rotation="1"
 									ToolTipService.ToolTip="{x:Bind Commands.LayoutAdaptive.LabelWithHotKey, Mode=OneWay}" />
+
+								<!--  Pulse: auto-group file versions into stacks  -->
+								<TextBlock
+									x:Name="PulseAutoGroupTextBlock"
+									Grid.Row="3"
+									Grid.Column="0"
+									VerticalAlignment="Center"
+									x:Load="{x:Bind ViewModel.IsPulseLayout, Mode=OneWay}"
+									Text="{helpers:ResourceString Name=PulseAutoGroupVersions}" />
+
+								<ToggleSwitch
+									x:Name="PulseAutoGroupToggleSwitch"
+									Grid.Row="3"
+									Grid.Column="1"
+									MinWidth="68"
+									HorizontalAlignment="Right"
+									x:Load="{x:Bind ViewModel.IsPulseLayout, Mode=OneWay}"
+									AutomationProperties.Name="{helpers:ResourceString Name=PulseAutoGroupVersions}"
+									IsOn="{x:Bind UserSettingsService.LayoutSettingsService.PulseAutoGroupVersions, Mode=TwoWay}" />
 							</Grid>
 
 						</StackPanel>
@@ -855,6 +867,36 @@
 				ToolTipService.ToolTip="{x:Bind Commands.ToggleInfoPane.LabelWithHotKey, Mode=OneWay}"
 				Visibility="{x:Bind ShowPreviewPaneButton, Mode=OneWay}">
 				<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.PanelRight}" />
+			</AppBarToggleButton>
+			<AppBarButton x:Name="SelectionOptions" Width="Auto" MinWidth="46"
+				x:Load="{x:Bind ViewModel.InstanceViewModel.IsPageTypeNotHome, Mode=OneWay}"
+				AccessKey="S" AccessKeyInvoked="AppBarButton_AccessKeyInvoked"
+				AutomationProperties.Name="{helpers:ResourceString Name=SelectionOptions}"
+				Label="{helpers:ResourceString Name=NavToolbarSelectionOptions/Label}" LabelPosition="Collapsed"
+				Style="{StaticResource ToolBarAppBarButtonFlyoutStyle}"
+				ToolTipService.ToolTip="{helpers:ResourceString Name=SelectionOptions}">
+				<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.SelectMode}" />
+				<AppBarButton.Flyout>
+					<MenuFlyout Placement="Bottom">
+						<local:MenuFlyoutItemWithThemedIcon x:Name="SelectAllMFI" AccessKey="A"
+							Command="{x:Bind Commands.SelectAll}" Text="{x:Bind Commands.SelectAll.Label}"
+							KeyboardAcceleratorTextOverride="{x:Bind Commands.SelectAll.HotKeyText, Mode=OneWay}" ThemedIconStyle="{x:Bind Commands.SelectAll.ThemedIconStyle}" />
+						<local:MenuFlyoutItemWithThemedIcon x:Name="InvertSelectionMFI" AccessKey="I"
+							Command="{x:Bind Commands.InvertSelection}" Text="{x:Bind Commands.InvertSelection.Label}"
+							KeyboardAcceleratorTextOverride="{x:Bind Commands.InvertSelection.HotKeyText, Mode=OneWay}" ThemedIconStyle="{x:Bind Commands.InvertSelection.ThemedIconStyle}" />
+						<local:MenuFlyoutItemWithThemedIcon x:Name="ClearSelectionMFI" AccessKey="C"
+							Command="{x:Bind Commands.ClearSelection}" Text="{x:Bind Commands.ClearSelection.Label}"
+							KeyboardAcceleratorTextOverride="{x:Bind Commands.ClearSelection.HotKeyText, Mode=OneWay}" ThemedIconStyle="{x:Bind Commands.ClearSelection.ThemedIconStyle}" />
+					</MenuFlyout>
+				</AppBarButton.Flyout>
+			</AppBarButton>
+			<AppBarToggleButton x:Name="FilterHeader" Width="Auto" MinWidth="40"
+				AccessKey="F" AccessKeyInvoked="AppBarButton_AccessKeyInvoked"
+				AutomationProperties.Name="{x:Bind Commands.ToggleFilterHeader.AutomationName}"
+				IsChecked="{x:Bind Commands.ToggleFilterHeader.IsOn, Mode=TwoWay}"
+				Label="{x:Bind Commands.ToggleFilterHeader.Label}" LabelPosition="Collapsed"
+				ToolTipService.ToolTip="{helpers:ResourceString Name=NaiAttributeFilterHint}">
+				<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.Filter}" />
 			</AppBarToggleButton>
 		</CommandBar>
 

@@ -41,6 +41,15 @@ namespace Files.App.Data.Enums
 		/// <summary>
 		/// Tag files command type
 		/// </summary>
-		TagFiles
+		TagFiles,
+
+		/// <summary>
+		/// External file-dialog mode ("open", "multi", "folder" or "save").
+		/// </summary>
+		DialogMode,
+
+		/// <summary>Run the explicit backend-only picker diagnostic.</summary>
+		DialogTrace,
+		DialogRequest
 	}
 }

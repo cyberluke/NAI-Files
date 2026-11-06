@@ -41,13 +41,8 @@ namespace Files.App
 			return string.IsNullOrEmpty(cwd) ? Environment.CurrentDirectory : cwd;
 		}
 
-		static Program()
+		private static void ResumeCachedInstance(AppActivationArguments activation)
 		{
-			// Capture the source process's working directory before any potential
-			// activation redirect, so a receiving instance can resolve relative
-			// paths like "." against the terminal's CWD rather than its own. (#16982)
-			ApplicationData.Current.LocalSettings.Values[LaunchCwdKey] = Environment.CurrentDirectory;
-
 			var pool = new Semaphore(0, 1, $"Files-{AppLifecycleHelper.AppEnvironment}-Instance", out var isNew);
 
 			if (!isNew)
@@ -69,7 +64,7 @@ namespace Files.App
 					}
 
 					// Redirect to the main process
-					RedirectActivationTo(instance, AppInstance.GetCurrent().GetActivatedEventArgs());
+					RedirectActivationTo(instance, activation);
 
 					// Kill the current process
 					Environment.Exit(0);
@@ -113,6 +108,18 @@ namespace Files.App
 			}
 
 			var commandLineArgs = GetCommandLineArgs(activatedArgs);
+			ApplicationData.Current.LocalSettings.Values[LaunchCwdKey] = Environment.CurrentDirectory;
+			var isDialog = commandLineArgs is not null && CommandLineParser.ParseUntrustedCommands(commandLineArgs)
+				.Any(command => command.Type == ParsedCommandType.OutputPath);
+DialogSession.IsDialogLaunch = isDialog;
+
+			// Self-heal the native Open/Save COM registration so a bare sideload
+			// (NAI OS not running) and package updates keep re-pointing the per-user
+			// CLSID shadows at this package's dialog servers. Never blocks startup.
+			DialogRegistrationSelfHeal.EnsureRegistration();
+
+			if (!isDialog)
+				ResumeCachedInstance(activatedArgs);
 
 			if (commandLineArgs is not null)
 			{
@@ -217,6 +224,9 @@ namespace Files.App
 
 			Application.Start((p) =>
 			{
+				// NAI: on .NET 11 the runtime eagerly initializes the WinRT reference-tracker
+				// callbacks (dotnet/runtime#121538, fixed by #121558), so the built-in sync
+				// context no longer deadlocks during GC callouts.
 				var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
 				SynchronizationContext.SetSynchronizationContext(context);
 
@@ -238,10 +248,35 @@ namespace Files.App
 				arg0.EndsWith($"files-dev", StringComparison.OrdinalIgnoreCase)) ? launchArgs.Arguments : null;
 			var cmdProtocolArgs = activatedArgs.Data is IProtocolActivatedEventArgs protocolArgs &&
 				protocolArgs.Uri.Query.TrimStart('?').Split('=') is string[] parsedArgs &&
-				parsedArgs.Length == 2 && parsedArgs[0] == "cmd" ? Uri.UnescapeDataString(parsedArgs[1]) : null;
+				parsedArgs.Length == 2 && parsedArgs[0] == "cmd" ? DecodeDialogCommand(parsedArgs[1]) : null;
 			var cmdLineArgs = activatedArgs.Data is ICommandLineActivatedEventArgs cmdArgs ? cmdArgs.Operation.Arguments : null;
 
 			return cmdLaunchArgs ?? cmdProtocolArgs ?? cmdLineArgs;
+		}
+
+		/// <summary>
+		/// The Files dialog COM servers hand the command line over the
+		/// <c>files-dev:</c> protocol as UTF-8 bytes hex-encoded into
+		/// [0-9A-F] — percent-decoding alone leaves a single opaque token that
+		/// the command-line parser cannot understand, so decode the hex first.
+		/// Plain (non-hex) payloads fall back to the percent-decoded text.
+		/// </summary>
+		internal static string DecodeDialogCommand(string payload)
+		{
+			var unescaped = Uri.UnescapeDataString(payload);
+			if (unescaped.Length % 2 == 0 && unescaped.Length >= 8 &&
+				unescaped.All(static c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F'))
+			{
+				try
+				{
+					return System.Text.Encoding.UTF8.GetString(Convert.FromHexString(unescaped));
+				}
+				catch (FormatException)
+				{
+					// Not a valid hex payload after all: keep the decoded text.
+				}
+			}
+			return unescaped;
 		}
 
 		/// <summary>

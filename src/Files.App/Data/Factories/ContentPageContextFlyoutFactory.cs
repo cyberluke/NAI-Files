@@ -101,6 +101,10 @@ namespace Files.App.Data.Factories
 
 			return new List<ContextMenuFlyoutItemViewModel>()
 			{
+				new ContextMenuFlyoutItemViewModelBuilder(Commands.NaiVision)
+				{
+					IsVisible = !itemsSelected || selectedItems.Any(item => item.ItemPath is string path && NaiVisionImage.Supports(path)),
+				}.Build(),
 				new ContextMenuFlyoutItemViewModelBuilder(Commands.CloseActivePane)
 				{
 					IsVisible = !itemsSelected && Commands.CloseActivePane.IsExecutable,
@@ -138,6 +142,10 @@ namespace Files.App.Data.Factories
 							IsToggle = true
 						}.Build(),
 						new ContextMenuFlyoutItemViewModelBuilder(Commands.LayoutColumns)
+						{
+							IsToggle = true
+						}.Build(),
+						new ContextMenuFlyoutItemViewModelBuilder(Commands.LayoutPulse)
 						{
 							IsToggle = true
 						}.Build(),

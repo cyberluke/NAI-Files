@@ -1,0 +1,80 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<UserControl
+	x:Class="Files.App.UserControls.Pulse.PulseSectionView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d">
+
+	<Grid RowSpacing="8">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<!--  Day header: relative label, absolute date, count  -->
+		<Grid
+			Grid.Row="0"
+			Margin="2,14,0,0"
+			ColumnSpacing="12">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+
+			<Rectangle
+				Grid.Column="0"
+				Width="3"
+				Height="22"
+				VerticalAlignment="Center"
+				Fill="{ThemeResource AccentFillColorDefaultBrush}"
+				RadiusX="1.5"
+				RadiusY="1.5" />
+			<TextBlock
+				x:Name="LabelText"
+				Grid.Column="1"
+				VerticalAlignment="Center"
+				FontSize="20"
+				FontWeight="SemiBold" />
+			<TextBlock
+				x:Name="DateText"
+				Grid.Column="2"
+				VerticalAlignment="Center"
+				FontFamily="Consolas"
+				FontSize="15"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+			<TextBlock
+				x:Name="CountText"
+				Grid.Column="3"
+				VerticalAlignment="Center"
+				FontSize="12"
+				Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+		</Grid>
+
+		<!--  Cards of the day. ItemInvoked is deliberately off: it fires on a single click, which would open the
+		file under the stack badge and defeat click-to-rename. The page owns tap/double-tap on the card roots.  -->
+		<ItemsView
+			x:Name="Cards"
+			Grid.Row="1"
+			IsItemInvokedEnabled="False"
+			IsTabStop="True"
+			SelectionMode="None"
+			SizeChanged="Cards_SizeChanged">
+			<ItemsView.Layout>
+				<!--  Fill: every line is scaled to the exact available width (the min/max widths supplied in
+				ItemsInfoRequested bound how far each card may move), so a balanced distribution never leaves a
+				blank slot at the end of a line. A short last line keeps its natural widths.  -->
+				<LinedFlowLayout
+					x:Name="FlowLayout"
+					ItemsInfoRequested="FlowLayout_ItemsInfoRequested"
+					ItemsJustification="Start"
+					ItemsStretch="Fill"
+					LineSpacing="10"
+					MinItemSpacing="10" />
+			</ItemsView.Layout>
+		</ItemsView>
+	</Grid>
+</UserControl>

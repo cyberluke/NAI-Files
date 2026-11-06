@@ -2786,6 +2786,60 @@
   <data name="LayoutColumnsDescription" xml:space="preserve">
     <value>Switch to columns view</value>
   </data>
+  <data name="Pulse" xml:space="preserve">
+    <value>Pulse</value>
+  </data>
+  <data name="OmnibarSwitchToTabDescription" xml:space="preserve">
+    <value>Switch to tab {0} · {1}</value>
+    <comment>{0} is the 1-based tab position, {1} the tab's location (may be empty)</comment>
+  </data>
+  <data name="LayoutPulseDescription" xml:space="preserve">
+    <value>Switch to Pulse view: a chronological media feed</value>
+  </data>
+  <data name="PulseVersionsCount" xml:space="preserve">
+    <value>{0} versions</value>
+    <comment>{0} is the number of files stacked as versions of one document</comment>
+  </data>
+  <data name="PulseLatestVersion" xml:space="preserve">
+    <value>Latest</value>
+    <comment>Label before the timestamp of the newest file in a stack</comment>
+  </data>
+  <data name="PulseMarkdownStats" xml:space="preserve">
+    <value>{0} headings · {1} code blocks</value>
+  </data>
+  <data name="PulseMarkdownAgentSpec" xml:space="preserve">
+    <value>Agent spec</value>
+    <comment>Badge on markdown files that look like AI agent specifications/prompts</comment>
+  </data>
+  <data name="PulseExpandStack" xml:space="preserve">
+    <value>Show all versions</value>
+  </data>
+  <data name="PulseCollapseStack" xml:space="preserve">
+    <value>Collapse versions</value>
+  </data>
+  <data name="PulseTimeRail" xml:space="preserve">
+    <value>Jump to date</value>
+  </data>
+  <data name="PulseFilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="PulseFilterMarkdown" xml:space="preserve">
+    <value>Markdown</value>
+  </data>
+  <data name="PulsePause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="PulseStop" xml:space="preserve">
+    <value>Stop</value>
+    <comment>Audio card: stop playback and rewind to the beginning</comment>
+  </data>
+  <data name="PulseFilterArchives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="PulseAutoGroupVersions" xml:space="preserve">
+    <value>Group file versions automatically</value>
+    <comment>Pulse view toggle: collapse "report.pdf", "report (1).pdf", "report-v2.pdf" into one stack</comment>
+  </data>
   <data name="LayoutAdaptiveDescription" xml:space="preserve">
     <value>Switch views adaptively</value>
   </data>

@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "CustomSaveDialog_i.h"
 #include "dllmain.h"
+#include "..\Files.App.OpenDialog\DialogSelfHeal.h"
 
 
 using namespace ATL;
@@ -21,7 +22,15 @@ STDAPI DllCanUnloadNow(void)
 _Use_decl_annotations_
 STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID* ppv)
 {
-	return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
+	HRESULT hr = _AtlModule.DllGetClassObject(rclsid, riid, ppv);
+	if (SUCCEEDED(hr))
+	{
+		// Runs inside the caller's process (never virtualized): keep the per-user
+		// CLSID shadows that route native dialogs to Files pointing at the current
+		// dialog bridge so a bare sideload / updated package works without NAI OS.
+		RepairDialogRegistration();
+	}
+	return hr;
 }
 
 // DllRegisterServer: aggiunge voci al Registro di sistema.

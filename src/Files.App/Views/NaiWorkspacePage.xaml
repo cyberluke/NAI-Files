@@ -1,0 +1,50 @@
+<Page
+	x:Class="Files.App.Views.NaiWorkspacePage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:local="using:Files.App.Views"
+	xmlns:status="using:Files.App.UserControls.StatusCenter">
+	<Grid Padding="24" RowSpacing="12">
+		<Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+		<StackPanel Spacing="6">
+			<TextBlock Text="{helpers:ResourceString Name=NaiWorkspaceTitle}" Style="{StaticResource TitleTextBlockStyle}" />
+			<TextBlock Text="{helpers:ResourceString Name=NaiWorkspaceDescription}" TextWrapping="Wrap" />
+		</StackPanel>
+		<Grid Grid.Row="1" ColumnSpacing="8">
+			<Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+			<TextBox x:Name="FolderBox" Header="{helpers:ResourceString Name=NaiVisionFolder}" IsReadOnly="True" />
+			<Button x:Name="ChooseFolderButton" Grid.Column="1" VerticalAlignment="Bottom" Content="{helpers:ResourceString Name=NaiChooseFolder}" Click="ChooseFolder_Click" />
+		</Grid>
+		<Expander Grid.Row="2" Header="{helpers:ResourceString Name=NaiWorkspaceSaved}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<ComboBox x:Name="SavedBox" MinWidth="200" PlaceholderText="{helpers:ResourceString Name=NaiWorkspaceSaved}" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceSave}" Click="SaveWorkspace_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceRestore}" Click="RestoreWorkspace_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceForget}" Click="ForgetWorkspace_Click" />
+			</StackPanel>
+		</Expander>
+		<StackPanel Grid.Row="3" Spacing="8">
+			<VariableSizedWrapGrid x:Name="ReviewActions" Orientation="Horizontal" ItemHeight="46" ItemWidth="205" MaximumRowsOrColumns="5">
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceStorage}" Click="Storage_Click" AutomationProperties.AutomationId="NaiWorkspaceStorage" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceDuplicates}" Click="Duplicates_Click" AutomationProperties.AutomationId="NaiWorkspaceDuplicates" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceHistory}" Click="History_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceCompare}" Click="Compare_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceChanges}" Click="Changes_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiWorkspaceGroups}" Click="Groups_Click" />
+				<Button Content="{helpers:ResourceString Name=NaiVisionTitle}" Click="Vision_Click" />
+			</VariableSizedWrapGrid>
+			<TextBlock x:Name="ScopeText" TextWrapping="Wrap" />
+			<TextBlock x:Name="StatusText" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+			<Button x:Name="CancelButton" Content="{helpers:ResourceString Name=Cancel}" Click="Cancel_Click" Visibility="Collapsed" />
+		</StackPanel>
+		<Expander Grid.Row="4" Header="{helpers:ResourceString Name=NaiWorkspaceOperations}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+			<status:StatusCenter MaxHeight="260" />
+		</Expander>
+		<ListView x:Name="Results" Grid.Row="5" IsItemClickEnabled="True" ItemClick="Results_ItemClick" AutomationProperties.AutomationId="NaiWorkspaceResults">
+			<ListView.ItemTemplate><DataTemplate x:DataType="local:NaiWorkspaceRow">
+				<StackPanel Padding="8" Spacing="4"><TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{x:Bind Detail}" TextWrapping="Wrap"/></StackPanel>
+			</DataTemplate></ListView.ItemTemplate>
+		</ListView>
+	</Grid>
+</Page>

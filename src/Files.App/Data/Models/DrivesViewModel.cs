@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Helpers.Application;
 using Files.App.Services.SizeProvider;
 using Microsoft.Extensions.Logging;
 using System.IO;
@@ -31,6 +32,7 @@ namespace Files.App.Data.Models
 
 		public DrivesViewModel(IRemovableDrivesService removableDrivesService, ISizeProvider folderSizeProvider, ILogger<App> logger)
 		{
+			NaiLanguageBridge.StartupStage("drivesvm-ctor-start");
 			this.removableDrivesService = removableDrivesService;
 			this.folderSizeProvider = folderSizeProvider;
 			this.logger = logger;
@@ -38,10 +40,12 @@ namespace Files.App.Data.Models
 			drives = [];
 
 			watcher = removableDrivesService.CreateWatcher();
+			NaiLanguageBridge.StartupStage("drivesvm-watcher-created");
 			watcher.DeviceAdded += Watcher_DeviceAdded;
 			watcher.DeviceRemoved += Watcher_DeviceRemoved;
 			watcher.DeviceModified += Watcher_DeviceModified;
 			watcher.EnumerationCompleted += Watcher_EnumerationCompleted;
+			NaiLanguageBridge.StartupStage("drivesvm-ctor-done");
 		}
 
 		private async void Watcher_EnumerationCompleted(object? sender, System.EventArgs e)

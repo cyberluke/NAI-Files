@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Helpers.Application;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -30,6 +31,260 @@ namespace Files.App.ViewModels
 		public ShelfViewModel ShelfViewModel { get; } = Ioc.Default.GetRequiredService<ShelfViewModel>();
 
 		private readonly IContentPageContext context = Ioc.Default.GetRequiredService<IContentPageContext>();
+
+		public bool IsDialogMode => App.IsDialogMode;
+
+		public bool IsDialogSaveMode => App.DialogMode == "save";
+
+		public bool IsDialogFolderMode => App.DialogMode == "folder";
+
+		public string DialogPathLabel =>
+			!string.IsNullOrWhiteSpace(DialogSession.Current?.Request.NameLabel) ? DialogSession.Current.Request.NameLabel : IsDialogFolderMode
+				? Strings.NaiChooseFolder.GetLocalizedResource()
+				: Strings.Filename.GetLocalizedResource();
+
+		public string DialogConfirmLabel =>
+			!string.IsNullOrWhiteSpace(DialogSession.Current?.Request.OkLabel) ? DialogSession.Current.Request.OkLabel : IsDialogSaveMode
+				? Strings.Save.GetLocalizedResource()
+				: IsDialogFolderMode
+					? Strings.NaiChooseFolder.GetLocalizedResource()
+					: Strings.Open.GetLocalizedResource();
+
+		public string DialogFileName
+		{
+			get => App.DialogFileName ?? string.Empty;
+			set
+			{
+				if (App.DialogFileName == value)
+					return;
+
+				App.DialogFileName = value;
+				nameFromSelection = false;
+				DialogError = string.Empty;
+				OnPropertyChanged(nameof(DialogFileName));
+				QueueDialogValidation();
+			}
+		}
+
+		private bool nameFromSelection;
+		private string[] lastSelectionPaths = [];
+		private string dialogError = string.Empty;
+		private DialogSelectionResult validatedSelection = DialogSelectionResult.Failure(DialogSelectionError.Empty);
+		private int validationGeneration;
+		private bool isValidating;
+		private bool isConfirming;
+		public bool IsDialogBusy => isValidating || isConfirming;
+		public IReadOnlyList<DialogFileType> DialogFileTypes => DialogSession.Current?.Request.FileTypes ?? [];
+		public bool HasDialogFileTypes => !IsDialogFolderMode && DialogFileTypes.Count > 0;
+		public int DialogFileTypeIndex
+		{
+			get => (DialogSession.Current?.SelectedTypeIndex ?? 1) - 1;
+			set
+			{
+				if (DialogSession.Current is not { } session || value < 0 || value >= DialogFileTypes.Count) return;
+				if (session.SelectedTypeIndex == value + 1) return;
+				session.SelectedTypeIndex = value + 1;
+				DialogError = string.Empty;
+				OnPropertyChanged(nameof(DialogFileTypeIndex));
+				if (nameFromSelection)
+				{
+					if (IsDialogSaveMode) nameFromSelection = false;
+					else DialogFileName = string.Empty;
+				}
+				QueueDialogValidation();
+				_ = RefreshDialogFilterAsync();
+			}
+		}
+		public string DialogError
+		{
+			get => dialogError;
+			private set
+			{
+				if (SetProperty(ref dialogError, value)) NotifyDialogValidation();
+			}
+		}
+		public bool HasDialogError => App.DialogRequestError is not null || !string.IsNullOrEmpty(DialogError);
+		public string DialogFeedback => App.DialogRequestError ?? (HasDialogError ? DialogError : isValidating ? Strings.Loading.GetLocalizedResource() : ValidationMessage(validatedSelection));
+		public bool HasDialogFeedback => !string.IsNullOrEmpty(DialogFeedback);
+		public Microsoft.UI.Xaml.Controls.InfoBarSeverity DialogFeedbackSeverity => HasDialogError
+			? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error
+			: validatedSelection.Error is DialogSelectionError.Empty or DialogSelectionError.None || isValidating
+				? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational : Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning;
+		internal void ReportDialogError(string error) => DialogError = error;
+
+		public bool CanConfirmDialog => IsDialogMode && App.DialogRequestError is null && !IsDialogBusy && validatedSelection.CanSubmit;
+
+		private Func<DialogSelectionResult> CaptureDialogSelection()
+		{
+			var mode = App.DialogMode;
+			var folder = context.ShellPage?.ShellViewModel?.WorkingDirectory;
+			var input = nameFromSelection ? null : DialogFileName;
+			var session = DialogSession.Current;
+			var selected = context.SelectedItems.Where(item => mode == "save" || session?.Includes(item) != false)
+				.Select(item => item.ItemPath).OfType<string>().ToArray();
+			return () =>
+			{
+				var result = DialogSelectionResolver.Resolve(mode, folder, input, selected);
+				if (result.NavigateTo is not null) return result;
+				if (mode == "save" && !string.IsNullOrWhiteSpace(input) && session is not null)
+					result = DialogSelectionResolver.Resolve(mode, folder, session.AddDefaultExtension(input), selected);
+				if (mode == "save" && result.Paths.Any(path => FilesystemHelpers.ContainsRestrictedFileName(System.IO.Path.GetFileName(path))))
+					return DialogSelectionResult.Failure(DialogSelectionError.InvalidName, input);
+				if (session?.StrictTypes == true && result.Paths.Any(path => !session.MatchesFile(path)))
+					return DialogSelectionResult.Failure(DialogSelectionError.UnsupportedType, session.SelectedType?.Name);
+				return result;
+			};
+		}
+
+		internal DialogSelectionResult ResolveDialogSelection() => CaptureDialogSelection()();
+
+		private async Task RefreshDialogFilterAsync()
+		{
+			try { if (context.ShellPage?.ShellViewModel is { } model) await model.ApplyFilesAndFoldersChangesAsync(); }
+			catch (Exception ex) { ReportDialogError(ex.Message); }
+		}
+
+		private void NotifyDialogValidation()
+		{
+			if (App.AppModel.IsMainWindowClosed) return;
+			OnPropertyChanged(nameof(HasDialogError));
+			OnPropertyChanged(nameof(DialogFeedback));
+			OnPropertyChanged(nameof(HasDialogFeedback));
+			OnPropertyChanged(nameof(DialogFeedbackSeverity));
+			OnPropertyChanged(nameof(IsDialogBusy));
+			OnPropertyChanged(nameof(CanConfirmDialog));
+		}
+
+		private void QueueDialogValidation()
+		{
+			if (!IsDialogMode || App.AppModel.IsMainWindowClosed) return;
+			var revision = ++validationGeneration;
+			var resolve = CaptureDialogSelection();
+			isValidating = true;
+			NotifyDialogValidation();
+			_ = ValidateDialogAsync(revision, resolve);
+		}
+
+		internal void RefreshDialogValidation() => QueueDialogValidation();
+
+		private async Task ValidateDialogAsync(int revision, Func<DialogSelectionResult> resolve)
+		{
+			try
+			{
+				await Task.Delay(120);
+				if (revision != validationGeneration || App.AppModel.IsMainWindowClosed) return;
+				var result = await Task.Run(resolve);
+				if (revision != validationGeneration || App.AppModel.IsMainWindowClosed) return;
+				validatedSelection = result;
+			}
+			catch (Exception ex) { if (revision == validationGeneration) ReportDialogError(ex.Message); }
+			finally
+			{
+				if (revision == validationGeneration) { isValidating = false; NotifyDialogValidation(); }
+			}
+		}
+
+		private string ValidationMessage(DialogSelectionResult result) => result.Error switch
+		{
+			DialogSelectionError.None => string.Empty,
+			DialogSelectionError.Empty => (IsDialogSaveMode ? Strings.DialogEnterFileName : Strings.DialogChooseFile).GetLocalizedResource(),
+			DialogSelectionError.MissingFile => string.Format(Strings.DialogFileMissing.GetLocalizedResource(), result.Detail ?? DialogFileName),
+			DialogSelectionError.MissingFolder => string.Format(Strings.DialogFolderMissing.GetLocalizedResource(), result.Detail ?? DialogFileName),
+			DialogSelectionError.AccessDenied => string.Format(Strings.DialogAccessDenied.GetLocalizedResource(), result.Detail),
+			DialogSelectionError.UnsupportedType => string.Format(Strings.DialogTypeMismatch.GetLocalizedResource(), result.Detail),
+			DialogSelectionError.PathTooLong => Strings.RenameErrorTooLongText.GetLocalizedResource(),
+			_ => Strings.FileNameTeachingTip_Subtitle.GetLocalizedResource(),
+		};
+
+		public async void ConfirmDialog() => await ConfirmDialogAsync();
+
+		public async Task ConfirmDialogAsync()
+		{
+			if (!IsDialogMode || isConfirming) return;
+			if (App.DialogRequestError is { } requestError) { ReportDialogError(requestError); return; }
+			isConfirming = true;
+			NotifyDialogValidation();
+			var revision = validationGeneration;
+			try
+			{
+			var selection = await Task.Run(CaptureDialogSelection());
+			if (App.AppModel.IsMainWindowClosed || revision != validationGeneration) return;
+			validatedSelection = selection;
+			if (selection.NavigateTo is { } folder)
+			{
+				var preserveSaveName = IsDialogSaveMode && nameFromSelection;
+				context.ShellPage?.NavigateToPath(folder);
+				if (!preserveSaveName)
+					DialogFileName = string.Empty;
+				nameFromSelection = false;
+				return;
+			}
+			if (selection.Paths.Count == 0)
+			{
+				DialogError = ValidationMessage(selection);
+				return;
+			}
+			if (IsDialogSaveMode && (DialogSession.Current?.RequiresOverwritePrompt ?? true)
+				&& await Task.Run(() => System.IO.File.Exists(selection.Paths[0])))
+			{
+				var replace = await DialogDisplayHelper.ShowDialogAsync(Strings.ItemAlreadyExistsDialogTitle.GetLocalizedResource(),
+					Strings.ItemAlreadyExistsDialogContent.GetLocalizedResource() + Environment.NewLine + selection.Paths[0],
+					Strings.ItemAlreadyExistsDialogSecondaryButtonText.GetLocalizedResource(), Strings.Cancel.GetLocalizedResource());
+				if (!replace || revision != validationGeneration || App.AppModel.IsMainWindowClosed) return;
+			}
+			if (App.TryCompleteDialog(selection.Paths, out var error))
+				MainWindow.Instance?.Close();
+			else
+				DialogError = error;
+			}
+			catch (Exception ex) { ReportDialogError(ex.Message); }
+			finally { isConfirming = false; NotifyDialogValidation(); }
+		}
+
+		internal void ConfirmSelection()
+		{
+			nameFromSelection = true;
+			ConfirmDialog();
+		}
+
+		public void CancelDialog()
+		{
+			if (!IsDialogMode)
+				return;
+
+			App.DialogConfirmRequested = false;
+			MainWindow.Instance?.Close();
+		}
+
+		private void SyncDialogFileNameFromSelection()
+		{
+			if (!IsDialogMode)
+				return;
+			var paths = context.SelectedItems.Select(item => item.ItemPath).OfType<string>().ToArray();
+			if (paths.SequenceEqual(lastSelectionPaths, StringComparer.OrdinalIgnoreCase))
+			{
+				QueueDialogValidation();
+				return;
+			}
+			lastSelectionPaths = paths;
+			if (paths.Length > 0)
+			{
+				// Selecting a folder must not erase the suggested/typed save filename.
+				if (!(IsDialogSaveMode && paths.All(System.IO.Directory.Exists)))
+					App.DialogFileName = IsDialogSaveMode
+						? System.IO.Path.GetFileName(paths[0])
+						: paths.Length == 1 ? paths[0] : string.Join(" ", paths.Select(path => $"\"{path}\""));
+				DialogError = string.Empty;
+				OnPropertyChanged(nameof(DialogFileName));
+			}
+			else if (nameFromSelection && !IsDialogSaveMode)
+			{
+				App.DialogFileName = string.Empty;
+				OnPropertyChanged(nameof(DialogFileName));
+			}
+			nameFromSelection = paths.Length > 0;
+			QueueDialogValidation();
+		}
 
 		// Properties
 
@@ -120,6 +375,7 @@ namespace Files.App.ViewModels
 
 		public bool ShowToolbar =>
 			AppearanceSettingsService.ShowToolbar &&
+			!IsDialogMode &&
 			context.PageType is not ContentPageTypes.Home &&
 			context.PageType is not ContentPageTypes.ReleaseNotes &&
 			context.PageType is not ContentPageTypes.Settings;
@@ -184,6 +440,7 @@ namespace Files.App.ViewModels
 
 		public MainPageViewModel()
 		{
+			NaiLanguageBridge.StartupStage("mainpagevm-ctor-start");
 			NavigateToNumberedTabKeyboardAcceleratorCommand = new RelayCommand<KeyboardAcceleratorInvokedEventArgs>(ExecuteNavigateToNumberedTabKeyboardAcceleratorCommand);
 			ReviewAppCommand = new RelayCommand(ExecuteReviewAppCommand);
 			SponsorCommand = new RelayCommand(ExecuteSponsorCommand);
@@ -220,6 +477,15 @@ namespace Files.App.ViewModels
 				{
 					case nameof(context.PageType):
 						OnPropertyChanged(nameof(ShowToolbar));
+						OnPropertyChanged(nameof(CanConfirmDialog));
+						break;
+					case nameof(context.HasSelection):
+					case nameof(context.SelectedItem):
+					case nameof(context.SelectedItems):
+					case nameof(context.Folder):
+					case nameof(context.ShellPage):
+						OnPropertyChanged(nameof(CanConfirmDialog));
+						SyncDialogFileNameFromSelection();
 						break;
 				}
 			};
@@ -233,6 +499,7 @@ namespace Files.App.ViewModels
 						break;
 				}
 			};
+			NaiLanguageBridge.StartupStage("mainpagevm-ctor-done");
 		}
 
 		// Methods
@@ -242,6 +509,7 @@ namespace Files.App.ViewModels
 			if (e.NavigationMode == NavigationMode.Back)
 				return;
 
+			NaiLanguageBridge.StartupStage("mainpage-nav-start");
 			var parameter = e.Parameter;
 			var ignoreStartupSettings = false;
 			if (parameter is MainPageNavigationArguments mainPageNavigationArguments)
@@ -295,7 +563,9 @@ namespace Files.App.ViewModels
 						}
 						else
 						{
+							NaiLanguageBridge.StartupStage("before-first-tab");
 							await NavigationHelpers.AddNewTabAsync();
+							NaiLanguageBridge.StartupStage("after-first-tab");
 						}
 					}
 					catch
@@ -336,6 +606,7 @@ namespace Files.App.ViewModels
 			finally
 			{
 				startupTabsTcs.TrySetResult();
+				NaiLanguageBridge.StartupStage("tabs-loaded");
 			}
 
 			// Load the app theme resources
@@ -345,6 +616,7 @@ namespace Files.App.ViewModels
 				DrivesViewModel.UpdateDrivesAsync(),
 				NetworkService.UpdateComputersAsync(),
 				NetworkService.UpdateShortcutsAsync());
+			NaiLanguageBridge.StartupStage("startup-drives-done");
 		}
 
 		private async Task RestoreSessionTabsAsync(List<string> sessionTabs)

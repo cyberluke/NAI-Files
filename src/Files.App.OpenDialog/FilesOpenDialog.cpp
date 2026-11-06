@@ -12,6 +12,7 @@
 #include <locale>
 #include <codecvt>
 #include "FilesOpenDialog.h"
+#include "DialogBridge.h"
 
 //#define SYSTEMDIALOG
 
@@ -81,40 +82,23 @@ CComPtr<T> AsInterface(CComPtr<IFileOpenDialog> dialog)
 	return dialogInterface;
 }
 
+/// <summary>Reads the NAI OS folder-picker preference (HKCU\Software\NAI OS\Files\Dialogs,
+/// value "FolderPicker"). Absent means enabled: the option only exists to opt out.</summary>
+bool IsFolderPickerEnabled()
+{
+	DWORD value = 1;
+	DWORD size = sizeof(value);
+	if (RegGetValueW(HKEY_CURRENT_USER, L"Software\\NAI OS\\Files\\Dialogs", L"FolderPicker",
+		RRF_RT_REG_DWORD, NULL, &value, &size) != ERROR_SUCCESS)
+		return true;
+	return value != 0;
+}
+
 CFilesOpenDialog::CFilesOpenDialog()
 {
-	_fos = FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST;
 	_systemDialog = nullptr;
 	_debugStream = NULL;
-	_dialogEvents = NULL;
-
-	PWSTR pszPath = NULL;
-	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, NULL, &pszPath);
-	if (SUCCEEDED(hr))
-	{
-		TCHAR debugPath[MAX_PATH];
-		wsprintf(debugPath, L"%s\\%s", pszPath, L"open_dialog.txt");
-#ifdef  DEBUGLOG
-		_wfreopen_s(&_debugStream, debugPath, L"w", stdout);
-#endif
-		CoTaskMemFree(pszPath);
-	}
-
-	cout << "Create" << endl;
-
-	TCHAR tempPath[MAX_PATH];
-	GetTempPath(MAX_PATH, tempPath);
-	TCHAR tempName[MAX_PATH];
-	GetTempFileName(tempPath, L"fsd", 0, tempName);
-	_outputPath = tempName;
-
-	(void)SHGetKnownFolderItem(FOLDERID_Documents, KF_FLAG_DEFAULT_PATH, NULL, IID_PPV_ARGS(&_initFolder));
-
-	if (_initFolder && SUCCEEDED(_initFolder->GetDisplayName(SIGDN_NORMALDISPLAY, &pszPath)))
-	{
-		wcout << L"_outputPath: " << _outputPath << L", _initFolder: " << pszPath << endl;
-		CoTaskMemFree(pszPath);
-	}
+	(void)SHGetKnownFolderItem(FOLDERID_Documents, KF_FLAG_DEFAULT_PATH, NULL, IID_PPV_ARGS(&_defaultFolder));
 
 #ifdef  SYSTEMDIALOG
 	_systemDialog = GetSystemDialog();
@@ -127,104 +111,49 @@ void CFilesOpenDialog::FinalRelease()
 		_systemDialog.Release();
 
 	_initFolder.Release();
-	_dialogEvents.Release();
-	DeleteFile(_outputPath.c_str());
+	_defaultFolder.Release();
+	_events.Clear();
 
 	if (_debugStream)
 		fclose(_debugStream);
 }
 
 STDAPICALL CFilesOpenDialog::Show(HWND hwndOwner)
+try
 {
-	cout << "Show, hwndOwner: " << hwndOwner << endl;
 	_selectedItems.clear();
 
 #ifdef  SYSTEMDIALOG
 	return _systemDialog->Show(hwndOwner);
 #endif
 
-	SHELLEXECUTEINFO ShExecInfo = { 0 };
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-
-	PWSTR pszPath = NULL;
-	WCHAR szBuf[MAX_PATH];
-	TCHAR args[1024] = { 0 };
-	ExpandEnvironmentStringsW(L"%LOCALAPPDATA%\\Microsoft\\WindowsApps\\files-dev.exe", szBuf, MAX_PATH - 1);
-
-	HANDLE closeEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("FILEDIALOG"));
-
-	if (_initFolder && SUCCEEDED(_initFolder->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
+	LPCWSTR mode = L"open";
+	if ((_fos & FOS_PICKFOLDERS) && IsFolderPickerEnabled())
+		mode = L"folder";
+	else if (_fos & FOS_ALLOWMULTISELECT)
+		mode = L"multi";
+	_request.folder = DialogOptions::Folder(_initFolder);
+	_request.defaultFolder = DialogOptions::Folder(_defaultFolder);
+	_request.suggestedName = _initName;
+	_request.flags = _fos;
+	_request.typeIndex = _fileTypeIndex;
+	for (;;)
 	{
-		swprintf(args, _countof(args) - 1, L"\"%s\" -directory \"%s\" -outputpath \"%s\"", szBuf, pszPath, _outputPath.c_str());
-		wcout << L"Invoking: " << args << endl;
-		CoTaskMemFree(pszPath);
+		std::wstring diagnostic;
+		const auto result = FilesDialogBridge::Show(hwndOwner, mode, _request.folder, _initName, _selectedItems, &diagnostic, &_request);
+		if (FAILED(result)) return result;
+		_fileTypeIndex = _request.typeIndex;
+		const auto accepted = _events.FileOk(static_cast<IFileOpenDialog*>(this));
+		FilesDialogBridge::TraceHResult(diagnostic, "OnFileOk", accepted);
+		if (accepted == S_FALSE) continue;
+		// Notifications are not the modal result. Writer returns E_NOTIMPL here;
+		// only an explicit S_FALSE veto rejects the user's accepted selection.
+		FilesDialogBridge::TraceHResult(diagnostic, "Show", S_OK);
+		return S_OK;
 	}
-	else
-	{
-		swprintf(args, _countof(args) - 1, L"\"%s\" -outputpath \"%s\"", szBuf, _outputPath.c_str());
-	}
-
-	std::wstring uriWithArgs = L"files-dev:?cmd=" + str2wstr(wstring_to_utf8_hex(args));
-	ShExecInfo.lpFile = uriWithArgs.c_str();
-	ShExecInfo.nShow = SW_SHOW;
-	ShellExecuteEx(&ShExecInfo);
-
-	if (hwndOwner)
-		EnableWindow(hwndOwner, FALSE);
-
-	MSG msg;
-	while (ShExecInfo.hProcess)
-	{
-		switch (MsgWaitForMultipleObjectsEx(1, &closeEvent, INFINITE, QS_ALLINPUT, 0))
-		{
-		case WAIT_OBJECT_0:
-			CloseHandle(ShExecInfo.hProcess);
-			ShExecInfo.hProcess = NULL;
-			break;
-		case WAIT_OBJECT_0 + 1:
-			while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			continue;
-		default: __debugbreak();
-		}
-	}
-
-	if (closeEvent)
-		CloseHandle(closeEvent);
-
-	if (hwndOwner)
-	{
-		EnableWindow(hwndOwner, TRUE);
-		SetForegroundWindow(hwndOwner);
-	}
-
-	std::ifstream file(_outputPath);
-	if (file.good())
-	{
-		std::string str;
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-
-		while (std::getline(file, str))
-		{
-			std::wstring wide = converter.from_bytes(str);
-			_selectedItems.push_back(wide);
-		}
-	}
-
-	DeleteFile(_outputPath.c_str());
-
-	if (!_selectedItems.empty())
-	{
-		if (_dialogEvents)
-			_dialogEvents->OnFileOk(this);
-	}
-
-	return !_selectedItems.empty() ? S_OK : HRESULT_FROM_WIN32(ERROR_CANCELLED);
 }
+catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+catch (...) { return E_FAIL; }
 
 STDAPICALL CFilesOpenDialog::SetFileTypes(UINT cFileTypes, const COMDLG_FILTERSPEC* rgFilterSpec)
 {
@@ -232,7 +161,7 @@ STDAPICALL CFilesOpenDialog::SetFileTypes(UINT cFileTypes, const COMDLG_FILTERSP
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileTypes(cFileTypes, rgFilterSpec);
 #endif
-	return S_OK;
+	return _request.SetTypes(cFileTypes, rgFilterSpec);
 }
 
 STDAPICALL CFilesOpenDialog::SetFileTypeIndex(UINT iFileType)
@@ -241,6 +170,8 @@ STDAPICALL CFilesOpenDialog::SetFileTypeIndex(UINT iFileType)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileTypeIndex(iFileType);
 #endif
+	if (!iFileType || iFileType > INT_MAX || (!_request.types.empty() && iFileType > _request.types.size())) return E_INVALIDARG;
+	_fileTypeIndex = iFileType;
 	return S_OK;
 }
 
@@ -250,7 +181,8 @@ STDAPICALL CFilesOpenDialog::GetFileTypeIndex(UINT* piFileType)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFileTypeIndex(piFileType);
 #endif
-	* piFileType = 1;
+	if (!piFileType) return E_POINTER;
+	*piFileType = _fileTypeIndex;
 	return S_OK;
 }
 
@@ -260,9 +192,7 @@ STDAPICALL CFilesOpenDialog::Advise(IFileDialogEvents* pfde, DWORD* pdwCookie)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->Advise(pfde, pdwCookie);
 #endif
-	_dialogEvents = pfde;
-	*pdwCookie = 1;
-	return S_OK;
+	return _events.Advise(pfde, pdwCookie);
 }
 
 STDAPICALL CFilesOpenDialog::Unadvise(DWORD dwCookie)
@@ -271,8 +201,7 @@ STDAPICALL CFilesOpenDialog::Unadvise(DWORD dwCookie)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->Unadvise(dwCookie);
 #endif
-	_dialogEvents.Release();
-	return S_OK;
+	return _events.Unadvise(dwCookie);
 }
 
 STDAPICALL CFilesOpenDialog::SetOptions(FILEOPENDIALOGOPTIONS fos)
@@ -291,12 +220,14 @@ STDAPICALL CFilesOpenDialog::GetOptions(FILEOPENDIALOGOPTIONS* pfos)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetOptions(pfos);
 #endif
-	* pfos = _fos;
+	if (!pfos) return E_POINTER;
+	*pfos = _fos;
 	return S_OK;
 }
 
 STDAPICALL CFilesOpenDialog::SetDefaultFolder(IShellItem* psi)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -306,12 +237,13 @@ STDAPICALL CFilesOpenDialog::SetDefaultFolder(IShellItem* psi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetDefaultFolder(psi);
 #endif
-	_initFolder = psi;
+	_defaultFolder = psi;
 	return S_OK;
 }
 
 STDAPICALL CFilesOpenDialog::SetFolder(IShellItem* psi)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -331,8 +263,9 @@ STDAPICALL CFilesOpenDialog::GetFolder(IShellItem** ppsi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFolder(ppsi);
 #endif
-	* ppsi = NULL;
-	return E_NOTIMPL;
+	if (!ppsi) return E_POINTER;
+	*ppsi = nullptr;
+	return (_initFolder ? _initFolder : _defaultFolder).CopyTo(ppsi);
 }
 
 STDAPICALL CFilesOpenDialog::GetCurrentSelection(IShellItem** ppsi)
@@ -350,7 +283,7 @@ STDAPICALL CFilesOpenDialog::SetFileName(LPCWSTR pszName)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileName(pszName);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_initName, pszName);
 }
 
 STDAPICALL CFilesOpenDialog::GetFileName(LPWSTR* pszName)
@@ -359,6 +292,7 @@ STDAPICALL CFilesOpenDialog::GetFileName(LPWSTR* pszName)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFileName(pszName);
 #endif
+	if (!pszName) return E_POINTER;
 	return SHStrDupW(_selectedItems.empty() ? L"" : _selectedItems[0].c_str(), pszName);
 }
 
@@ -368,7 +302,7 @@ STDAPICALL CFilesOpenDialog::SetTitle(LPCWSTR pszTitle)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetTitle(pszTitle);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.title, pszTitle);
 }
 
 STDAPICALL CFilesOpenDialog::SetOkButtonLabel(LPCWSTR pszText)
@@ -377,7 +311,7 @@ STDAPICALL CFilesOpenDialog::SetOkButtonLabel(LPCWSTR pszText)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetOkButtonLabel(pszText);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.okLabel, pszText);
 }
 
 STDAPICALL CFilesOpenDialog::SetFileNameLabel(LPCWSTR pszLabel)
@@ -386,7 +320,7 @@ STDAPICALL CFilesOpenDialog::SetFileNameLabel(LPCWSTR pszLabel)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileNameLabel(pszLabel);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.nameLabel, pszLabel);
 }
 
 STDAPICALL CFilesOpenDialog::GetResult(IShellItem** ppsi)
@@ -395,6 +329,7 @@ STDAPICALL CFilesOpenDialog::GetResult(IShellItem** ppsi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetResult(ppsi);
 #endif
+	if (!ppsi) return E_POINTER;
 	*ppsi = NULL;
 	if (!_selectedItems.empty())
 		return SHCreateItemFromParsingName(_selectedItems[0].c_str(), NULL, IID_IShellItem, (void**)ppsi);
@@ -403,6 +338,7 @@ STDAPICALL CFilesOpenDialog::GetResult(IShellItem** ppsi)
 
 STDAPICALL CFilesOpenDialog::AddPlace(IShellItem* psi, FDAP fdap)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -421,7 +357,7 @@ STDAPICALL CFilesOpenDialog::SetDefaultExtension(LPCWSTR pszDefaultExtension)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetDefaultExtension(pszDefaultExtension);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.extension, pszDefaultExtension);
 }
 
 STDAPICALL CFilesOpenDialog::Close(HRESULT hr)
@@ -439,7 +375,9 @@ STDAPICALL CFilesOpenDialog::SetClientGuid(REFGUID guid)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetClientGuid(guid);
 #endif
-	return S_OK;
+	wchar_t value[40];
+	StringFromGUID2(guid, value, _countof(value));
+	return DialogOptions::Text(_request.clientGuid, value);
 }
 
 STDAPICALL CFilesOpenDialog::ClearClientData(void)
@@ -448,6 +386,7 @@ STDAPICALL CFilesOpenDialog::ClearClientData(void)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->ClearClientData();
 #endif
+	_request.clearClientData = true;
 	return S_OK;
 }
 
@@ -461,38 +400,29 @@ STDAPICALL CFilesOpenDialog::SetFilter(IShellItemFilter* pFilter)
 }
 
 STDAPICALL CFilesOpenDialog::GetResults(IShellItemArray** ppenum)
+try
 {
 	cout << "GetResults, results: " << _selectedItems.size() << endl;
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetResults(ppenum);
 #endif
-	*ppenum = NULL;
-	if (!_selectedItems.empty())
+	if (!ppenum) return E_POINTER;
+	*ppenum = nullptr;
+	if (_selectedItems.empty()) return E_UNEXPECTED;
+	std::vector<PIDLIST_ABSOLUTE> pidls(_selectedItems.size(), nullptr);
+	struct Cleanup { std::vector<PIDLIST_ABSOLUTE>& values; ~Cleanup() { for (auto value : values) CoTaskMemFree(value); } } cleanup{pidls};
+	for (size_t i = 0; i < _selectedItems.size(); ++i)
 	{
-		std::vector<PIDLIST_ABSOLUTE> pidls;
-		for (const std::wstring& ipath : _selectedItems)
-		{
-			CComPtr<IShellItem> psi;
-			if (SUCCEEDED(SHCreateItemFromParsingName(ipath.c_str(), NULL, IID_PPV_ARGS(&psi))))
-			{
-				PIDLIST_ABSOLUTE pidl = NULL;
-				if (SUCCEEDED(SHGetIDListFromObject(psi, &pidl)))
-					pidls.push_back(pidl);
-			}
-		}
-
-		if (pidls.empty())
-			return E_FAIL;
-
-		HRESULT hr = SHCreateShellItemArrayFromIDLists((UINT)pidls.size(), (LPCITEMIDLIST*)pidls.data(), ppenum);
-		for (PIDLIST_ABSOLUTE item : pidls)
-		{
-			CoTaskMemFree(item);
-		}
-		return hr;
+		CComPtr<IShellItem> item;
+		auto hr = SHCreateItemFromParsingName(_selectedItems[i].c_str(), nullptr, IID_PPV_ARGS(&item));
+		if (FAILED(hr)) return hr;
+		hr = SHGetIDListFromObject(item, &pidls[i]);
+		if (FAILED(hr)) return hr;
 	}
-	return E_NOTIMPL;
+	return SHCreateShellItemArrayFromIDLists(static_cast<UINT>(pidls.size()), (LPCITEMIDLIST*)pidls.data(), ppenum);
 }
+catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+catch (...) { return E_FAIL; }
 
 STDAPICALL CFilesOpenDialog::GetSelectedItems(IShellItemArray** ppsai)
 {
@@ -599,7 +529,8 @@ STDAPICALL CFilesOpenDialog::GetControlState(DWORD dwIDCtl, CDCONTROLSTATEF* pdw
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetControlState(dwIDCtl, pdwState);
 #endif
-	* pdwState = CDCS_ENABLEDVISIBLE;
+	if (!pdwState) return E_POINTER;
+	*pdwState = CDCS_ENABLEDVISIBLE;
 	return S_OK;
 }
 
@@ -618,8 +549,8 @@ STDAPICALL CFilesOpenDialog::GetEditBoxText(DWORD dwIDCtl, WCHAR** ppszText)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetEditBoxText(dwIDCtl, ppszText);
 #endif
-	SHStrDupW(L"", ppszText);
-	return S_OK;
+	if (!ppszText) return E_POINTER;
+	return SHStrDupW(L"", ppszText);
 }
 
 STDAPICALL CFilesOpenDialog::SetEditBoxText(DWORD dwIDCtl, LPCWSTR pszText)
@@ -637,7 +568,8 @@ STDAPICALL CFilesOpenDialog::GetCheckButtonState(DWORD dwIDCtl, BOOL* pbChecked)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetCheckButtonState(dwIDCtl, pbChecked);
 #endif
-	* pbChecked = false;
+	if (!pbChecked) return E_POINTER;
+	*pbChecked = false;
 	return S_OK;
 }
 
@@ -656,7 +588,7 @@ STDAPICALL CFilesOpenDialog::AddControlItem(DWORD dwIDCtl, DWORD dwIDItem, LPCWS
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->AddControlItem(dwIDCtl, dwIDItem, pszLabel);
 #endif
-	return S_OK;
+	return _controlSelections.Add(dwIDCtl, dwIDItem);
 }
 
 STDAPICALL CFilesOpenDialog::RemoveControlItem(DWORD dwIDCtl, DWORD dwIDItem)
@@ -665,7 +597,7 @@ STDAPICALL CFilesOpenDialog::RemoveControlItem(DWORD dwIDCtl, DWORD dwIDItem)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->RemoveControlItem(dwIDCtl, dwIDItem);
 #endif
-	return S_OK;
+	return _controlSelections.Remove(dwIDCtl, dwIDItem);
 }
 
 STDAPICALL CFilesOpenDialog::RemoveAllControlItems(DWORD dwIDCtl)
@@ -674,7 +606,7 @@ STDAPICALL CFilesOpenDialog::RemoveAllControlItems(DWORD dwIDCtl)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->RemoveAllControlItems(dwIDCtl);
 #endif
-	return S_OK;
+	return _controlSelections.Clear(dwIDCtl);
 }
 
 STDAPICALL CFilesOpenDialog::GetControlItemState(DWORD dwIDCtl, DWORD dwIDItem, CDCONTROLSTATEF* pdwState)
@@ -683,7 +615,8 @@ STDAPICALL CFilesOpenDialog::GetControlItemState(DWORD dwIDCtl, DWORD dwIDItem, 
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetControlItemState(dwIDCtl, dwIDItem, pdwState);
 #endif
-	* pdwState = CDCS_ENABLEDVISIBLE;
+	if (!pdwState) return E_POINTER;
+	*pdwState = CDCS_ENABLEDVISIBLE;
 	return S_OK;
 }
 
@@ -702,8 +635,7 @@ STDAPICALL CFilesOpenDialog::GetSelectedControlItem(DWORD dwIDCtl, DWORD* pdwIDI
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetSelectedControlItem(dwIDCtl, pdwIDItem);
 #endif
-	* pdwIDItem = 0;
-	return S_OK;
+	return _controlSelections.Get(dwIDCtl, pdwIDItem);
 }
 
 STDAPICALL CFilesOpenDialog::SetSelectedControlItem(DWORD dwIDCtl, DWORD dwIDItem)
@@ -712,7 +644,7 @@ STDAPICALL CFilesOpenDialog::SetSelectedControlItem(DWORD dwIDCtl, DWORD dwIDIte
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->SetSelectedControlItem(dwIDCtl, dwIDItem);
 #endif
-	return S_OK;
+	return _controlSelections.Set(dwIDCtl, dwIDItem);
 }
 
 STDAPICALL CFilesOpenDialog::StartVisualGroup(DWORD dwIDCtl, LPCWSTR pszLabel)
@@ -775,6 +707,7 @@ STDAPICALL CFilesOpenDialog::SetSite(IUnknown* pUnkSite)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IObjectWithSite>(_systemDialog)->SetSite(pUnkSite);
 #endif
+	_site = pUnkSite;
 	return S_OK;
 }
 
@@ -784,7 +717,9 @@ STDAPICALL CFilesOpenDialog::GetSite(REFIID riid, void** ppvSite)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IObjectWithSite>(_systemDialog)->GetSite(riid, ppvSite);
 #endif
-	return E_NOTIMPL;
+	if (!ppvSite) return E_POINTER;
+	*ppvSite = nullptr;
+	return _site ? _site->QueryInterface(riid, ppvSite) : E_FAIL;
 }
 
 STDAPICALL CFilesOpenDialog::HideControlsForHostedPickerProviderApp(void)

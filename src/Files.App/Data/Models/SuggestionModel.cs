@@ -17,6 +17,11 @@ namespace Files.App.Data.Models
 
 		public bool IsShortcut { get; set; } = false;
 
+		/// <summary>An open tab matched by name; selecting it switches to that tab instead of navigating.</summary>
+		public bool IsTab => TabItem is not null;
+
+		public Files.App.UserControls.TabBar.TabBarItem? TabItem { get; set; }
+
 		public bool LoadFileIcon { get; set; } = false;
 
 		public bool NeedsPlaceholderGlyph { get; set; } = true;
@@ -31,7 +36,7 @@ namespace Files.App.Data.Models
 
 		public string DisplayName => IsSearchQuery ? string.Format(Strings.SearchForQuery.GetLocalizedResource(), Name) : Name;
 
-		public string PlaceholderGlyph => IsSearchQuery ? "\uE721" : IsRecentSearch ? "\uE81C" : "\uE7C3";
+		public string PlaceholderGlyph => IsSearchQuery ? "\uE721" : IsRecentSearch ? "\uE81C" : IsTab ? "\uE737" : "\uE7C3";
 
 		public SettingsSearchResult? SettingsResult { get; set; }
 

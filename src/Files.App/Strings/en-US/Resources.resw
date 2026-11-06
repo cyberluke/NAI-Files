@@ -2786,6 +2786,312 @@
   <data name="LayoutColumnsDescription" xml:space="preserve">
     <value>Switch to columns view</value>
   </data>
+  <data name="Pulse" xml:space="preserve">
+    <value>Pulse</value>
+  </data>
+  <data name="LayoutPulseDescription" xml:space="preserve">
+    <value>Switch to Pulse view: a chronological media feed</value>
+  </data>
+  <data name="PulseVersionsCount" xml:space="preserve">
+    <value>{0} versions</value>
+    <comment>{0} is the number of files stacked as versions of one document</comment>
+  </data>
+  <data name="PulseLatestVersion" xml:space="preserve">
+    <value>Latest</value>
+    <comment>Label before the timestamp of the newest file in a stack</comment>
+  </data>
+  <data name="PulseMarkdownStats" xml:space="preserve">
+    <value>{0} headings · {1} code blocks</value>
+  </data>
+  <data name="PulseMarkdownAgentSpec" xml:space="preserve">
+    <value>Agent spec</value>
+    <comment>Badge on markdown files that look like AI agent specifications/prompts</comment>
+  </data>
+  <data name="PulseExpandStack" xml:space="preserve">
+    <value>Show all versions</value>
+  </data>
+  <data name="PulseCollapseStack" xml:space="preserve">
+    <value>Collapse versions</value>
+  </data>
+  <data name="PulseTimeRail" xml:space="preserve">
+    <value>Jump to date</value>
+  </data>
+  <data name="PulseFilterAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="PulseFilterMarkdown" xml:space="preserve">
+    <value>Markdown</value>
+  </data>
+  <data name="PulsePause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="PulseStop" xml:space="preserve">
+    <value>Stop</value>
+    <comment>Audio card: stop playback and rewind to the beginning</comment>
+  </data>
+  <data name="PulseFilterArchives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="PulseAutoGroupVersions" xml:space="preserve">
+    <value>Group file versions automatically</value>
+    <comment>Pulse view toggle: collapse "report.pdf", "report (1).pdf", "report-v2.pdf" into one stack</comment>
+  </data>
+  <data name="PulseTrim" xml:space="preserve">
+    <value>Trim</value>
+  </data>
+  <data name="PulseTrimAudio" xml:space="preserve">
+    <value>Trim audio</value>
+    <comment>Audio card button: open the Pulse trim dialog for the track</comment>
+  </data>
+  <data name="PulseTrimVideo" xml:space="preserve">
+    <value>Extract and trim audio</value>
+    <comment>Video card button: open the Pulse trim dialog, which extracts the video's audio track</comment>
+  </data>
+  <data name="PulseTrimDialogTitle" xml:space="preserve">
+    <value>Trim audio</value>
+  </data>
+  <data name="PulseTrimCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="PulseTrimExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="PulseTrimSourceInfo" xml:space="preserve">
+    <value>Source: {0} · FFmpeg {1}</value>
+    <comment>{0} is the media duration, {1} the bundled FFmpeg version</comment>
+  </data>
+  <data name="PulseTrimAnalyzing" xml:space="preserve">
+    <value>Analyzing audio…</value>
+  </data>
+  <data name="PulseTrimUnavailable" xml:space="preserve">
+    <value>FFmpeg is not available, so audio trimming is disabled.</value>
+    <comment>Shown when the bundled FFmpeg toolset is missing</comment>
+  </data>
+  <data name="PulseTrimUnsupported" xml:space="preserve">
+    <value>This file has no readable audio track.</value>
+  </data>
+  <data name="PulseTrimNoAudio" xml:space="preserve">
+    <value>No waveform could be decoded.</value>
+  </data>
+  <data name="PulseTrimStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="PulseTrimEnd" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="PulseTrimLoop" xml:space="preserve">
+    <value>Loop preview</value>
+  </data>
+  <data name="PulseTrimPreviewFailed" xml:space="preserve">
+    <value>Preview playback failed.</value>
+  </data>
+  <data name="PulseTrimExporting" xml:space="preserve">
+    <value>Exporting…</value>
+  </data>
+  <data name="PulseTrimExportFailed" xml:space="preserve">
+    <value>Export failed.</value>
+  </data>
+  <data name="PulseTrimModeAudio" xml:space="preserve">
+    <value>Audio clip</value>
+    <comment>Trim dialog: export the selected region as an audio-only clip</comment>
+  </data>
+  <data name="PulseTrimModeVideo" xml:space="preserve">
+    <value>Video clip</value>
+    <comment>Trim dialog: export the selected region as a re-encoded video cut</comment>
+  </data>
+  <data name="PulseTrimNormalize" xml:space="preserve">
+    <value>Normalize</value>
+    <comment>Trim dialog: EBU R128 loudness normalization applied to the exported clip</comment>
+  </data>
+  <data name="PulseTrimSpeed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="PulseTrimFadeIn" xml:space="preserve">
+    <value>Fade in</value>
+  </data>
+  <data name="PulseTrimFadeOut" xml:space="preserve">
+    <value>Fade out</value>
+  </data>
+  <data name="PulseConvert" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="PulseConvertDialogTitle" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="PulseConvertAudio" xml:space="preserve">
+    <value>Convert audio</value>
+    <comment>Audio card button: open the convert dialog</comment>
+  </data>
+  <data name="PulseConvertVideo" xml:space="preserve">
+    <value>Convert video or extract audio</value>
+    <comment>Video card button: open the convert dialog</comment>
+  </data>
+  <data name="PulseConvertImage" xml:space="preserve">
+    <value>Convert image</value>
+    <comment>Image card button: open the convert dialog</comment>
+  </data>
+  <data name="PulseConvertToVideo" xml:space="preserve">
+    <value>Video</value>
+    <comment>Convert dialog output type: re-encode the whole video</comment>
+  </data>
+  <data name="PulseConvertFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="PulseConvertQuality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="PulseConvertConverting" xml:space="preserve">
+    <value>Converting…</value>
+  </data>
+  <data name="PulseEditImage" xml:space="preserve">
+    <value>Edit image</value>
+    <comment>Image card button: open the image editor (crop/rotate/resize)</comment>
+  </data>
+  <data name="PulseImageDialogTitle" xml:space="preserve">
+    <value>Edit image</value>
+  </data>
+  <data name="PulseImageApply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="PulseImageLoading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="PulseImageAspectFree" xml:space="preserve">
+    <value>Free</value>
+    <comment>Crop aspect-ratio preset: unconstrained</comment>
+  </data>
+  <data name="PulseImageRotateLeft" xml:space="preserve">
+    <value>Rotate left</value>
+  </data>
+  <data name="PulseImageRotateRight" xml:space="preserve">
+    <value>Rotate right</value>
+  </data>
+  <data name="PulseImageResetCrop" xml:space="preserve">
+    <value>Reset crop</value>
+  </data>
+  <data name="PulseImageResize" xml:space="preserve">
+    <value>Resize</value>
+  </data>
+  <data name="PulseImageApplying" xml:space="preserve">
+    <value>Applying…</value>
+  </data>
+  <data name="PulseVideoTools" xml:space="preserve">
+    <value>Video tools</value>
+    <comment>Video card button: frame extraction and GIF creation</comment>
+  </data>
+  <data name="PulseVideoDialogTitle" xml:space="preserve">
+    <value>Video tools</value>
+  </data>
+  <data name="PulseVideoExtractFrame" xml:space="preserve">
+    <value>Extract frame</value>
+  </data>
+  <data name="PulseVideoExtract" xml:space="preserve">
+    <value>Extract</value>
+  </data>
+  <data name="PulseVideoExtracting" xml:space="preserve">
+    <value>Extracting frame…</value>
+  </data>
+  <data name="PulseVideoExtractDone" xml:space="preserve">
+    <value>Frame saved as a new version.</value>
+  </data>
+  <data name="PulseVideoCreateGif" xml:space="preserve">
+    <value>Create GIF</value>
+  </data>
+  <data name="PulseVideoGifFps" xml:space="preserve">
+    <value>FPS</value>
+  </data>
+  <data name="PulseVideoGifWidth" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="PulseVideoCreate" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="PulseVideoCreatingGif" xml:space="preserve">
+    <value>Creating GIF…</value>
+  </data>
+  <data name="PulseVideoGifDone" xml:space="preserve">
+    <value>GIF saved as a new version.</value>
+  </data>
+  <data name="PulseSplit" xml:space="preserve">
+    <value>Split</value>
+    <comment>Card button: separate the audio into stems with Demucs</comment>
+  </data>
+  <data name="PulseSplitAudio" xml:space="preserve">
+    <value>Split audio into stems</value>
+    <comment>Audio card button: open the Pulse split dialog</comment>
+  </data>
+  <data name="PulseSplitVideo" xml:space="preserve">
+    <value>Split audio into stems</value>
+    <comment>Video card button: open the Pulse split dialog (uses the video's audio track)</comment>
+  </data>
+  <data name="PulseSplitDialogTitle" xml:space="preserve">
+    <value>Split audio</value>
+  </data>
+  <data name="PulseSplitRun" xml:space="preserve">
+    <value>Split</value>
+  </data>
+  <data name="PulseSplitClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="PulseSplitCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="PulseSplitSourceInfo" xml:space="preserve">
+    <value>Demucs {0} · PyTorch {1} · htdemucs · {2}</value>
+    <comment>{0} is the Demucs version, {1} the bundled PyTorch version, {2} the device (CPU or CUDA with the GPU name)</comment>
+  </data>
+  <data name="PulseSplitModeLabel" xml:space="preserve">
+    <value>Stems</value>
+  </data>
+  <data name="PulseSplitModeTwoStems" xml:space="preserve">
+    <value>Vocals + instrumental (2 stems)</value>
+  </data>
+  <data name="PulseSplitModeFourStems" xml:space="preserve">
+    <value>Full split (4 stems: vocals, drums, bass, other)</value>
+  </data>
+  <data name="PulseSplitFormatLabel" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="PulseSplitOutputInfo" xml:space="preserve">
+    <value>Stems are saved next to the source file.</value>
+  </data>
+  <data name="PulseSplitPreparing" xml:space="preserve">
+    <value>Preparing…</value>
+  </data>
+  <data name="PulseSplitExtracting" xml:space="preserve">
+    <value>Extracting audio…</value>
+  </data>
+  <data name="PulseSplitLoadingModel" xml:space="preserve">
+    <value>Loading model…</value>
+  </data>
+  <data name="PulseSplitSeparating" xml:space="preserve">
+    <value>Separating stems…</value>
+  </data>
+  <data name="PulseSplitConverting" xml:space="preserve">
+    <value>Converting stems…</value>
+  </data>
+  <data name="PulseSplitDone" xml:space="preserve">
+    <value>Split complete — {0} stems saved.</value>
+  </data>
+  <data name="PulseSplitCancelled" xml:space="preserve">
+    <value>Split cancelled.</value>
+  </data>
+  <data name="PulseSplitFailed" xml:space="preserve">
+    <value>Split failed.</value>
+  </data>
+  <data name="PulseSplitBusy" xml:space="preserve">
+    <value>Another split is already running.</value>
+  </data>
+  <data name="PulseSplitUnavailable" xml:space="preserve">
+    <value>Demucs is not available, so audio splitting is disabled.</value>
+    <comment>Shown when the bundled Demucs runtime is missing</comment>
+  </data>
+  <data name="PulseSplitNoAudio" xml:space="preserve">
+    <value>This file has no readable audio track.</value>
+  </data>
+  <data name="PulseSplitFfmpegUnavailable" xml:space="preserve">
+    <value>FFmpeg is not available, so audio splitting is disabled.</value>
+  </data>
   <data name="LayoutAdaptiveDescription" xml:space="preserve">
     <value>Switch views adaptively</value>
   </data>
@@ -4743,4 +5049,193 @@
   <data name="SearchForQuery" xml:space="preserve">
     <value>Search for `{0}`</value>
   </data>
+  <data name="OmnibarSwitchToTabDescription" xml:space="preserve">
+    <value>Switch to tab {0} · {1}</value>
+    <comment>{0} is the 1-based tab position, {1} the tab's location (may be empty)</comment>
+  </data>
+  <data name="NaiAssistantTitle" xml:space="preserve"><value>NAI Files assistant</value></data>
+  <data name="NaiOpened" xml:space="preserve"><value>Opened with Files</value></data>
+  <data name="NaiUnopened" xml:space="preserve"><value>Not opened with Files</value></data>
+  <data name="NaiOpenedAt" xml:space="preserve"><value>Last opened: {0} · Launches: {1}</value></data>
+  <data name="NaiMarkUnopened" xml:space="preserve"><value>Mark as unopened</value></data>
+  <data name="NaiActionSummary" xml:space="preserve"><value>Summarize documents</value></data>
+  <data name="NaiActionQuestion" xml:space="preserve"><value>Ask about selected documents</value></data>
+  <data name="NaiActionKeyPoints" xml:space="preserve"><value>Extract key points</value></data>
+  <data name="NaiActionTasks" xml:space="preserve"><value>Extract tasks and deadlines</value></data>
+  <data name="NaiActionExplain" xml:space="preserve"><value>Explain in plain language</value></data>
+  <data name="NaiActionTranslate" xml:space="preserve"><value>Translate selected text</value></data>
+  <data name="NaiActionCompare" xml:space="preserve"><value>Compare documents</value></data>
+  <data name="NaiActionName" xml:space="preserve"><value>Suggest descriptive file names</value></data>
+  <data name="NaiActionTags" xml:space="preserve"><value>Suggest tags and categories</value></data>
+  <data name="NaiActionOrganize" xml:space="preserve"><value>Plan folder organization</value></data>
+  <data name="NaiActionSearch" xml:space="preserve"><value>Turn a question into indexed search</value></data>
+  <data name="NaiAiConsent" xml:space="preserve"><value>I allow sending the displayed selection and question to the configured AI provider through Kelvin AI Workstation. Document content is never sent automatically.</value></data>
+  <data name="NaiAiReview" xml:space="preserve"><value>Suggestions only. No files are renamed, moved, deleted, or executed automatically. Review AI output before using it.</value></data>
+  <data name="NaiAiGenerate" xml:space="preserve"><value>Generate</value></data>
+  <data name="NaiAiPrompt" xml:space="preserve"><value>Your question, instructions, or target language…</value></data>
+  <data name="NaiAiConnect" xml:space="preserve"><value>Connect to Kelvin AI Workstation</value></data>
+  <data name="NaiAiUnavailable" xml:space="preserve"><value>The AI gateway is unavailable or this Files app is not paired. Search and local document history still work.</value></data>
+  <data name="NaiAiNoSelection" xml:space="preserve"><value>Select documents first. Text, Markdown, DOCX, ODT and PPTX are read locally as bounded excerpts. Unsupported, unavailable or oversized documents use names and metadata only.</value></data>
+  <data name="NaiAiPreview" xml:space="preserve"><value>Content that will be sent</value></data>
+  <data name="NaiAiModel" xml:space="preserve"><value>Model</value></data>
+  <data name="NaiAiResult" xml:space="preserve"><value>AI result</value></data>
+  <data name="NaiAiFailure" xml:space="preserve"><value>The request failed. No files were changed. {0}</value></data>
+  <data name="NaiAiApplySearch" xml:space="preserve"><value>Review and run search</value></data>
+  <data name="NaiAiPairCode" xml:space="preserve"><value>Pairing code</value></data>
+  <data name="NaiAiPair" xml:space="preserve"><value>Pair Files</value></data>
+  <data name="NaiAiDisconnect" xml:space="preserve"><value>Disconnect Files from AI</value></data>
+  <data name="NaiAiConnected" xml:space="preserve"><value>Connected to Kelvin AI Workstation. The selected model determines where inference runs.</value></data>
+  <data name="NaiSearchHint" xml:space="preserve"><value>Fuzzy search · files: name · unread: name · read: name · content: words · $AQS</value></data>
+  <data name="NaiLanguageRestart" xml:space="preserve"><value>The language now follows NAI OS. Reopen Files to update already displayed pages; your tabs will be restored.</value></data>
+  <data name="NaiLanguageManaged" xml:space="preserve"><value>The language follows NAI OS Settings. Existing pages may require a restart; your tabs are preserved.</value></data>
+  <data name="NaiAiInvalidResponse" xml:space="preserve"><value>The model did not return a verifiable proposal. No files were changed. Adjust the request or choose another model.</value></data>
+  <data name="NaiFuzzySearch" xml:space="preserve"><value>Fuzzy search</value></data>
+  <data name="NaiAssistantShortTitle" xml:space="preserve"><value>AI assistant</value></data>
+  <data name="NaiProductName" xml:space="preserve"><value>NAI Files</value></data>
+  <data name="NaiConnectionSettings" xml:space="preserve"><value>Model and Kelvin AI Workstation connection</value></data>
+  <data name="NaiChooseAction" xml:space="preserve"><value>What would you like to do with your files?</value></data>
+  <data name="NaiNoCompatibleModel" xml:space="preserve"><value>No compatible chat model is advertised by Kelvin AI Workstation. Speech and embedding models are not shown here.</value></data>
+  <data name="NaiPinnedModelUnavailable" xml:space="preserve"><value>The selected model is unavailable or incompatible: {0}. Choose another model explicitly.</value></data>
+  <data name="NaiSortDirection" xml:space="preserve"><value>Toggle ascending / descending</value></data>
+  <data name="NaiAttributeFilterHint" xml:space="preserve"><value>Filter the current list by file properties. Fuzzy search finds approximate names; AI vision search finds image content.</value></data>
+  <data name="NaiThumbnailProgress" xml:space="preserve"><value>Previews: {0} ready · {1} queued · {2} loading · {3} unavailable without download · {4} failed</value></data>
+  <data name="NaiVisionTitle" xml:space="preserve"><value>Image intelligence</value></data>
+  <data name="NaiVisionDescription" xml:space="preserve"><value>Search analyzed images by visible content, captions, OCR and tags. Typing searches the local cache only; image analysis requires your approval.</value></data>
+  <data name="NaiVisionFolder" xml:space="preserve"><value>Current folder</value></data>
+  <data name="NaiChooseFolder" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="NaiVisionSearchHint" xml:space="preserve"><value>Fuzzy search — describe an image or screenshot…</value></data>
+  <data name="NaiVisionAllCache" xml:space="preserve"><value>All analyzed images</value></data>
+  <data name="NaiVisionTags" xml:space="preserve"><value>Generated tags</value></data>
+  <data name="NaiVisionAnalyze" xml:space="preserve"><value>Analyze this folder</value></data>
+  <data name="NaiVisionConsent" xml:space="preserve"><value>I approve image analysis for this folder using the explicitly selected model through Kelvin AI Workstation. Only locally available images are read; online-only files and subfolders are skipped. No automatic cloud or CPU fallback.</value></data>
+  <data name="NaiVisionResults" xml:space="preserve"><value>{0} matching images · {1} cached analyses</value></data>
+  <data name="NaiVisionProgress" xml:space="preserve"><value>{0} analyzed · {1} cached · {2} skipped · {3} failed / {4} images · {5}</value></data>
+  <data name="NaiAllTags" xml:space="preserve"><value>All tags</value></data>
+  <data name="NaiVisionTranslate" xml:space="preserve"><value>Search across languages</value></data>
+  <data name="NaiVisionChooseModel" xml:space="preserve"><value>Select a compatible model explicitly</value></data>
+  <data name="NaiVisionQueryConsent" xml:space="preserve"><value>Send only this search phrase to {0} through Kelvin AI Workstation? No images, filenames or cached descriptions are sent. No model fallback.&#10;&#10;{1}</value></data>
+  <data name="NaiVisionInterpreted" xml:space="preserve"><value>Search interpretation: {0} · {1}</value></data>
+  <data name="NaiVisionLiteralSearch" xml:space="preserve"><value>Translation unavailable; the displayed results still use your literal query. {0}</value></data>
+  <data name="NaiVisionStale" xml:space="preserve"><value>Cached analysis: the source has changed or is no longer available. This is not evidence of its current contents.</value></data>
+  <data name="NaiOpenSource" xml:space="preserve"><value>Open source</value></data>
+  <data name="NaiRevealSource" xml:space="preserve"><value>Reveal in folder</value></data>
+  <data name="NaiWorkspaceTitle" xml:space="preserve"><value>Files workspace</value></data>
+  <data name="NaiWorkspaceDescription" xml:space="preserve"><value>Named tab sets, real file operations, storage review, opened history and folder comparison. Reviews never move or delete files.</value></data>
+  <data name="NaiWorkspaceSaved" xml:space="preserve"><value>Saved workspaces</value></data>
+  <data name="NaiWorkspaceSave" xml:space="preserve"><value>Save current tabs</value></data>
+  <data name="NaiWorkspaceRestore" xml:space="preserve"><value>Restore as new tabs</value></data>
+  <data name="NaiWorkspaceForget" xml:space="preserve"><value>Forget saved item</value></data>
+  <data name="NaiWorkspaceName" xml:space="preserve"><value>Name (an existing name is replaced)</value></data>
+  <data name="NaiWorkspaceStorage" xml:space="preserve"><value>Largest files</value></data>
+  <data name="NaiWorkspaceDuplicates" xml:space="preserve"><value>Review exact duplicates</value></data>
+  <data name="NaiWorkspaceHistory" xml:space="preserve"><value>Opened document history</value></data>
+  <data name="NaiWorkspaceCompare" xml:space="preserve"><value>Compare with folder…</value></data>
+  <data name="NaiWorkspaceChanges" xml:space="preserve"><value>Changes and stale analyses</value></data>
+  <data name="NaiWorkspaceGroups" xml:space="preserve"><value>AI grouping proposals</value></data>
+  <data name="NaiWorkspaceOperations" xml:space="preserve"><value>Live file operations and progress</value></data>
+  <data name="NaiWorkspaceCancelled" xml:space="preserve"><value>Review cancelled. No files were changed.</value></data>
+  <data name="NaiWorkspaceResults" xml:space="preserve"><value>{0} of {1} results shown. Select a file to reveal it in its folder.</value></data>
+  <data name="NaiWorkspaceScope" xml:space="preserve"><value>Direct children only: {0} entries · {1} inaccessible · {2}</value></data>
+  <data name="NaiWorkspaceTruncated" xml:space="preserve"><value>10,000-entry limit reached; results are partial</value></data>
+  <data name="NaiWorkspaceOnlineOnly" xml:space="preserve"><value>Not eligible for local content reads</value></data>
+  <data name="NaiWorkspaceComparisonNote" xml:space="preserve"><value>Metadata-only comparison, without recursion or synchronization. Matching metadata does not prove identical contents. Other folder:</value></data>
+  <data name="NaiCompareOnlyLeft" xml:space="preserve"><value>Only in current folder</value></data>
+  <data name="NaiCompareOnlyRight" xml:space="preserve"><value>Only in compared folder</value></data>
+  <data name="NaiCompareTypeChanged" xml:space="preserve"><value>File/directory type differs</value></data>
+  <data name="NaiCompareMetadataChanged" xml:space="preserve"><value>Size or modification time differs</value></data>
+  <data name="NaiCompareMetadataEqual" xml:space="preserve"><value>Metadata matches; contents not compared</value></data>
+  <data name="NaiWorkspaceHashConsent" xml:space="preserve"><value>Read local files in this folder to verify equal-size candidates using SHA-256? Online-only files, links, subfolders and files above 512 MiB are skipped. You can cancel. Nothing is deleted.</value></data>
+  <data name="NaiWorkspaceHashProgress" xml:space="preserve"><value>{0}/{1} candidates checked · {2} skipped</value></data>
+  <data name="NaiWorkspaceDuplicateGroup" xml:space="preserve"><value>{0} identical files · {1:N0} bytes each</value></data>
+  <data name="NaiWorkspaceOpened" xml:space="preserve"><value>Last opened through Files: {0} · {1} recorded opens</value></data>
+  <data name="NaiWorkspaceNotOpened" xml:space="preserve"><value>No open recorded by Files</value></data>
+  <data name="NaiWorkspaceChangedSinceOpen" xml:space="preserve"><value>Modified after its last recorded open in Files</value></data>
+  <data name="NaiWorkspaceChangesNote" xml:space="preserve"><value>Based only on current metadata, Files open history and cached analysis provenance. No claim about historical content changes.</value></data>
+  <data name="NaiWorkspaceGroupsNote" xml:space="preserve"><value>Review-only groups from the primary English AI tag in the latest cached analyses; each source names its model. Cache may be stale. No folders are created and no files are moved.</value></data>
+  <data name="NaiVisionLenses" xml:space="preserve"><value>Saved semantic searches</value></data>
+  <data name="NaiVisionSaveLens" xml:space="preserve"><value>Save search and scope</value></data>
+  <data name="NaiVisionLoadLens" xml:space="preserve"><value>Load saved search</value></data>
+  <data name="NaiVisionDuplicates" xml:space="preserve"><value>Cached duplicate images</value></data>
+  <data name="NaiVisionRelated" xml:space="preserve"><value>Related analyzed images</value></data>
+  <data name="NaiVisionSharedTags" xml:space="preserve"><value>Shared AI tags: {0}. Tag similarity, not pixel or byte identity.</value></data>
+  <data name="NaiVisionRelatedResults" xml:space="preserve"><value>{0} related images for {1}, within the current cache scope</value></data>
+  <data name="NaiVisionCachedDuplicatesNote" xml:space="preserve"><value>{0} images share cached source hashes. Sources have not been re-read; use exact-duplicate review to verify current files.</value></data>
+  <data name="NaiResourcesTitle" xml:space="preserve"><value>Resources</value></data>
+  <data name="NaiTelemetryUnknown" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="NaiTelemetryDisk" xml:space="preserve"><value>System drive free/total</value></data>
+  <data name="NaiTelemetryObserved" xml:space="preserve"><value>Measured at {0}</value></data>
+  <data name="NaiTelemetrySource" xml:space="preserve"><value>Windows processor-group time counters, physical RAM, system-volume capacity and Wi-Fi signal. Disk capacity is not I/O utilization. Unknown GPU/NPU values are not estimated from scheduling reservations.</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Kelvin topology and queue</value></data>
+  <data name="NaiRuntimeDescription" xml:space="preserve"><value>Read-only Kelvin AI Workstation snapshot using Files' own pairing. No model is started. Provider membership and actual device assignments are shown; these are not measured traffic or inferred performance.</value></data>
+  <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Refresh snapshot</value></data>
+  <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Live snapshot unavailable. Any displayed snapshot is stale; reconnect Kelvin AI Workstation through NAI Assistant. {0}</value></data>
+  <data name="NaiRuntimeSnapshotAt" xml:space="preserve"><value>Snapshot captured: {0}</value></data>
+  <data name="NaiRuntimeQueue" xml:space="preserve"><value>Kelvin orchestrator: {0} active leases · {1} queued. Direct chat requests are not included.</value></data>
+  <data name="NaiRuntimeQueueUnknown" xml:space="preserve"><value>Orchestrator queue is unavailable, not empty.</value></data>
+  <data name="NaiRuntimeAssignments" xml:space="preserve"><value>Workload assignments (capability · state · provider → device)</value></data>
+  <data name="NaiRuntimeRelationships" xml:space="preserve"><value>Observed topology relationships</value></data>
+  <data name="NaiRuntimeTruncated" xml:space="preserve"><value>Snapshot limit reached; the overview is partial.</value></data>
+  <data name="NaiRuntimeReadOnly" xml:space="preserve"><value>Read-only. Refreshes every five seconds while this page is visible.</value></data>
+  <data name="NaiEmailTitle" xml:space="preserve"><value>NAI E-MAIL overview</value></data>
+  <data name="NaiEmailDescription" xml:space="preserve"><value>Live read-only metadata from a running NAI E-Mail window and explicitly approved owner accounts. Keep both apps open; this page retries every five seconds. Attachments and meetings open in NAI E-Mail. Files never reads its mailbox database, message bodies, transcripts or attachment disk paths.</value></data>
+  <data name="NaiEmailInbox" xml:space="preserve"><value>Open inbox</value></data>
+  <data name="NaiEmailAttachments" xml:space="preserve"><value>Recent attachments</value></data>
+  <data name="NaiEmailCalendar" xml:space="preserve"><value>Today's meetings</value></data>
+  <data name="NaiEmailTasks" xml:space="preserve"><value>Open tasks</value></data>
+  <data name="NaiEmailGrantMissing" xml:space="preserve"><value>Keep NAI E-Mail open. The Files overview uses every owner mailbox by default; its dedicated Windows-user grant is discovered automatically. Open Settings → AI only to narrow or revoke access.</value></data>
+  <data name="NaiEmailUnavailable" xml:space="preserve"><value>Mail overview unavailable. Old rows are cleared, not presented as live data. {0}</value></data>
+  <data name="NaiEmailSummary" xml:space="preserve"><value>Today: {0} unread inbox threads received · {1} top-level tasks due · {2} meetings · {3} approved accounts</value></data>
+  <data name="NaiEmailProvenance" xml:space="preserve"><value>Live NAI E-Mail cache · snapshot {0} · day {1} ({2}). Refreshes every five seconds while this page and NAI E-Mail are open.</value></data>
+  <data name="NaiEmailAllDay" xml:space="preserve"><value>All day</value></data>
+  <data name="NaiEmailHasRecord" xml:space="preserve"><value>Meeting record exists in E-Mail</value></data>
+  <data name="NaiEmailOpenFailed" xml:space="preserve"><value>NAI E-Mail could not be opened. Install or repair its owner-app protocol registration.</value></data>
+  <data name="NaiTelemetryGpuSource" xml:space="preserve"><value>GPU/NPU uses Windows PDH's busiest measured engine per adapter. IDs are Windows LUID/physical-node identities, not invented OpenVINO indices. Missing counter providers remain unavailable.</value></data>
+  <data name="NaiEmailTimeout" xml:space="preserve"><value>NAI E-Mail did not finish its response before the request deadline.</value></data>
+  <data name="NaiEmailWaiting" xml:space="preserve"><value>Waiting for a running NAI E-Mail window with reviewed Files access. This page retries every five seconds while both apps are open.</value></data>
+  <data name="NaiRequestTimeout" xml:space="preserve"><value>The requested service timed out. No alternative provider was used.</value></data>
+  <data name="NaiWorkspaceSection" xml:space="preserve"><value>NAI OS</value></data>
+  <data name="NaiAiPairingCapabilities" xml:space="preserve"><value>Kelvin returned an older Files registration without embeddings, rerank and chat. Revoke only nai-files in Kelvin Integrations, then connect Files again. No other app's credentials will be used.</value></data>
+  <data name="NaiSearchMode" xml:space="preserve"><value>Search mode</value></data>
+  <data name="NaiSearchLocal" xml:space="preserve"><value>Local fuzzy / AQS</value></data>
+  <data name="NaiSearchSemantic" xml:space="preserve"><value>Semantic · NPU</value></data>
+  <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Index</value></data>
+  <data name="NaiSemanticTitle" xml:space="preserve"><value>Semantic file search</value></data>
+  <data name="NaiSemanticDescription" xml:space="preserve"><value>Search approved document contents through Kelvin's local NPU index. This is separate from local filename fuzzy/AQS search. Indexing is explicit, bounded and cancellable; stale source versions are excluded.</value></data>
+  <data name="NaiSemanticRecursive" xml:space="preserve"><value>Include subfolders (never follow links)</value></data>
+  <data name="NaiSemanticConsent" xml:space="preserve"><value>Allow reading reviewed local documents and storing bounded excerpts and vectors in Kelvin. No online-only files, links or cloud fallback. I will review the file list before indexing.</value></data>
+  <data name="NaiSemanticIndex" xml:space="preserve"><value>Review and index documents</value></data>
+  <data name="NaiSemanticApprove" xml:space="preserve"><value>Index reviewed files</value></data>
+  <data name="NaiSemanticForget" xml:space="preserve"><value>Remove this index</value></data>
+  <data name="NaiSemanticForgetConfirm" xml:space="preserve"><value>Remove only this Files-owned folder index and its exact tracked chunk IDs? Source files and other apps' indexes are not changed.</value></data>
+  <data name="NaiSemanticQueryHint" xml:space="preserve"><value>Describe the meaning you are looking for; submit to query the NPU</value></data>
+  <data name="NaiSemanticChooseFolder" xml:space="preserve"><value>Choose a local folder. No drive-wide or background indexing is started automatically.</value></data>
+  <data name="NaiSemanticIndexRequired" xml:space="preserve"><value>No approved semantic index exists for this folder. Open Index, review the scope, and index the chosen documents.</value></data>
+  <data name="NaiSemanticIndexState" xml:space="preserve"><value>{0} tracked documents · updated {1} · {2} · {3} exact cleanup IDs pending</value></data>
+  <data name="NaiSemanticPartial" xml:space="preserve"><value>Partial / bounded coverage</value></data>
+  <data name="NaiSemanticReady" xml:space="preserve"><value>Reviewed run completed</value></data>
+  <data name="NaiSemanticRetrievalUnavailable" xml:space="preserve"><value>Kelvin is paired, but the local NPU retrieval service is unavailable. Start the OpenVINO NPU service in Kelvin and retry.</value></data>
+  <data name="NaiSemanticReviewPlan" xml:space="preserve"><value>Approve these {0} documents? {1} unsupported/unavailable entries were skipped. {2} Limits: 256 files, 32 MiB per file, 512 MiB per run, first 24,000 characters and at most 16 chunks per document. No source file is modified. Excerpts and embeddings stay with the explicitly paired local NPU owner.</value></data>
+  <data name="NaiSemanticProgress" xml:space="preserve"><value>{0}/{1} reviewed · {2} indexed · {3} unchanged · {4} skipped · {5} failed</value></data>
+  <data name="NaiSemanticCancelled" xml:space="preserve"><value>Index/query cancelled. Completed document checkpoints remain; pending exact-ID cleanup is retained.</value></data>
+  <data name="NaiSemanticSearchFailure" xml:space="preserve"><value>Semantic search/index unavailable — no local or provider fallback: {0}</value></data>
+  <data name="NaiSemanticResults" xml:space="preserve"><value>NPU relevance order: {0} results · {1} current indexed documents · {2} stale/unavailable documents excluded</value></data>
+  <data name="NaiSemanticEvidence" xml:space="preserve"><value>Rerank score {0:F4} · indexed {1} · cached evidence, not a new document reading</value></data>
+  <data name="NaiSemanticFullResults" xml:space="preserve"><value>Open in Files results</value></data>
+  <data name="PulseMediaStartFailed" xml:space="preserve"><value>{0} could not start: {1}</value></data>
+  <data name="PulseMediaProcessFailed" xml:space="preserve"><value>{0} failed (exit code {1}).
+{2}</value></data>
+  <data name="PulseMediaTimedOut" xml:space="preserve"><value>{0} stopped responding. The operation was stopped.</value></data>
+  <data name="PulseMediaOutputMissing" xml:space="preserve"><value>No output was created: {0}</value></data>
+  <data name="PulseMediaRuntimeUnavailable" xml:space="preserve"><value>The bundled media tools are unavailable.
+{0}</value></data>
+  <data name="PulseMediaPreparing" xml:space="preserve"><value>Preparing media tools…</value></data>
+  <data name="PulseMediaReady" xml:space="preserve"><value>Ready.</value></data>
+  <data name="PulseMediaPreviewPreparing" xml:space="preserve"><value>Preparing a compatible preview…</value></data>
+  <data name="PulseMediaActionFailed" xml:space="preserve"><value>Media action failed</value></data>
+  <data name="DialogChooseFile" xml:space="preserve"><value>Select a file or enter its path.</value></data>
+  <data name="DialogEnterFileName" xml:space="preserve"><value>Enter a file name.</value></data>
+  <data name="DialogFileMissing" xml:space="preserve"><value>File not found: {0}</value></data>
+  <data name="DialogFolderMissing" xml:space="preserve"><value>Folder is unavailable: {0}</value></data>
+  <data name="DialogAccessDenied" xml:space="preserve"><value>Access denied: {0}</value></data>
+  <data name="DialogTypeMismatch" xml:space="preserve"><value>The file does not match the selected file type: {0}</value></data>
 </root>

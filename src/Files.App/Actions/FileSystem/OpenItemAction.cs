@@ -42,6 +42,15 @@ namespace Files.App.Actions
 
 		public Task ExecuteAsync(object? parameter = null)
 		{
+			if (App.IsDialogMode
+				&& App.DialogMode != "folder"
+				&& context.SelectedItem is { PrimaryItemAttribute: StorageItemTypes.File } selected
+				&& !string.IsNullOrEmpty(selected.ItemPath))
+			{
+				Ioc.Default.GetRequiredService<MainPageViewModel>().ConfirmSelection();
+				return Task.CompletedTask;
+			}
+
 			if (context.ShellPage is not null)
 				return NavigationHelpers.OpenSelectedItemsAsync(context.ShellPage);
 

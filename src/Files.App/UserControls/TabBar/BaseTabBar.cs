@@ -44,6 +44,7 @@ namespace Files.App.UserControls.TabBar
 
 		public BaseTabBar()
 		{
+			CurrentInstanceChanged += TabView_CurrentInstanceChanged;
 			Loaded += TabView_Loaded;
 		}
 
@@ -100,8 +101,8 @@ namespace Files.App.UserControls.TabBar
 
 		public void TabView_Loaded(object sender, RoutedEventArgs e)
 		{
-			CurrentInstanceChanged += TabView_CurrentInstanceChanged;
 			OnLoaded?.Invoke(null, this);
+			SelectionChanged();
 		}
 
 		public ITabBarItemContent? GetCurrentSelectedTabInstance()

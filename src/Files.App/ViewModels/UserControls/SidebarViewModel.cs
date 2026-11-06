@@ -3,7 +3,10 @@
 
 using Files.App.Controls;
 using Files.App.Helpers;
+using Files.App.Helpers.Application;
 using Files.App.Helpers.ContextFlyouts;
+using Files.App.Utils.Storage;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -78,6 +81,7 @@ namespace Files.App.ViewModels.UserControls
 		private readonly SectionType[] SectionOrder =
 			[
 				SectionType.Home,
+				SectionType.Nai,
 				SectionType.Pinned,
 				SectionType.Library,
 				SectionType.Drives,
@@ -293,6 +297,7 @@ namespace Files.App.ViewModels.UserControls
 
 		public SidebarViewModel()
 		{
+			NaiLanguageBridge.StartupStage("sidebarvm-ctor-start");
 			dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 			fileTagsService = Ioc.Default.GetRequiredService<IFileTagsService>();
 
@@ -308,6 +313,7 @@ namespace Files.App.ViewModels.UserControls
 			sidebarItems = [];
 			UserSettingsService.OnSettingChangedEvent += UserSettingsService_OnSettingChangedEvent;
 			CreateItemHomeAsync();
+			_ = CreateSectionAsync(SectionType.Nai);
 
 			Manager_DataChanged(SectionType.Pinned, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			Manager_DataChanged(SectionType.Library, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
@@ -333,6 +339,7 @@ namespace Files.App.ViewModels.UserControls
 			EjectDeviceCommand = new RelayCommand(EjectDevice);
 			OpenPropertiesCommand = new RelayCommand<FlyoutBase>(OpenProperties);
 			ReorderItemsCommand = new AsyncRelayCommand(ReorderItemsAsync);
+			NaiLanguageBridge.StartupStage("sidebarvm-ctor-done");
 		}
 
 		private Task<LocationItem?> CreateItemHomeAsync()
@@ -348,19 +355,68 @@ namespace Files.App.ViewModels.UserControls
 			await dispatcherQueue.EnqueueOrInvokeAsync(RefreshSectionIcons);
 		}
 
-		private void RefreshSectionIcons()
+		private async void RefreshSectionIcons()
 		{
 			foreach (var item in sidebarItems.OfType<LocationItem>())
 			{
 				if (!item.IsHeader)
 					continue;
 
-				var uri = SidebarSectionIcons.For(item.Section);
-				if (uri is null)
+				item.Icon = null;
+				item.Icon = await SidebarSectionIcons.LoadIconAsync(item.Section);
+			}
+
+			// NAI workspace children (Vision, Workbench, ...) carry themed folder
+			// glyphs, and pinned folders re-resolve through the theme as well.
+			await RefreshNaiChildIconsAsync();
+			await App.QuickAccessManager.Model.RefreshIconsAsync();
+		}
+
+		private static readonly Dictionary<string, string> NaiChildIconSemantics = new()
+		{
+			[NaiWorkspaceRoutes.Vision] = "pictures",
+			[NaiWorkspaceRoutes.Workbench] = "development",
+			[NaiWorkspaceRoutes.Runtime] = "activities",
+			[NaiWorkspaceRoutes.Mail] = "mail",
+			[NaiWorkspaceRoutes.Semantic] = "text",
+		};
+
+		private async Task RefreshNaiChildIconsAsync()
+		{
+			var probeRoot = Path.GetPathRoot(Environment.SystemDirectory) ?? @"C:\";
+			foreach (var (route, semantic) in NaiChildIconSemantics)
+			{
+				var probe = Path.Combine(probeRoot, semantic);
+				var bytes = NaiIconThemeHelper.GetIcon(probe, (int)(16 * App.AppModel.AppWindowDPI), true);
+				if (bytes is null)
 					continue;
 
-				item.Icon = null;
-				item.Icon = new BitmapImage(new Uri(uri));
+				BitmapImage? image = null;
+				try
+				{
+					image = await bytes.ToBitmapAsync();
+				}
+				catch (Exception ex)
+				{
+					App.Logger.LogWarning(ex, "NAI sidebar child icon decode failed for {Route}", route);
+				}
+				if (image is null)
+					continue;
+
+				await MainWindow.Instance.DispatcherQueue.EnqueueOrInvokeAsync(() =>
+				{
+					foreach (var item in sidebarItems.OfType<LocationItem>())
+					{
+						if (item.Section == SectionType.Nai && item.ChildItems is not null)
+						{
+							foreach (var child in item.ChildItems.OfType<LocationItem>())
+							{
+								if (string.Equals(child.Path, route, StringComparison.OrdinalIgnoreCase))
+									child.Icon = image;
+							}
+						}
+					}
+				});
 			}
 		}
 
@@ -542,17 +598,49 @@ namespace Files.App.ViewModels.UserControls
 			return GetSection(sectionType) ?? await CreateSectionAsync(sectionType);
 		}
 
-		private LocationItem? GetSection(SectionType sectionType)
+		internal LocationItem? GetSection(SectionType sectionType)
 		{
 			return sidebarItems.FirstOrDefault(x => x.Section == sectionType) as LocationItem;
 		}
 
-		private Task<LocationItem?> CreateSectionAsync(SectionType sectionType)
+		internal bool HasUniqueSections => sidebarItems.Select(item => item.Section).Distinct().Count() == sidebarItems.Count;
+
+		private async Task<LocationItem?> CreateSectionAsync(SectionType sectionType)
 		{
 			LocationItem? section = null;
 
 			switch (sectionType)
 			{
+				case SectionType.Nai:
+					section = BuildSection("NaiWorkspaceSection".GetLocalizedResource(), sectionType, new ContextMenuOptions(), false);
+					section.IsHeader = true;
+					section.IsExpanded = true;
+					section.ChildItems!.Add(new LocationItem
+					{
+						Text = NaiWorkspaceRoutes.Title(NaiWorkspaceRoutes.Vision), Path = NaiWorkspaceRoutes.Vision,
+						Section = sectionType, SelectsOnInvoked = true, MenuOptions = new ContextMenuOptions(),
+					});
+					section.ChildItems.Add(new LocationItem
+					{
+						Text = NaiWorkspaceRoutes.Title(NaiWorkspaceRoutes.Workbench), Path = NaiWorkspaceRoutes.Workbench,
+						Section = sectionType, SelectsOnInvoked = true, MenuOptions = new ContextMenuOptions(),
+					});
+					section.ChildItems.Add(new LocationItem
+					{
+						Text = NaiWorkspaceRoutes.Title(NaiWorkspaceRoutes.Runtime), Path = NaiWorkspaceRoutes.Runtime,
+						Section = sectionType, SelectsOnInvoked = true, MenuOptions = new ContextMenuOptions(),
+					});
+					section.ChildItems.Add(new LocationItem
+					{
+						Text = NaiWorkspaceRoutes.Title(NaiWorkspaceRoutes.Mail), Path = NaiWorkspaceRoutes.Mail,
+						Section = sectionType, SelectsOnInvoked = true, MenuOptions = new ContextMenuOptions(),
+					});
+					section.ChildItems.Add(new LocationItem
+					{
+						Text = NaiWorkspaceRoutes.Title(NaiWorkspaceRoutes.Semantic), Path = NaiWorkspaceRoutes.Semantic,
+						Section = sectionType, SelectsOnInvoked = true, MenuOptions = new ContextMenuOptions(),
+					});
+					break;
 				case SectionType.Home:
 					section = BuildSection(Strings.Home.GetLocalizedResource(), sectionType, new ContextMenuOptions { IsLocationItem = true }, true);
 					section.Path = "Home";
@@ -611,14 +699,20 @@ namespace Files.App.ViewModels.UserControls
 
 			if (section is not null)
 			{
-				var iconPath = SidebarSectionIcons.For(sectionType);
-				if (iconPath is not null)
-					section.Icon = new BitmapImage(new Uri(iconPath));
-
+				// Publish before loading icons: overlapping manager events must share this section.
 				AddSectionToSideBar(section);
+				if (sectionType == SectionType.Nai)
+					section.Icon = new BitmapImage(new Uri(AppLifecycleHelper.AppIconPath));
+				else
+					section.Icon = await SidebarSectionIcons.LoadIconAsync(sectionType);
+
+				// The NAI workspace children get themed folder glyphs right away
+				// (RefreshSectionIcons also re-applies them on theme change).
+				if (sectionType == SectionType.Nai)
+					await RefreshNaiChildIconsAsync();
 			}
 
-			return Task.FromResult(section);
+			return section;
 		}
 
 		private LocationItem BuildSection(string sectionName, SectionType sectionType, ContextMenuOptions options, bool selectsOnInvoked)
@@ -823,7 +917,7 @@ namespace Files.App.ViewModels.UserControls
 				await ShellContextFlyoutFactory.LoadShellMenuItemsAsync(item.GetRequiredPath(), flyout, menuOptions, moreOptions, moreSeparator);
 		}
 
-		public async void HandleItemInvokedAsync(object item, PointerUpdateKind pointerUpdateKind)
+		public async Task HandleItemInvokedAsync(object item, PointerUpdateKind pointerUpdateKind)
 		{
 			if (item is not INavigationControlItem navigationControlItem) return;
 			var navigationPath = item as string;
@@ -833,6 +927,14 @@ namespace Files.App.ViewModels.UserControls
 
 			var ctrlPressed = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down);
 			var middleClickPressed = pointerUpdateKind == PointerUpdateKind.MiddleButtonReleased;
+			if (NaiWorkspaceRoutes.IsRoute(navigationControlItem.Path))
+			{
+				if (ctrlPressed || middleClickPressed)
+					await NavigationHelpers.AddNewTabByPathAsync(typeof(ShellPanesPage), navigationControlItem.Path!, true);
+				else if (PaneHolder?.ActivePane is IShellPage workspacePane)
+					NaiWorkspaceRoutes.OpenInPane(workspacePane, navigationControlItem.Path!);
+				return;
+			}
 			if (string.Equals(navigationControlItem.Path, "Settings", StringComparison.OrdinalIgnoreCase))
 			{
 				if (ctrlPressed || middleClickPressed)
@@ -1212,6 +1314,12 @@ namespace Files.App.ViewModels.UserControls
 
 		public async Task HandleItemDragOverAsync(ItemDragOverEventArgs args)
 		{
+			if (args.DropTarget is INavigationControlItem workspace && NaiWorkspaceRoutes.IsRoute(workspace.Path))
+			{
+				args.RawEvent.AcceptedOperation = DataPackageOperation.None;
+				args.RawEvent.Handled = true;
+				return;
+			}
 			if (args.DropTarget is LocationItem locationItem)
 				await HandleLocationItemDragOverAsync(locationItem, args);
 			else if (args.DropTarget is DriveItem driveItem)
@@ -1385,6 +1493,7 @@ namespace Files.App.ViewModels.UserControls
 
 		public async Task HandleItemDroppedAsync(ItemDroppedEventArgs args)
 		{
+			if (args.DropTarget is INavigationControlItem workspace && NaiWorkspaceRoutes.IsRoute(workspace.Path)) return;
 			if (args.DropTarget is LocationItem locationItem)
 				await HandleLocationItemDroppedAsync(locationItem, args);
 			else if (args.DropTarget is DriveItem driveItem)

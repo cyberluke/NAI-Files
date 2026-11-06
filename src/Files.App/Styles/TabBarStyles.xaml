@@ -202,6 +202,16 @@
 								Style="{ThemeResource TabBarCloseButtonStyle}" />
 						</Grid>
 
+						<!--  Keep the path accent visible in every state, including compact tabs.  -->
+						<Border
+							Grid.Column="1"
+							Height="3"
+							Margin="8,1,8,0"
+							VerticalAlignment="Top"
+							Background="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}"
+							CornerRadius="1.5"
+							IsHitTestVisible="False" />
+
 						<!--  Drop-into target highlight  -->
 						<Border
 							x:Name="StorageItemDragOverIndicator"

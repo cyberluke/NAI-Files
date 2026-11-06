@@ -49,6 +49,33 @@ namespace Files.App.Utils.Storage
 				? MtpHelpers.ResolveMtpShellPath(path) ?? path
 				: path;
 
+			// NAI OS icon theme (KDE-style desktop-wide icons): folders, file types and
+			// known apps resolve through the theme before the Windows shell icon.
+			// Thumbnails are never themed — with `None`, thumbnail-capable files
+			// (pictures, videos, PDFs) first ask the shell for a thumbnail and only use
+			// the themed type icon when there is none, so previews work like in Dolphin.
+			if (NaiIconThemeHelper.IsEnabled
+				&& !iconOptions.HasFlag(IconOptions.ReturnThumbnailOnly)
+				&& !iconOptions.HasFlag(IconOptions.ReturnOnlyIfCached))
+			{
+				var themeFirst = isFolder
+					|| iconOptions.HasFlag(IconOptions.ReturnIconOnly)
+					|| !NaiIconThemeHelper.PrefersThumbnail(resolvedPath);
+
+				if (!themeFirst)
+				{
+					var thumbnail = await STATask.RunPooled(
+						() => Win32Helper.GetIcon(resolvedPath, (int)size, isFolder, iconOptions | IconOptions.ReturnThumbnailOnly),
+						App.Logger);
+					if (thumbnail is not null)
+						return thumbnail;
+				}
+
+				var themed = NaiIconThemeHelper.GetIcon(resolvedPath, (int)size, isFolder);
+				if (themed is not null)
+					return themed;
+			}
+
 			return await STATask.RunPooled(() => Win32Helper.GetIcon(resolvedPath, (int)size, isFolder, iconOptions), App.Logger);
 		}
 

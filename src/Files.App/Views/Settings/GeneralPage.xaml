@@ -30,12 +30,13 @@
 				Text="{helpers:ResourceString Name=General}" />
 
 			<!--  Language settings  -->
-			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=Language}">
+			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=Language}" Description="{x:Bind ViewModel.NaiLanguageDescription, Mode=OneWay}">
 				<wctcontrols:SettingsCard.HeaderIcon>
 					<FontIcon Glyph="&#xF2B7;" />
 				</wctcontrols:SettingsCard.HeaderIcon>
 				<uc:ComboBoxEx
 					x:Name="AppLanguagesComboBox"
+					IsEnabled="{x:Bind ViewModel.IsAppLanguageEditable, Mode=OneWay}"
 					HorizontalAlignment="Left"
 					AutomationProperties.Name="{helpers:ResourceString Name=Language}"
 					ItemsSource="{x:Bind ViewModel.AppLanguages}"

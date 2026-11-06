@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "FilesSaveDialog.h"
+#include "../Files.App.OpenDialog/DialogBridge.h"
 #include <shlobj.h>
 #include <iostream>
 #include <fstream>
@@ -80,36 +81,9 @@ CComPtr<T> AsInterface(CComPtr<IFileSaveDialog> dialog)
 
 CFilesSaveDialog::CFilesSaveDialog()
 {
-	_fos = FOS_PATHMUSTEXIST;
 	_systemDialog = nullptr;
 	_debugStream = NULL;
-	_dialogEvents = NULL;
-
-	PWSTR pszPath = NULL;
-	HRESULT hr = SHGetKnownFolderPath(FOLDERID_Desktop, 0, NULL, &pszPath);
-	if (SUCCEEDED(hr))
-	{
-		TCHAR debugPath[MAX_PATH];
-		wsprintf(debugPath, L"%s\\%s", pszPath, L"save_dialog.txt");
-#ifdef DEBUGLOG
-		_wfreopen_s(&_debugStream, debugPath, L"w", stdout);
-#endif
-		CoTaskMemFree(pszPath);
-	}
-	cout << "Create" << endl;
-
-	TCHAR tempPath[MAX_PATH];
-	GetTempPath(MAX_PATH, tempPath);
-	TCHAR tempName[MAX_PATH];
-	GetTempFileName(tempPath, L"fsd", 0, tempName);
-	_outputPath = tempName;
-
-	(void)SHGetKnownFolderItem(FOLDERID_Documents, KF_FLAG_DEFAULT_PATH, NULL, IID_PPV_ARGS(&_initFolder));
-	if (_initFolder && SUCCEEDED(_initFolder->GetDisplayName(SIGDN_NORMALDISPLAY, &pszPath)))
-	{
-		wcout << L"_outputPath: " << _outputPath << L", _initFolder: " << pszPath << endl;
-		CoTaskMemFree(pszPath);
-	}
+	(void)SHGetKnownFolderItem(FOLDERID_Documents, KF_FLAG_DEFAULT_PATH, NULL, IID_PPV_ARGS(&_defaultFolder));
 
 #ifdef SYSTEMDIALOG
 	_systemDialog = GetSystemDialog();
@@ -123,8 +97,8 @@ void CFilesSaveDialog::FinalRelease()
 		_systemDialog.Release();
 	}
 	_initFolder.Release();
-	_dialogEvents.Release();
-	DeleteFile(_outputPath.c_str());
+	_defaultFolder.Release();
+	_events.Clear();
 	if (_debugStream)
 	{
 		fclose(_debugStream);
@@ -137,6 +111,7 @@ HRESULT __stdcall CFilesSaveDialog::SetSite(IUnknown* pUnkSite)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IObjectWithSite>(_systemDialog)->SetSite(pUnkSite);
 #endif
+	_site = pUnkSite;
 	return S_OK;
 }
 
@@ -146,7 +121,9 @@ HRESULT __stdcall CFilesSaveDialog::GetSite(REFIID riid, void** ppvSite)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IObjectWithSite>(_systemDialog)->GetSite(riid, ppvSite);
 #endif
-	return E_NOTIMPL;
+	if (!ppvSite) return E_POINTER;
+	*ppvSite = nullptr;
+	return _site ? _site->QueryInterface(riid, ppvSite) : E_FAIL;
 }
 
 HRESULT __stdcall CFilesSaveDialog::EnableOpenDropDown(DWORD dwIDCtl)
@@ -245,7 +222,8 @@ HRESULT __stdcall CFilesSaveDialog::GetControlState(DWORD dwIDCtl, CDCONTROLSTAT
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetControlState(dwIDCtl, pdwState);
 #endif
-	* pdwState = CDCS_ENABLEDVISIBLE;
+	if (!pdwState) return E_POINTER;
+	*pdwState = CDCS_ENABLEDVISIBLE;
 	return S_OK;
 }
 
@@ -264,8 +242,8 @@ HRESULT __stdcall CFilesSaveDialog::GetEditBoxText(DWORD dwIDCtl, WCHAR** ppszTe
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetEditBoxText(dwIDCtl, ppszText);
 #endif
-	SHStrDupW(L"", ppszText);
-	return S_OK;
+	if (!ppszText) return E_POINTER;
+	return SHStrDupW(L"", ppszText);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetEditBoxText(DWORD dwIDCtl, LPCWSTR pszText)
@@ -283,7 +261,8 @@ HRESULT __stdcall CFilesSaveDialog::GetCheckButtonState(DWORD dwIDCtl, BOOL* pbC
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetCheckButtonState(dwIDCtl, pbChecked);
 #endif
-	* pbChecked = false;
+	if (!pbChecked) return E_POINTER;
+	*pbChecked = false;
 	return S_OK;
 }
 
@@ -302,8 +281,7 @@ HRESULT __stdcall CFilesSaveDialog::AddControlItem(DWORD dwIDCtl, DWORD dwIDItem
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->AddControlItem(dwIDCtl, dwIDItem, pszLabel);
 #endif
-	_ctrlItems.push_back(dwIDItem);
-	return S_OK;
+	return _controlSelections.Add(dwIDCtl, dwIDItem);
 }
 
 HRESULT __stdcall CFilesSaveDialog::RemoveControlItem(DWORD dwIDCtl, DWORD dwIDItem)
@@ -312,7 +290,7 @@ HRESULT __stdcall CFilesSaveDialog::RemoveControlItem(DWORD dwIDCtl, DWORD dwIDI
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->RemoveControlItem(dwIDCtl, dwIDItem);
 #endif
-	return S_OK;
+	return _controlSelections.Remove(dwIDCtl, dwIDItem);
 }
 
 HRESULT __stdcall CFilesSaveDialog::RemoveAllControlItems(DWORD dwIDCtl)
@@ -321,7 +299,7 @@ HRESULT __stdcall CFilesSaveDialog::RemoveAllControlItems(DWORD dwIDCtl)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->RemoveAllControlItems(dwIDCtl);
 #endif
-	return S_OK;
+	return _controlSelections.Clear(dwIDCtl);
 }
 
 HRESULT __stdcall CFilesSaveDialog::GetControlItemState(DWORD dwIDCtl, DWORD dwIDItem, CDCONTROLSTATEF* pdwState)
@@ -330,7 +308,8 @@ HRESULT __stdcall CFilesSaveDialog::GetControlItemState(DWORD dwIDCtl, DWORD dwI
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetControlItemState(dwIDCtl, dwIDItem, pdwState);
 #endif
-	* pdwState = CDCS_ENABLEDVISIBLE;
+	if (!pdwState) return E_POINTER;
+	*pdwState = CDCS_ENABLEDVISIBLE;
 	return S_OK;
 }
 
@@ -349,11 +328,7 @@ HRESULT __stdcall CFilesSaveDialog::GetSelectedControlItem(DWORD dwIDCtl, DWORD*
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->GetSelectedControlItem(dwIDCtl, pdwIDItem);
 #endif
-	if (!_ctrlItems.empty()) {
-		*pdwIDItem = _ctrlItems.back();
-		return S_OK;
-	}
-	return E_NOTIMPL;
+	return _controlSelections.Get(dwIDCtl, pdwIDItem);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetSelectedControlItem(DWORD dwIDCtl, DWORD dwIDItem)
@@ -362,8 +337,7 @@ HRESULT __stdcall CFilesSaveDialog::SetSelectedControlItem(DWORD dwIDCtl, DWORD 
 #ifdef SYSTEMDIALOG
 	return AsInterface<IFileDialogCustomize>(_systemDialog)->SetSelectedControlItem(dwIDCtl, dwIDItem);
 #endif
-	_ctrlItems.push_back(dwIDItem);
-	return S_OK;
+	return _controlSelections.Set(dwIDCtl, dwIDItem);
 }
 
 HRESULT __stdcall CFilesSaveDialog::StartVisualGroup(DWORD dwIDCtl, LPCWSTR pszLabel)
@@ -403,10 +377,8 @@ HRESULT __stdcall CFilesSaveDialog::SetControlItemText(DWORD dwIDCtl, DWORD dwID
 }
 
 HRESULT __stdcall CFilesSaveDialog::Show(HWND hwndOwner)
+try
 {
-	wchar_t wnd_title[1024];
-	GetWindowText(hwndOwner, wnd_title, 1024);
-	wcout << L"Show, ID: " << GetCurrentProcessId() << endl;
 	_selectedItem.clear();
 
 #ifdef SYSTEMDIALOG
@@ -415,108 +387,30 @@ HRESULT __stdcall CFilesSaveDialog::Show(HWND hwndOwner)
 	return res;
 #endif
 
-	SHELLEXECUTEINFO ShExecInfo = { 0 };
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	
-	PWSTR pszPath = NULL;
-	WCHAR szBuf[MAX_PATH];
-	TCHAR args[1024] = { 0 };
-	ExpandEnvironmentStringsW(L"%LOCALAPPDATA%\\Microsoft\\WindowsApps\\files-dev.exe", szBuf, MAX_PATH - 1);
-
-	HANDLE closeEvent = CreateEvent(NULL, FALSE, FALSE, TEXT("FILEDIALOG"));
-
-	if (_initFolder && SUCCEEDED(_initFolder->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
+	_request.folder = DialogOptions::Folder(_initFolder);
+	_request.defaultFolder = DialogOptions::Folder(_defaultFolder);
+	_request.suggestedName = _initName;
+	_request.flags = _fos;
+	_request.typeIndex = _fileTypeIndex;
+	for (;;)
 	{
-		if (!_initName.empty())
-		{
-			swprintf(args, _countof(args) - 1, L"\"%s\" -directory \"%s\" -outputpath \"%s\" -select \"%s\"", szBuf, pszPath, _outputPath.c_str(), _initName.c_str());
-		}
-		else
-		{
-			swprintf(args, _countof(args) - 1, L"\"%s\" -directory \"%s\" -outputpath \"%s\"", szBuf, pszPath, _outputPath.c_str());
-		}
-		wcout << L"Invoking: " << args << endl;
-		CoTaskMemFree(pszPath);
+		std::vector<std::wstring> paths;
+		std::wstring diagnostic;
+		const auto result = FilesDialogBridge::Show(hwndOwner, L"save", _request.folder, _initName, paths, &diagnostic, &_request);
+		if (FAILED(result)) return result;
+		if (paths.size() != 1) return E_UNEXPECTED;
+		_selectedItem = paths[0];
+		_fileTypeIndex = _request.typeIndex;
+		const auto accepted = _events.FileOk(static_cast<IFileSaveDialog*>(this));
+		FilesDialogBridge::TraceHResult(diagnostic, "OnFileOk", accepted);
+		if (accepted == S_FALSE) continue;
+		// A caller may leave OnFileOk unimplemented; that is not a failed save.
+		FilesDialogBridge::TraceHResult(diagnostic, "Show", S_OK);
+		return S_OK;
 	}
-	else
-	{
-		swprintf(args, _countof(args) - 1, L"\"%s\" -outputpath \"%s\"", szBuf, _outputPath.c_str());
-	}
-
-	std::wstring uriWithArgs = L"files-dev:?cmd=" + str2wstr(wstring_to_utf8_hex(args));
-	ShExecInfo.lpFile = uriWithArgs.c_str();
-	ShExecInfo.nShow = SW_SHOW;
-	ShellExecuteEx(&ShExecInfo);
-
-	if (hwndOwner)
-		EnableWindow(hwndOwner, FALSE);
-
-	MSG msg;
-	while (ShExecInfo.hProcess)
-	{
-		switch (MsgWaitForMultipleObjectsEx(1, &closeEvent, INFINITE, QS_ALLINPUT, 0))
-		{
-		case WAIT_OBJECT_0:
-			CloseHandle(ShExecInfo.hProcess);
-			ShExecInfo.hProcess = NULL;
-			break;
-		case WAIT_OBJECT_0 + 1:
-			while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-			continue;
-		default: __debugbreak();
-		}
-	}
-
-	if (closeEvent)
-		CloseHandle(closeEvent);
-
-	if (hwndOwner)
-	{
-		EnableWindow(hwndOwner, TRUE);
-		SetForegroundWindow(hwndOwner);
-	}
-
-	std::ifstream file(_outputPath);
-	if (file.good())
-	{
-		std::string str;
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		while (std::getline(file, str))
-		{
-			std::wstring wide = converter.from_bytes(str);
-			_selectedItem = wide;
-		}
-	}
-	DeleteFile(_outputPath.c_str());
-
-	if (!_selectedItem.empty())
-	{
-		// Create destination file if not existing
-		HANDLE hFile = CreateFile(_selectedItem.c_str(), GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-		if (hFile != INVALID_HANDLE_VALUE)
-		{
-			CloseHandle(hFile);
-		}
-		else
-		{
-			_selectedItem = L"";
-		}
-	}
-	if (!_selectedItem.empty())
-	{
-		if (_dialogEvents)
-		{
-			_dialogEvents->OnFileOk(this);
-		}
-	}
-
-	return !_selectedItem.empty() ? S_OK : HRESULT_FROM_WIN32(ERROR_CANCELLED);
 }
+catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+catch (...) { return E_FAIL; }
 
 HRESULT __stdcall CFilesSaveDialog::SetFileTypes(UINT cFileTypes, const COMDLG_FILTERSPEC* rgFilterSpec)
 {
@@ -524,7 +418,7 @@ HRESULT __stdcall CFilesSaveDialog::SetFileTypes(UINT cFileTypes, const COMDLG_F
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileTypes(cFileTypes, rgFilterSpec);
 #endif
-	return S_OK;
+	return _request.SetTypes(cFileTypes, rgFilterSpec);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetFileTypeIndex(UINT iFileType)
@@ -533,6 +427,8 @@ HRESULT __stdcall CFilesSaveDialog::SetFileTypeIndex(UINT iFileType)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileTypeIndex(iFileType);
 #endif
+	if (!iFileType || iFileType > INT_MAX || (!_request.types.empty() && iFileType > _request.types.size())) return E_INVALIDARG;
+	_fileTypeIndex = iFileType;
 	return S_OK;
 }
 
@@ -542,7 +438,8 @@ HRESULT __stdcall CFilesSaveDialog::GetFileTypeIndex(UINT* piFileType)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFileTypeIndex(piFileType);
 #endif
-	* piFileType = 1;
+	if (!piFileType) return E_POINTER;
+	*piFileType = _fileTypeIndex;
 	return S_OK;
 }
 
@@ -552,9 +449,7 @@ HRESULT __stdcall CFilesSaveDialog::Advise(IFileDialogEvents* pfde, DWORD* pdwCo
 #ifdef SYSTEMDIALOG
 	return _systemDialog->Advise(pfde, pdwCookie);
 #endif
-	_dialogEvents = pfde;
-	*pdwCookie = 4;
-	return S_OK;
+	return _events.Advise(pfde, pdwCookie);
 }
 
 HRESULT __stdcall CFilesSaveDialog::Unadvise(DWORD dwCookie)
@@ -563,8 +458,7 @@ HRESULT __stdcall CFilesSaveDialog::Unadvise(DWORD dwCookie)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->Unadvise(dwCookie);
 #endif
-	_dialogEvents.Release();
-	return S_OK;
+	return _events.Unadvise(dwCookie);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetOptions(FILEOPENDIALOGOPTIONS fos)
@@ -583,12 +477,14 @@ HRESULT __stdcall CFilesSaveDialog::GetOptions(FILEOPENDIALOGOPTIONS* pfos)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetOptions(pfos);
 #endif
-	* pfos = _fos;
+	if (!pfos) return E_POINTER;
+	*pfos = _fos;
 	return S_OK;
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetDefaultFolder(IShellItem* psi)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -598,12 +494,13 @@ HRESULT __stdcall CFilesSaveDialog::SetDefaultFolder(IShellItem* psi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetDefaultFolder(psi);
 #endif
-	_initFolder = psi;
+	_defaultFolder = psi;
 	return S_OK;
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetFolder(IShellItem* psi)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -623,8 +520,9 @@ HRESULT __stdcall CFilesSaveDialog::GetFolder(IShellItem** ppsi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFolder(ppsi);
 #endif
-	* ppsi = NULL;
-	return E_NOTIMPL;
+	if (!ppsi) return E_POINTER;
+	*ppsi = nullptr;
+	return (_initFolder ? _initFolder : _defaultFolder).CopyTo(ppsi);
 }
 
 HRESULT __stdcall CFilesSaveDialog::GetCurrentSelection(IShellItem** ppsi)
@@ -642,9 +540,7 @@ HRESULT __stdcall CFilesSaveDialog::SetFileName(LPCWSTR pszName)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileName(pszName);
 #endif
-	std::wstring absPath = std::wstring(pszName);
-	_initName = absPath.substr(absPath.find_last_of(L"/\\") + 1);
-	return S_OK;
+	return DialogOptions::Text(_initName, pszName);
 }
 
 HRESULT __stdcall CFilesSaveDialog::GetFileName(LPWSTR* pszName)
@@ -653,6 +549,7 @@ HRESULT __stdcall CFilesSaveDialog::GetFileName(LPWSTR* pszName)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetFileName(pszName);
 #endif
+	if (!pszName) return E_POINTER;
 	return SHStrDupW(_selectedItem.empty() ? L"" : _selectedItem.c_str(), pszName);
 }
 
@@ -662,7 +559,7 @@ HRESULT __stdcall CFilesSaveDialog::SetTitle(LPCWSTR pszTitle)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetTitle(pszTitle);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.title, pszTitle);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetOkButtonLabel(LPCWSTR pszText)
@@ -671,7 +568,7 @@ HRESULT __stdcall CFilesSaveDialog::SetOkButtonLabel(LPCWSTR pszText)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetOkButtonLabel(pszText);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.okLabel, pszText);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetFileNameLabel(LPCWSTR pszLabel)
@@ -680,7 +577,7 @@ HRESULT __stdcall CFilesSaveDialog::SetFileNameLabel(LPCWSTR pszLabel)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetFileNameLabel(pszLabel);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.nameLabel, pszLabel);
 }
 
 HRESULT __stdcall CFilesSaveDialog::GetResult(IShellItem** ppsi)
@@ -689,14 +586,12 @@ HRESULT __stdcall CFilesSaveDialog::GetResult(IShellItem** ppsi)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetResult(ppsi);
 #endif
-	*ppsi = NULL;
-	if (!_selectedItem.empty())
-		return SHCreateItemFromParsingName(_selectedItem.c_str(), NULL, IID_IShellItem, (void**)ppsi);
-	return E_NOTIMPL;
+	return FilesDialogBridge::CreateSaveItem(_selectedItem, ppsi);
 }
 
 HRESULT __stdcall CFilesSaveDialog::AddPlace(IShellItem* psi, FDAP fdap)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -715,7 +610,7 @@ HRESULT __stdcall CFilesSaveDialog::SetDefaultExtension(LPCWSTR pszDefaultExtens
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetDefaultExtension(pszDefaultExtension);
 #endif
-	return S_OK;
+	return DialogOptions::Text(_request.extension, pszDefaultExtension);
 }
 
 HRESULT __stdcall CFilesSaveDialog::Close(HRESULT hr)
@@ -733,7 +628,9 @@ HRESULT __stdcall CFilesSaveDialog::SetClientGuid(REFGUID guid)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->SetClientGuid(guid);
 #endif
-	return S_OK;
+	wchar_t value[40];
+	StringFromGUID2(guid, value, _countof(value));
+	return DialogOptions::Text(_request.clientGuid, value);
 }
 
 HRESULT __stdcall CFilesSaveDialog::ClearClientData(void)
@@ -742,6 +639,7 @@ HRESULT __stdcall CFilesSaveDialog::ClearClientData(void)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->ClearClientData();
 #endif
+	_request.clearClientData = true;
 	return S_OK;
 }
 
@@ -1036,6 +934,7 @@ HRESULT __stdcall CFilesSaveDialog::HandleTab(void)
 
 HRESULT __stdcall CFilesSaveDialog::SetSaveAsItem(IShellItem* psi)
 {
+	if (!psi) return E_INVALIDARG;
 	PWSTR pszPath = NULL;
 	if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pszPath)))
 	{
@@ -1046,13 +945,12 @@ HRESULT __stdcall CFilesSaveDialog::SetSaveAsItem(IShellItem* psi)
 	return _systemDialog->SetSaveAsItem(psi);
 #endif
 	_initFolder.Release();
-	psi->GetParent(&_initFolder);
-	if (SUCCEEDED(psi->GetDisplayName(SIGDN_NORMALDISPLAY, &pszPath)))
-	{
-		_initName = pszPath;
-		CoTaskMemFree(pszPath);
-	}
-	return S_OK;
+	auto hr = psi->GetParent(&_initFolder);
+	if (FAILED(hr)) return hr;
+	CComHeapPtr<wchar_t> filename;
+	hr = psi->GetDisplayName(SIGDN_FILESYSPATH, &filename);
+	if (FAILED(hr)) return hr;
+	return DialogOptions::Text(_initName, filename);
 }
 
 HRESULT __stdcall CFilesSaveDialog::SetProperties(IPropertyStore* pStore)
@@ -1079,6 +977,8 @@ HRESULT __stdcall CFilesSaveDialog::GetProperties(IPropertyStore** ppStore)
 #ifdef SYSTEMDIALOG
 	return _systemDialog->GetProperties(ppStore);
 #endif
+	if (!ppStore) return E_POINTER;
+	*ppStore = nullptr;
 	if (!_selectedItem.empty())
 	{
 		return SHGetPropertyStoreFromParsingName(_selectedItem.c_str(),
@@ -1102,8 +1002,9 @@ HRESULT __stdcall CFilesSaveDialog::GetWindow(HWND* phwnd)
 #ifdef SYSTEMDIALOG
 	return AsInterface<IOleWindow>(_systemDialog)->GetWindow(phwnd);
 #endif
-	* phwnd = NULL;
-	return S_OK;
+	if (!phwnd) return E_POINTER;
+	*phwnd = nullptr;
+	return E_FAIL;
 }
 
 HRESULT __stdcall CFilesSaveDialog::ContextSensitiveHelp(BOOL fEnterMode)

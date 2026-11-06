@@ -225,5 +225,10 @@ namespace Files.App.Data.Contracts
 		/// Item size in the Columns View
 		/// </summary>
 		ColumnsViewSizeKind ColumnsViewSize { get; set; }
+
+		/// <summary>
+		/// Pulse View: collapse version/sibling files ("report.pdf", "report (1).pdf", "report-v2.pdf") into one stack
+		/// </summary>
+		bool PulseAutoGroupVersions { get; set; }
 	}
 }

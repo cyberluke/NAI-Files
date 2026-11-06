@@ -3,7 +3,11 @@
 
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Hosting;
 using Windows.Foundation;
+using Windows.UI.ViewManagement;
 using WinRT;
 
 namespace Files.App.Controls
@@ -19,6 +23,10 @@ namespace Files.App.Controls
 		private const string TemplatePartName_AutoSuggestBoxSuggestionsPopup = "PART_SuggestionsPopup";
 		private const string TemplatePartName_AutoSuggestBoxSuggestionsContainerBorder = "PART_SuggestionsContainerBorder";
 		private const string TemplatePartName_SuggestionsListView = "PART_SuggestionsListView";
+		private const string TemplatePartName_ShellRing = "PART_ShellRing";
+		private const string TemplatePartName_UnderlineActive = "PART_UnderlineActive";
+		private const string TemplatePartName_UnderlineSweep = "PART_UnderlineSweep";
+		private const string TemplatePartName_UnderlineHost = "PART_UnderlineHost";
 
 		// Fields
 
@@ -27,6 +35,14 @@ namespace Files.App.Controls
 		private Popup _textBoxSuggestionsPopup = null!;
 		private Border _textBoxSuggestionsContainerBorder = null!;
 		private ListView _textBoxSuggestionsListView = null!;
+
+		private Border _shellRing = null!;
+		private Border _underlineActive = null!;
+		private Border _underlineSweep = null!;
+		private Grid _underlineHost = null!;
+
+		private readonly UISettings uiSettings = new();
+		private bool _sweepAnimating;
 
 		private string _userInput = string.Empty;
 		private OmnibarTextChangeReason _textChangeReason = OmnibarTextChangeReason.None;
@@ -82,6 +98,15 @@ namespace Files.App.Controls
 			_textBoxSuggestionsListView = GetTemplateChild(TemplatePartName_SuggestionsListView) as ListView
 				?? throw new MissingFieldException($"Could not find {TemplatePartName_SuggestionsListView} in the given {nameof(Omnibar)}'s style.");
 
+			_shellRing = GetTemplateChild(TemplatePartName_ShellRing) as Border
+				?? throw new MissingFieldException($"Could not find {TemplatePartName_ShellRing} in the given {nameof(Omnibar)}'s style.");
+			_underlineHost = GetTemplateChild(TemplatePartName_UnderlineHost) as Grid
+				?? throw new MissingFieldException($"Could not find {TemplatePartName_UnderlineHost} in the given {nameof(Omnibar)}'s style.");
+			_underlineActive = GetTemplateChild(TemplatePartName_UnderlineActive) as Border
+				?? throw new MissingFieldException($"Could not find {TemplatePartName_UnderlineActive} in the given {nameof(Omnibar)}'s style.");
+			_underlineSweep = GetTemplateChild(TemplatePartName_UnderlineSweep) as Border
+				?? throw new MissingFieldException($"Could not find {TemplatePartName_UnderlineSweep} in the given {nameof(Omnibar)}'s style.");
+
 			PopulateModes();
 
 			SizeChanged += Omnibar_SizeChanged;
@@ -100,7 +125,77 @@ namespace Files.App.Controls
 			// Set the default width
 			_textBoxSuggestionsContainerBorder.Width = ActualWidth;
 
+			Loaded += Omnibar_Loaded;
+			Unloaded += Omnibar_Unloaded;
+
 			GlobalHelper.WriteDebugStringForOmnibar("The template and the events have been initialized.");
+		}
+
+		private void Omnibar_Loaded(object sender, RoutedEventArgs e)
+		{
+			uiSettings.AnimationsEnabledChanged += AnimationsEnabledChanged;
+			UpdateShellState();
+		}
+
+		private void Omnibar_Unloaded(object sender, RoutedEventArgs e)
+		{
+			uiSettings.AnimationsEnabledChanged -= AnimationsEnabledChanged;
+			StopSweep();
+		}
+
+		private void AnimationsEnabledChanged(UISettings sender, object args)
+			=> DispatcherQueue.TryEnqueue(() => { UpdateShellState(); });
+
+		/// <summary>Drives the launcher-style focus ring + underline layers.</summary>
+		internal void UpdateShellState()
+		{
+			if (_shellRing is null)
+				return;
+
+			var state = IsFocused ? "ShellFocused" : "ShellUnfocused";
+			VisualStateManager.GoToState(this, state, true);
+
+			if (IsFocused)
+				StartSweep();
+			else
+				StopSweep();
+		}
+
+		/// <summary>White sweep travelling left to right along the underline.</summary>
+		private void StartSweep()
+		{
+			if (!IsLoaded || !uiSettings.AnimationsEnabled || _underlineSweep is null || _underlineHost is null)
+				return;
+
+			StopSweep();
+
+			var hostWidth = (float)_underlineHost.ActualWidth;
+			if (hostWidth <= 0)
+				return;
+
+			var visual = ElementCompositionPreview.GetElementVisual(_underlineSweep);
+			visual.Offset = new System.Numerics.Vector3(-hostWidth * 1.2f, 0, 0);
+
+			var sweep = visual.Compositor.CreateScalarKeyFrameAnimation();
+			sweep.Duration = TimeSpan.FromSeconds(1.5);
+			sweep.IterationBehavior = AnimationIterationBehavior.Forever;
+			sweep.InsertKeyFrame(0f, -hostWidth * 1.2f);
+			sweep.InsertKeyFrame(0.6f, hostWidth * 1.2f);
+			sweep.InsertKeyFrame(1f, hostWidth * 1.2f);
+
+			visual.StartAnimation("Offset.X", sweep);
+			_sweepAnimating = true;
+		}
+
+		private void StopSweep()
+		{
+			if (!_sweepAnimating || _underlineSweep is null)
+				return;
+
+			var visual = ElementCompositionPreview.GetElementVisual(_underlineSweep);
+			visual.StopAnimation("Offset.X");
+			visual.Offset = new System.Numerics.Vector3(0, 0, 0);
+			_sweepAnimating = false;
 		}
 
 		public void PopulateModes()

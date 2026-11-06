@@ -84,7 +84,7 @@
 			IsAddTabButtonVisible="False"
 			PointerWheelChanged="TabView_PointerWheelChanged"
 			SelectedIndex="{x:Bind root:App.AppModel.TabStripSelectedIndex, Mode=TwoWay}"
-			SelectionChanged="TabView_SelectionChanged"
+			SelectionChanged="HorizontalTabView_SelectionChanged"
 			TabCloseRequested="TabView_TabCloseRequested"
 			TabDragCompleted="TabView_TabDragCompleted"
 			TabDragStarting="TabView_TabDragStarting"
@@ -218,7 +218,33 @@
 						IconSource="{x:Bind IconSource, Mode=OneWay}"
 						Loaded="TabViewItem_Loaded"
 						Style="{StaticResource TabBarItemStyle}"
-						ToolTipService.ToolTip="{x:Bind ToolTipText, Mode=OneWay}" />
+						Tag="{x:Bind AccentBrush, Mode=OneWay}">
+						<ToolTipService.ToolTip>
+							<ToolTip
+								MaxWidth="500"
+								Padding="12,8"
+								helpers:NaiTabAppearance.AnimateToolTip="True"
+								CornerRadius="8"
+								Placement="Bottom">
+								<Grid ColumnSpacing="10">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="*" />
+									</Grid.ColumnDefinitions>
+									<Border
+										Width="3"
+										Background="{x:Bind AccentBrush, Mode=OneWay}"
+										CornerRadius="1.5" />
+									<TextBlock
+										Grid.Column="1"
+										MaxWidth="460"
+										Text="{x:Bind FullToolTipText, Mode=OneWay}"
+										TextTrimming="None"
+										TextWrapping="Wrap" />
+								</Grid>
+							</ToolTip>
+						</ToolTipService.ToolTip>
+					</TabViewItem>
 				</DataTemplate>
 			</TabView.TabItemTemplate>
 

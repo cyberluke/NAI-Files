@@ -262,12 +262,14 @@ namespace Files.App.Views.Layouts
 
 			shellViewModel.CancelExtendedPropertiesLoading();
 			var filesAndFolders = shellViewModel.FilesAndFolders.ToList();
+			var visualLoads = new List<Task>();
 			foreach (ListedItem listedItem in filesAndFolders)
 			{
 				listedItem.ItemPropertiesInitialized = false;
 				if (FileList.ContainerFromItem(listedItem) is not null)
-					await shellViewModel.LoadExtendedItemPropertiesAsync(listedItem);
+					visualLoads.Add(shellViewModel.LoadExtendedItemPropertiesAsync(listedItem));
 			}
+			await Task.WhenAll(visualLoads);
 		}
 
 		override public void StartRenameItem()
@@ -712,6 +714,9 @@ namespace Files.App.Views.Layouts
 					break;
 				case FolderLayoutModes.GridView:
 					parent.FolderSettings.ToggleLayoutModeGridView(true);
+					break;
+				case FolderLayoutModes.PulseView:
+					parent.FolderSettings.ToggleLayoutModePulseView(true);
 					break;
 				case FolderLayoutModes.Adaptive:
 					parent.FolderSettings.ToggleLayoutModeAdaptive();

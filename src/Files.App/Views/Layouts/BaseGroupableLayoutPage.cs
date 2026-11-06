@@ -144,7 +144,7 @@ namespace Files.App.Views.Layouts
 				return;
 			var shellViewModel = parentShellPage.GetRequiredShellViewModel();
 
-			shellViewModel.CancelExtendedPropertiesLoading();
+			shellViewModel.CancelExtendedPropertiesLoadingForItem(selectedItem);
 			selectedItem.ItemPropertiesInitialized = false;
 
 			await shellViewModel.LoadExtendedItemPropertiesAsync(selectedItem);
@@ -164,10 +164,9 @@ namespace Files.App.Views.Layouts
 				return;
 			var shellViewModel = parentShellPage.GetRequiredShellViewModel();
 
-			shellViewModel.CancelExtendedPropertiesLoading();
-
 			foreach (var selectedItem in selectedItems)
 			{
+				shellViewModel.CancelExtendedPropertiesLoadingForItem(selectedItem);
 				selectedItem.ItemPropertiesInitialized = false;
 				await shellViewModel.LoadExtendedItemPropertiesAsync(selectedItem);
 			}

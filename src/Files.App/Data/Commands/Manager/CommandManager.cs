@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Helpers.Application;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
@@ -29,11 +30,14 @@ namespace Files.App.Data.Commands
 
 		public CommandManager()
 		{
+			NaiLanguageBridge.StartupStage("commandmanager-ctor-start");
 			_commands = CreateCommands();
+			NaiLanguageBridge.StartupStage("commandmanager-commands-created");
 
 			ActionsSettingsService.PropertyChanged += (s, e) => { OverwriteKeyBindings(); };
 
 			OverwriteKeyBindings();
+			NaiLanguageBridge.StartupStage("commandmanager-ctor-done");
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

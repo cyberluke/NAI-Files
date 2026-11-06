@@ -59,6 +59,7 @@
 					<ComboBoxItem Content="{helpers:ResourceString Name=Columns}" />
 					<ComboBoxItem Content="{helpers:ResourceString Name=Grid}" />
 					<ComboBoxItem Content="{helpers:ResourceString Name=Adaptive}" IsEnabled="{x:Bind ViewModel.SyncFolderPreferencesAcrossDirectories, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}" />
+					<ComboBoxItem Content="{helpers:ResourceString Name=Pulse}" />
 				</uc:ComboBoxEx>
 			</wctcontrols:SettingsCard>
 

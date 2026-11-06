@@ -126,6 +126,13 @@ namespace Files.App.Views.Shells
 			{
 				NavigateToSettings(navParams.SelectItem);
 			}
+			else if (NaiWorkspaceRoutes.IsRoute(navParams.NavPath))
+			{
+				ItemDisplayFrame.Navigate(NaiWorkspaceRoutes.PageType(navParams.NavPath), new NavigationArguments
+				{
+					NavPathParam = navParams.NavPath, AssociatedTabInstance = this,
+				});
+			}
 			else
 			{
 				var isTagSearch = navParams.NavPath.StartsWith("tag:");
@@ -148,6 +155,7 @@ namespace Files.App.Views.Shells
 		{
 			if (e is null || string.IsNullOrWhiteSpace(e.Path))
 				return;
+			if (NaiWorkspaceRoutes.IsRoute(e.Path)) return;
 
 			if (e.IsLibrary)
 				await UpdatePathUIToWorkingDirectoryAsync(null, e.Name);
@@ -161,7 +169,8 @@ namespace Files.App.Views.Shells
 
 			ToolbarViewModel.UpdateAdditionalActions();
 			if (ItemDisplayFrame.CurrentSourcePageType == typeof(DetailsLayoutPage) ||
-				ItemDisplayFrame.CurrentSourcePageType == typeof(GridLayoutPage))
+				ItemDisplayFrame.CurrentSourcePageType == typeof(GridLayoutPage) ||
+				ItemDisplayFrame.CurrentSourcePageType == typeof(PulseLayoutPage))
 			{
 				// Reset DataGrid Rows that may be in "cut" command mode
 				ContentPage!.ResetItemOpacity();

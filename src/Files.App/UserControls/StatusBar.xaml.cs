@@ -33,6 +33,39 @@ namespace Files.App.UserControls
 
 		public ICommandManager Commands { get; } = Ioc.Default.GetRequiredService<ICommandManager>();
 
+		public ShellViewModel? ThumbnailSource
+		{
+			get => (ShellViewModel?)GetValue(ThumbnailSourceProperty);
+			set => SetValue(ThumbnailSourceProperty, value);
+		}
+		public static readonly DependencyProperty ThumbnailSourceProperty = DependencyProperty.Register(nameof(ThumbnailSource), typeof(ShellViewModel), typeof(StatusBar),
+			new PropertyMetadata(null, (owner, args) =>
+			{
+				var bar = (StatusBar)owner;
+				if (args.OldValue is ShellViewModel old) old.PropertyChanged -= bar.ThumbnailChanged;
+				if (args.NewValue is ShellViewModel next) next.PropertyChanged += bar.ThumbnailChanged;
+				bar.UpdateThumbnailProgress();
+			}));
+
+		private void ThumbnailChanged(object? sender, PropertyChangedEventArgs args)
+		{
+			if (args.PropertyName == nameof(ShellViewModel.ThumbnailProgress)) UpdateThumbnailProgress();
+		}
+
+		private void UpdateThumbnailProgress()
+		{
+			if (ThumbnailProgressBar is null || ThumbnailProgressText is null) return;
+			var progress = ThumbnailSource?.ThumbnailProgress;
+			var active = progress is not null && progress.Pending + progress.Running > 0;
+			ThumbnailProgressBar.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+			ThumbnailProgressBar.Maximum = Math.Max(1, progress?.Total ?? 1);
+			ThumbnailProgressBar.Value = progress?.Settled ?? 0;
+			ThumbnailProgressText.Text = progress is null || progress.Total == 0 ? string.Empty
+				: string.Format("NaiThumbnailProgress".GetLocalizedResource(), progress.Completed, progress.Pending, progress.Running, progress.Unavailable, progress.Failed);
+			ToolTipService.SetToolTip(ThumbnailProgressBar, ThumbnailProgressText.Text);
+			QueueRemeasure();
+		}
+
 		public StatusBarViewModel? StatusBarViewModel
 		{
 			get => (StatusBarViewModel)GetValue(StatusBarViewModelProperty);

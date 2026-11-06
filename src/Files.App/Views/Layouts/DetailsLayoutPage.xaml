@@ -932,7 +932,7 @@
 										HorizontalAlignment="Left"
 										VerticalAlignment="Stretch">
 
-										<!--  Thumbnail  -->
+											<!--  Thumbnail  -->
 										<Grid
 											x:Name="IconBox"
 											Width="{Binding Path=ColumnsViewModel.IconColumn.LengthPixels, ElementName=PageRoot, Mode=OneWay}"
@@ -975,6 +975,12 @@
 												x:Load="{x:Bind IsShortcut}">
 												<controls:ThemedIcon Style="{StaticResource App.ThemedIcons.Shortcut}" />
 											</Viewbox>
+											<Border x:Name="NaiDocumentBadge" Width="9" Height="9" CornerRadius="5"
+												HorizontalAlignment="Right" VerticalAlignment="Top"
+												x:Load="{x:Bind HasNaiDocumentStatus, Mode=OneWay}"
+												Background="{x:Bind NaiDocumentMarkerBrush, Mode=OneWay}"
+												AutomationProperties.Name="{x:Bind NaiDocumentStatus, Mode=OneWay}"
+												ToolTipService.ToolTip="{x:Bind NaiDocumentStatus, Mode=OneWay}" />
 											<Image
 												x:Name="ShieldOverlay"
 												Width="8"

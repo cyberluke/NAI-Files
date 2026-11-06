@@ -41,6 +41,9 @@ namespace Files.App.Data.Contexts
 					case LayoutTypes.Columns:
 						viewModel.ToggleLayoutModeColumnView(true);
 						break;
+					case LayoutTypes.Pulse:
+						viewModel.ToggleLayoutModePulseView(true);
+						break;
 					case LayoutTypes.Adaptive:
 						viewModel.ToggleLayoutModeAdaptive();
 						break;
@@ -248,6 +251,7 @@ namespace Files.App.Data.Contexts
 				FolderLayoutModes.CardsView => LayoutTypes.Cards,
 				FolderLayoutModes.GridView => LayoutTypes.Grid,
 				FolderLayoutModes.ColumnView => LayoutTypes.Columns,
+				FolderLayoutModes.PulseView => LayoutTypes.Pulse,
 				_ => throw new InvalidEnumArgumentException(),
 			};
 		}

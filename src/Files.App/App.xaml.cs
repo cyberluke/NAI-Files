@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Data.Commands;
 using Files.App.Helpers.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,21 @@ namespace Files.App
 
 		public static TaskCompletionSource? SplashScreenLoadingTCS { get; private set; }
 		public static string? OutputPath { get; set; }
+
+		/// <summary>External file-dialog activation mode: "open", "multi", "folder" or "save".</summary>
+		public static string? DialogMode { get; set; }
+
+		/// <summary>Suggested file name for save-dialog activations (from -select).</summary>
+		public static string? DialogFileName { get; set; }
+
+		/// <summary>True when this instance was launched as a native open/save dialog.</summary>
+		public static bool IsDialogMode => DialogMode is not null;
+
+		/// <summary>Set by the Open/Save action button before the window closes; the
+		/// close handler only writes the result file after a confirmation, so
+		/// Cancel and the X button cancel the dialog (the COM host treats a missing
+		/// output file as ERROR_CANCELLED).</summary>
+		public static bool DialogConfirmRequested;
 
 		private static FlyoutBase? _LastOpenedFlyout;
 		private static bool _isWindowTeardownCompleted;
@@ -56,7 +72,11 @@ namespace Files.App
 		/// </summary>
 		public App()
 		{
+			NaiLanguageBridge.StartupStage("language-start");
+			NaiLanguageBridge.Initialize();
+			NaiLanguageBridge.StartupStage("language-ready");
 			InitializeComponent();
+			NaiLanguageBridge.StartupStage("resources-ready");
 
 			// Configure exception handlers
 			AppLifecycleHelper.RecordFirstChanceExceptions();
@@ -72,86 +92,77 @@ namespace Files.App
 		/// </summary>
 		protected override void OnLaunched(LaunchActivatedEventArgs e)
 		{
+			NaiLanguageBridge.StartupStage("on-launched");
 			UiDispatcher = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 
 			// Constructed on the UI thread: the ctor subscribes the UI-thread-only Clipboard.ContentChanged
 			AppModel = new AppModel();
+			NaiLanguageBridge.StartupStage("app-model-ready");
 
-			_ = ActivateAsync();
+			_ = ActivateAsync().ContinueWith(task =>
+			{
+				if (task.Exception is { } exception)
+				{
+					NaiLanguageBridge.StartupStage("activation-failed: " + exception);
+					Logger?.LogError(exception, "Application activation failed");
+				}
+			}, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
 
 			async Task ActivateAsync()
 			{
-				// Build the DI container off-thread while the window initializes
-				var appModel = AppModel;
-				Task commandsWarmupTask = Task.CompletedTask;
-				var servicesTask = Task.Run(() =>
+				// Service/action constructors can reach MainWindow and WinUI resources.
+				// Resolving them on a worker races MainWindow.Instance and can deadlock
+				// the dispatcher against a DI singleton lock before the first window.
+				// Configure the provider once and keep UI-affine resolution on this thread.
+				var serviceProvider = AppLifecycleHelper.ConfigureHost(AppModel);
+				Ioc.Default.ConfigureServices(serviceProvider);
+				NaiLanguageBridge.StartupStage("services-configured");
+
+				// TODO: Replace with DI
+				QuickAccessManager = Ioc.Default.GetRequiredService<QuickAccessManager>();
+				HistoryWrapper = Ioc.Default.GetRequiredService<StorageHistoryWrapper>();
+				FileTagsManager = Ioc.Default.GetRequiredService<FileTagsManager>();
+				LibraryManager = Ioc.Default.GetRequiredService<LibraryManager>();
+				Logger = Ioc.Default.GetRequiredService<ILogger<App>>();
+				AppModel = Ioc.Default.GetRequiredService<AppModel>();
+				NaiLanguageBridge.StartupStage("managers-resolved");
+
+				// Construct the command graph (200+ action classes + their DI singletons,
+				// ~1.4 s normally, far more right after a fresh install while the OS is
+				// still scanning the package payload) off the UI thread. Context ctors
+				// already defer UI-thread-only work (WindowContext, MultitaskingContext)
+				// when constructed off-thread, so the first MainPage frame is never
+				// stalled by command creation. On failure the UI thread constructs the
+				// graph the usual way, so this is a strict improvement.
+				_ = Task.Run(() =>
 				{
 					try
 					{
-						var provider = AppLifecycleHelper.ConfigureHost(appModel);
-
-						// Configure Ioc here so Ioc.Default-dependent constructions warm off-thread too
-						Ioc.Default.ConfigureServices(provider);
-
-						// Load the appearance settings needed for the first frame off the UI thread.
-						_ = provider.GetRequiredService<IGeneralSettingsService>().CloseToBackground;
-						var appearanceSettings = provider.GetRequiredService<IAppearanceSettingsService>();
-						_ = appearanceSettings.AppThemeMode;
-						_ = appearanceSettings.AppThemeBackdropMaterial;
-
-						// Commands are needed for the main page, not for the initial window and backdrop.
-						commandsWarmupTask = Task.Run(() =>
-						{
-							var previousPriority = Thread.CurrentThread.Priority;
-							Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
-							try
-							{
-								// Action and context constructors access these statics.
-								QuickAccessManager = provider.GetRequiredService<QuickAccessManager>();
-								HistoryWrapper = provider.GetRequiredService<StorageHistoryWrapper>();
-								FileTagsManager = provider.GetRequiredService<FileTagsManager>();
-								LibraryManager = provider.GetRequiredService<LibraryManager>();
-
-								_ = provider.GetRequiredService<ICommandManager>();
-							}
-							catch (Exception)
-							{
-								// UI-thread-only constructors run on first use instead.
-							}
-							finally
-							{
-								Thread.CurrentThread.Priority = previousPriority;
-							}
-						});
-
-						return provider;
+						_ = Ioc.Default.GetRequiredService<ICommandManager>();
+						NaiLanguageBridge.StartupStage("command-prewarm-done");
 					}
-					catch (Exception)
+					catch (Exception ex)
 					{
-						// A UI-thread-only service ctor failed off-thread; rebuilt on the UI thread below
-						return null;
+						var text = ex.ToString() + "\n--captured--\n" + Environment.StackTrace;
+						NaiLanguageBridge.StartupStage("command-prewarm-failed: " + text[..Math.Min(text.Length, 1600)]);
 					}
 				});
 
 				// Get AppActivationArguments
 				var appActivationArguments = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+				NaiLanguageBridge.StartupStage("activation-args-ready");
 				var isStartupTask = appActivationArguments.Data is Windows.ApplicationModel.Activation.IStartupTaskActivatedEventArgs;
+				NaiLanguageBridge.StartupStage("startup-task=" + isStartupTask);
 
 				// IsDynamicCodeSupported is false on Native AOT, where startup is fast enough to skip the splash screen
 				var showSplashScreen = System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported;
 
 				if (!isStartupTask)
 				{
-					// Construct the window while appearance settings are loaded.
+					// The main window is owned exclusively by the UI thread.
+					NaiLanguageBridge.StartupStage("window-constructing");
 					_ = MainWindow.Instance;
-				}
-
-				// Configure the DI (dependency injection) container
-				var serviceProvider = await servicesTask;
-				if (serviceProvider is null)
-				{
-					serviceProvider = AppLifecycleHelper.ConfigureHost(appModel);
-					Ioc.Default.ConfigureServices(serviceProvider);
+					NaiLanguageBridge.StartupStage("window-constructed");
 				}
 
 				var userSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
@@ -167,27 +178,19 @@ namespace Files.App
 
 					if (!await MainWindow.Instance.ActivateWithBackdropAsync())
 						return;
+					NaiLanguageBridge.StartupStage("window-activated");
 				}
-
-				await commandsWarmupTask;
 
 				// Configure Sentry
 				if (AppLifecycleHelper.AppEnvironment is not AppEnvironment.Dev)
 					AppLifecycleHelper.ConfigureSentry();
-
-				// TODO: Replace with DI
-				QuickAccessManager = Ioc.Default.GetRequiredService<QuickAccessManager>();
-				HistoryWrapper = Ioc.Default.GetRequiredService<StorageHistoryWrapper>();
-				FileTagsManager = Ioc.Default.GetRequiredService<FileTagsManager>();
-				LibraryManager = Ioc.Default.GetRequiredService<LibraryManager>();
-				Logger = Ioc.Default.GetRequiredService<ILogger<App>>();
-				AppModel = Ioc.Default.GetRequiredService<AppModel>();
 
 				// Hook events for the window
 				MainWindow.Instance.Closed += Window_Closed;
 				MainWindow.Instance.Activated += Window_Activated;
 
 				Logger.LogInformation($"App launched. Launch args type: {appActivationArguments.Data.GetType().Name}");
+				NaiLanguageBridge.StartupStage("app-launched-logged");
 
 				if (!(isStartupTask && isLeaveAppRunning))
 				{
@@ -197,6 +200,7 @@ namespace Files.App
 						await SplashScreenLoadingTCS.Task.WithTimeoutAsync(TimeSpan.FromMilliseconds(500));
 						SplashScreenLoadingTCS = null;
 					}
+					NaiLanguageBridge.StartupStage("splash-done");
 
 					// Deferred so the first frame renders first
 					MainWindow.Instance.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
@@ -207,6 +211,7 @@ namespace Files.App
 					});
 
 					_ = MainWindow.Instance.InitializeApplicationAsync(appActivationArguments.Data);
+					NaiLanguageBridge.StartupStage("initialize-application-started");
 				}
 				else
 				{
@@ -271,6 +276,8 @@ namespace Files.App
 			SystemTrayIcon?.EnsureCreated();
 		}
 
+		private bool _isDialogTeardownStarted;
+
 		/// <summary>
 		/// Gets invoked when the application execution is closed.
 		/// </summary>
@@ -279,9 +286,23 @@ namespace Files.App
 		/// </remarks>
 		private async void Window_Closed(object sender, WindowEventArgs args)
 		{
+			// Complete before flyout teardown or any await. A confirmed writer is already
+			// sealed, so this can neither replace success nor wake the caller twice.
+			if (IsDialogMode && !TryCompleteDialog(Array.Empty<string>(), out var error))
+				Logger.LogError("Dialog cancellation delivery failed: {Error}", error);
+
 			// Let the final close after background teardown proceed
 			if (_isWindowTeardownCompleted)
 				return;
+			if (IsDialogMode)
+			{
+				// Keep XAML alive until its panes/watchers have been detached. Letting
+				// Closed proceed first races background collection notifications with destruction.
+				args.Handled = true;
+				if (_isDialogTeardownStarted)
+					return;
+				_isDialogTeardownStarted = true;
+			}
 
 			// Stop dispatcher timers before the close handler yields and window teardown begins.
 			AppModel.IsMainWindowClosed = true;
@@ -292,7 +313,7 @@ namespace Files.App
 			ICommandManager commandManager = Ioc.Default.GetRequiredService<ICommandManager>();
 
 			// A Workaround for the crash (#10110)
-			if (_LastOpenedFlyout?.IsOpen ?? false)
+			if (!IsDialogMode && (_LastOpenedFlyout?.IsOpen ?? false))
 			{
 				args.Handled = true;
 				_LastOpenedFlyout.Closed += (sender, e) => App.Current.Exit();
@@ -304,27 +325,12 @@ namespace Files.App
 			ActiveSessionTracker.OnActivationChanged(false);
 
 			// Save the current tab list in case it was overwriten by another instance
-			if (userSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp || userSettingsService.AppSettingsService.RestoreTabsOnStartup)
-				AppLifecycleHelper.SaveSessionTabs();
-			else
-				await commandManager.CloseAllTabs.ExecuteAsync();
-
-			if (OutputPath is not null)
+			if (!IsDialogMode)
 			{
-				var instance = MainPageViewModel.AppInstances.FirstOrDefault(x =>
-					(x.TabItemContent ?? throw new InvalidOperationException("A tab does not have content.")).IsCurrentInstance);
-				if (instance is null)
-					return;
-
-				var items = (instance.TabItemContent as ShellPanesPage)?.ActivePane?.SlimContentPage?.SelectedItems;
-				if (items is null)
-					return;
-
-				var results = items.Select(x => x.ItemPath!).ToList();
-				System.IO.File.WriteAllLines(OutputPath, results);
-
-				using var eventHandle = PInvoke.CreateEvent(null, false, false, "FILEDIALOG");
-				PInvoke.SetEvent(eventHandle);
+				if (userSettingsService.GeneralSettingsService.ContinueLastSessionOnStartUp || userSettingsService.AppSettingsService.RestoreTabsOnStartup)
+					AppLifecycleHelper.SaveSessionTabs();
+				else
+					await commandManager.CloseAllTabs.ExecuteAsync();
 			}
 
 			// Dev, preview and stable all run as "Files"; only this channel's other instances block parking
@@ -345,14 +351,23 @@ namespace Files.App
 			}
 
 			// Continue running the app on the background
-			var isClosedToBackground = false;
-			if (userSettingsService.GeneralSettingsService.CloseToBackground &&
+			var needsFinalClose = IsDialogMode;
+			if (IsDialogMode)
+			{
+				_LastOpenedFlyout?.Hide();
+				UIHelpers.CloseAllDialogs();
+				SafetyExtensions.IgnoreExceptions(() => Ioc.Default.GetRequiredService<InfoPaneViewModel>().UnloadPreview());
+				MainPageViewModel.AppInstances.ForEach(tab => tab.Unload());
+				MainPageViewModel.AppInstances.Clear();
+			}
+			else if (
+				userSettingsService.GeneralSettingsService.CloseToBackground &&
 				!AppModel.ForceProcessTermination &&
 				!Process.GetProcessesByName("Files").Any(IsSameChannelInstance))
 			{
 				// Handled set after an await is read too late to cancel the close
 				args.Handled = true;
-				isClosedToBackground = true;
+				needsFinalClose = true;
 
 				// Close open content dialogs
 				UIHelpers.CloseAllDialogs();
@@ -437,7 +452,7 @@ namespace Files.App
 			FileOperationsHelpers.WaitForCompletion();
 
 			// Close the still-alive window for real now that teardown is done
-			if (isClosedToBackground && !_isWindowTeardownCompleted)
+			if (needsFinalClose && !_isWindowTeardownCompleted)
 			{
 				_isWindowTeardownCompleted = true;
 				MainWindow.Instance.Close();
@@ -507,6 +522,27 @@ namespace Files.App
 			flyoutBase.Closed -= LastOpenedFlyout_Closed;
 			if (_LastOpenedFlyout == flyoutBase)
 				_LastOpenedFlyout = null;
+		}
+
+		private static DialogResultWriter? dialogResultWriter;
+		internal static bool DialogTraceRequested { get; set; }
+		internal static string? DialogRequestError { get; set; }
+		internal static bool DialogTraceForWriter { get; set; }
+
+		internal static bool TryCompleteDialog(IReadOnlyList<string> paths, out string error)
+		{
+			if (string.IsNullOrEmpty(OutputPath))
+			{
+				error = Strings.InvalidPath.GetLocalizedResource();
+				return false;
+			}
+			if (dialogResultWriter?.OutputPath != OutputPath)
+				dialogResultWriter = new DialogResultWriter(OutputPath);
+			var session = DialogSession.Current;
+			if (!dialogResultWriter.TryComplete(paths, out error, session?.SelectedTypeIndex ?? 1, session is null ? null : session.SaveCurrent))
+				return false;
+			DialogConfirmRequested = dialogResultWriter.IsConfirmed;
+			return true;
 		}
 	}
 }

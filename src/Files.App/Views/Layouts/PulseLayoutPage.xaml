@@ -1,0 +1,1379 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<local:BaseGroupableLayoutPage
+	x:Class="Files.App.Views.Layouts.PulseLayoutPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="using:Files.App.Controls"
+	xmlns:converters="using:Files.App.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:local="using:Files.App.Views.Layouts"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:pulse="using:Files.App.Services.Pulse"
+	xmlns:pulseuc="using:Files.App.UserControls.Pulse"
+	xmlns:selectors="using:Files.App.Data.TemplateSelectors"
+	xmlns:uc="using:Files.App.UserControls"
+	xmlns:wctconverters="using:CommunityToolkit.WinUI.Converters"
+	x:Name="PageRoot"
+	NavigationCacheMode="Enabled"
+	PointerCanceled="PageRoot_PointerCanceled"
+	PointerCaptureLost="PageRoot_PointerCaptureLost"
+	PointerMoved="PageRoot_PointerMoved"
+	PointerPressed="PageRoot_PointerPressed"
+	PointerReleased="PageRoot_PointerReleased"
+	PointerWheelChanged="LayoutPage_PointerWheelChanged"
+	mc:Ignorable="d">
+
+	<local:BaseGroupableLayoutPage.Resources>
+		<wctconverters:BoolToVisibilityConverter
+			x:Key="BoolToVisibilityConverter"
+			FalseValue="Collapsed"
+			TrueValue="Visible" />
+		<wctconverters:BoolToVisibilityConverter
+			x:Key="NegatedBoolToVisibilityConverter"
+			FalseValue="Visible"
+			TrueValue="Collapsed" />
+		<wctconverters:EmptyObjectToObjectConverter
+			x:Key="EmptyObjectToObjectConverter"
+			EmptyValue="Collapsed"
+			NotEmptyValue="Visible" />
+		<wctconverters:BoolToObjectConverter
+			x:Key="NegatedBoolToOpacityConverter"
+			FalseValue="1"
+			TrueValue="0" />
+		<wctconverters:BoolNegationConverter x:Key="BoolNegationConverter" />
+		<converters:StringToBrushConverter x:Key="StringToBrushConverter" />
+		<!--  A stacked card leaves room above for the fanned "versions behind" ribbon  -->
+		<Thickness x:Key="PulseNoMargin">0</Thickness>
+		<Thickness x:Key="PulseStackMargin">0,10,0,0</Thickness>
+		<wctconverters:BoolToObjectConverter
+			x:Key="StackMarginConverter"
+			FalseValue="{StaticResource PulseNoMargin}"
+			TrueValue="{StaticResource PulseStackMargin}" />
+		<!--  Duration badge: normal corner margin, or lifted above the overlaid footer of a portrait box  -->
+		<Thickness x:Key="PulseDurationMargin">8</Thickness>
+		<Thickness x:Key="PulseDurationPortraitMargin">8,8,8,66</Thickness>
+		<wctconverters:BoolToObjectConverter
+			x:Key="DurationMarginConverter"
+			FalseValue="{StaticResource PulseDurationMargin}"
+			TrueValue="{StaticResource PulseDurationPortraitMargin}" />
+
+		<x:Double x:Key="PulseFooterHeight">52</x:Double>
+		<CornerRadius x:Key="PulseCardCornerRadius">10</CornerRadius>
+		<Thickness x:Key="PulseCardPadding">0</Thickness>
+
+		<!--  Card chrome shared by every card family  -->
+		<Style x:Key="PulseCardBorderStyle" TargetType="Border">
+			<Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+			<Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="CornerRadius" Value="{StaticResource PulseCardCornerRadius}" />
+		</Style>
+
+		<!--  Small type/format badge ("JPG", "MD")  -->
+		<Style x:Key="PulseBadgeTextStyle" TargetType="TextBlock">
+			<Setter Property="FontSize" Value="10" />
+			<Setter Property="FontWeight" Value="SemiBold" />
+			<Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+		</Style>
+
+		<!--  Footer: [sync][tag] name left, absolute timestamp (monospace), size and type at the far right. Always visible.
+		Portrait photos overlay this footer on the bottom of the picture (dark gradient, light text) and stack the
+		date and the time on two lines so the narrow box still shows the full timestamp.  -->
+		<DataTemplate x:Key="PulseCardFooterTemplate" x:DataType="pulse:PulseCardViewModel">
+			<Grid
+				MinHeight="{StaticResource PulseFooterHeight}"
+				Padding="10,6,10,6"
+				VerticalAlignment="Bottom"
+				Background="{x:Bind FooterBackground, Mode=OneWay}"
+				RequestedTheme="{x:Bind FooterTheme, Mode=OneWay}">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<!--  Name row  -->
+				<Grid Grid.Row="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+
+					<!--  Cloud sync status  -->
+					<Border
+						x:Name="CloudDriveSyncStatusGlyph"
+						Grid.Column="0"
+						Margin="0,0,6,0"
+						VerticalAlignment="Center"
+						x:Load="{x:Bind Item.SyncStatusUI.LoadSyncStatus, Mode=OneWay}"
+						Background="Transparent"
+						ToolTipService.ToolTip="{x:Bind Item.SyncStatusUI.SyncStatusString, Mode=OneWay}">
+						<controls:ThemedIcon
+							Width="14"
+							Height="14"
+							Style="{x:Bind Item.SyncStatusUI.ThemedIconStyle, Mode=OneWay}" />
+					</Border>
+
+					<!--  First file tag  -->
+					<Ellipse
+						Grid.Column="1"
+						Width="10"
+						Height="10"
+						Margin="0,0,6,0"
+						VerticalAlignment="Center"
+						Fill="{x:Bind Item.FileTagsUI[0].Color, Mode=OneWay, Converter={StaticResource StringToBrushConverter}}"
+						ToolTipService.ToolTip="{x:Bind Item.FileTagsUI[0].Name, Mode=OneWay}"
+						Visibility="{x:Bind Item.FileTagsUI, Converter={StaticResource EmptyObjectToObjectConverter}, Mode=OneWay}" />
+
+					<TextBlock
+						x:Name="ItemName"
+						Grid.Column="2"
+						FontSize="12.5"
+						FontWeight="SemiBold"
+						Text="{x:Bind Item.Name, Mode=OneWay}"
+						TextTrimming="CharacterEllipsis"
+						TextWrapping="NoWrap"
+						ToolTipService.ToolTip="{x:Bind Item.Name, Mode=OneWay}" />
+
+					<TextBox
+						x:Name="PulseRenameTextBox"
+						Grid.ColumnSpan="3"
+						Margin="-6,-4,-6,-4"
+						Padding="6,2"
+						BeforeTextChanging="RenameTextBox_BeforeTextChanging"
+						FontSize="12.5"
+						Visibility="Collapsed" />
+				</Grid>
+
+				<!--  Meta row (below-preview footer): the timestamp never yields; the size appears only when the card is wide enough  -->
+				<Grid
+					Grid.Row="1"
+					ColumnSpacing="8"
+					Visibility="{x:Bind IsNotPortrait, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+
+					<TextBlock
+						Grid.Column="0"
+						FontFamily="Consolas"
+						FontSize="11.5"
+						Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+						Text="{x:Bind Timestamp, Mode=OneWay}"
+						TextWrapping="NoWrap" />
+
+					<TextBlock
+						Grid.Column="1"
+						HorizontalAlignment="Right"
+						Style="{StaticResource PulseBadgeTextStyle}"
+						FontWeight="Normal"
+						Text="{x:Bind Item.FileSize, Mode=OneWay}"
+						TextTrimming="CharacterEllipsis"
+						TextWrapping="NoWrap"
+						Visibility="{x:Bind ShowsSize, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<TextBlock
+						Grid.Column="2"
+						MaxWidth="64"
+						Style="{StaticResource PulseBadgeTextStyle}"
+						Text="{x:Bind TypeBadge}"
+						TextTrimming="CharacterEllipsis"
+						TextWrapping="NoWrap" />
+				</Grid>
+
+				<!--  Meta rows (portrait overlay): date, then time with the type badge  -->
+				<TextBlock
+					Grid.Row="1"
+					FontFamily="Consolas"
+					FontSize="11.5"
+					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+					Text="{x:Bind TimestampDate, Mode=OneWay}"
+					TextWrapping="NoWrap"
+					Visibility="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+				<Grid
+					Grid.Row="2"
+					ColumnSpacing="6"
+					Visibility="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<TextBlock
+						Grid.Column="0"
+						FontFamily="Consolas"
+						FontSize="11.5"
+						Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+						Text="{x:Bind TimestampTime, Mode=OneWay}"
+						TextWrapping="NoWrap" />
+					<TextBlock
+						Grid.Column="2"
+						MaxWidth="40"
+						Style="{StaticResource PulseBadgeTextStyle}"
+						Text="{x:Bind TypeBadge}"
+						TextTrimming="CharacterEllipsis"
+						TextWrapping="NoWrap" />
+				</Grid>
+			</Grid>
+		</DataTemplate>
+
+		<!--  Overlays shared by every card family, drawn over the preview: opened/unopened document status
+		(top right), shell icon overlay and shortcut glyph (bottom left), elevation shield (bottom right)  -->
+		<DataTemplate x:Key="PulseCardOverlaysTemplate" x:DataType="pulse:PulseCardViewModel">
+			<Grid>
+				<Border
+					x:Name="NaiDocumentBadge"
+					Width="12"
+					Height="12"
+					Margin="8"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					x:Load="{x:Bind Item.HasNaiDocumentStatus, Mode=OneWay}"
+					AutomationProperties.Name="{x:Bind Item.NaiDocumentStatus, Mode=OneWay}"
+					Background="{x:Bind Item.NaiDocumentMarkerBrush, Mode=OneWay}"
+					BorderBrush="#80000000"
+					BorderThickness="1"
+					CornerRadius="6"
+					ToolTipService.ToolTip="{x:Bind Item.NaiDocumentStatus, Mode=OneWay}" />
+
+				<Image
+					Width="28"
+					Height="28"
+					Margin="8"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Bottom"
+					Source="{x:Bind Item.IconOverlay, Mode=OneWay}"
+					Stretch="Uniform" />
+
+				<Viewbox
+					x:Name="ShortcutGlyph"
+					Width="16"
+					Height="16"
+					Margin="10"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Bottom"
+					x:Load="{x:Bind Item.IsShortcut}">
+					<controls:ThemedIcon
+						Width="12"
+						Height="12"
+						Style="{StaticResource App.ThemedIcons.Shortcut}" />
+				</Viewbox>
+
+				<Image
+					x:Name="ShieldOverlay"
+					Width="16"
+					Height="16"
+					Margin="10"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Bottom"
+					x:Load="{x:Bind Item.IsElevationRequired, Mode=OneWay}"
+					Source="{x:Bind Item.ShieldIcon, Mode=OneWay}"
+					Stretch="Uniform" />
+			</Grid>
+		</DataTemplate>
+
+		<!--  Selection chrome: accent ring + tint over any card family, driven by the layout page
+		(PulseCardViewModel.IsSelected). Never hit-testable, so it cannot steal clicks from the
+		card, the stack badge or the audio transport.  -->
+		<DataTemplate x:Key="PulseSelectionOverlayTemplate" x:DataType="pulse:PulseCardViewModel">
+			<Grid
+				IsHitTestVisible="False"
+				Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+				<Border
+					CornerRadius="{StaticResource PulseCardCornerRadius}"
+					Background="{ThemeResource AccentFillColorDefaultBrush}"
+					Opacity="0.14" />
+				<Border
+					CornerRadius="{StaticResource PulseCardCornerRadius}"
+					BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+					BorderThickness="2" />
+			</Grid>
+		</DataTemplate>
+
+		<!--  Stack fan: two offset "cards behind" drawn under the card body. Not hit-testable, so it never
+		competes with the card or the badge for the pointer.  -->
+		<DataTemplate x:Key="PulseStackFanTemplate" x:DataType="pulse:PulseCardViewModel">
+			<Grid IsHitTestVisible="False">
+				<Border
+					Margin="10,0,10,6"
+					Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+					BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+					BorderThickness="1"
+					CornerRadius="{StaticResource PulseCardCornerRadius}"
+					Opacity="0.55" />
+				<Border
+					Margin="5,4,5,3"
+					Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+					BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+					BorderThickness="1"
+					CornerRadius="{StaticResource PulseCardCornerRadius}"
+					Opacity="0.8" />
+			</Grid>
+		</DataTemplate>
+
+		<!--  Stack badge: drawn OVER the card body (declared after it in every card template) so hover and click
+		reach it instead of the card. Collapsed stack: version count, opens the stack inline. Expanded stack:
+		collapse button on the latest version.  -->
+		<DataTemplate x:Key="PulseStackBadgeTemplate" x:DataType="pulse:PulseCardViewModel">
+			<Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+				<Button
+					x:Name="ExpandStackButton"
+					Margin="8,18,8,8"
+					Padding="8,4"
+					x:Load="{x:Bind IsStack, Mode=OneWay}"
+					Background="{ThemeResource AccentFillColorDefaultBrush}"
+					Click="StackToggle_Click"
+					CornerRadius="6"
+					Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+					ToolTipService.ToolTip="{helpers:ResourceString Name=PulseExpandStack}">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<FontIcon FontSize="12" Glyph="&#xE8A9;" />
+						<TextBlock FontSize="12" Text="{x:Bind StackCountText, Mode=OneWay}" />
+					</StackPanel>
+				</Button>
+				<Button
+					x:Name="CollapseStackButton"
+					Margin="8"
+					Padding="8,4"
+					x:Load="{x:Bind IsExpandedStack, Mode=OneWay}"
+					Background="{ThemeResource AccentFillColorDefaultBrush}"
+					Click="StackToggle_Click"
+					CornerRadius="6"
+					Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+					ToolTipService.ToolTip="{helpers:ResourceString Name=PulseCollapseStack}">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<FontIcon FontSize="12" Glyph="&#xE70E;" />
+						<TextBlock FontSize="12" Text="{x:Bind StackCountText, Mode=OneWay}" />
+					</StackPanel>
+				</Button>
+			</Grid>
+		</DataTemplate>
+
+		<!--  Image: the thumbnail is the card  -->
+		<DataTemplate x:Key="PulseImageTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Grid.RowSpan="{x:Bind PreviewRowSpan, Mode=OneWay}"
+								Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+								CornerRadius="9,9,0,0">
+								<Grid>
+									<Image
+										Source="{x:Bind Item.FileImage, Mode=OneWay}"
+										Stretch="UniformToFill" />
+									<ContentControl
+										HorizontalContentAlignment="Stretch"
+										VerticalContentAlignment="Stretch"
+										Content="{x:Bind}"
+										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+										IsTabStop="False" />
+
+									<!--  Image tools: edit (crop/rotate/resize) + convert, bottom left  -->
+									<StackPanel
+										Margin="8"
+										HorizontalAlignment="Left"
+										VerticalAlignment="Bottom"
+										Orientation="Horizontal"
+										Spacing="6">
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind EditButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="ImageEdit_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{x:Bind EditButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE70F;" />
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind ConvertButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="ImageConvert_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{x:Bind ConvertButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8AB;" />
+										</Button>
+									</StackPanel>
+								</Grid>
+							</Border>
+
+							<!--  Landscape: below the picture (row 1). Portrait: overlaid on the picture's bottom edge (row 0).  -->
+							<ContentControl
+								Grid.Row="{x:Bind FooterRow, Mode=OneWay}"
+								HorizontalContentAlignment="Stretch"
+								VerticalAlignment="Bottom"
+								VerticalContentAlignment="Bottom"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<!--  Video: frame thumbnail, duration badge, shared hover player  -->
+		<DataTemplate x:Key="PulseVideoTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					PointerEntered="Card_PointerEntered"
+					PointerExited="Card_PointerExited"
+					PointerMoved="Card_PointerMoved"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Grid.RowSpan="{x:Bind PreviewRowSpan, Mode=OneWay}"
+								Background="Black"
+								CornerRadius="9,9,0,0">
+								<Grid>
+									<Image
+										Source="{x:Bind Item.FileImage, Mode=OneWay}"
+										Stretch="UniformToFill" />
+	
+									<!--  Hover player surface; the single shared MediaPlayer is attached by the coordinator  -->
+									<MediaPlayerElement
+										x:Name="HoverPlayer"
+										AreTransportControlsEnabled="False"
+										IsHitTestVisible="False"
+										Stretch="UniformToFill"
+										Visibility="{x:Bind IsHoverPreviewActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+	
+									<!--  Play glyph while idle  -->
+									<Border
+										Width="40"
+										Height="40"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Background="#99000000"
+										CornerRadius="20"
+										IsHitTestVisible="False"
+										Visibility="{x:Bind IsHoverPreviewActive, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}">
+										<FontIcon
+											FontSize="16"
+											Foreground="White"
+											Glyph="&#xE768;" />
+									</Border>
+	
+									<!--  Duration: bottom right; on a portrait box it lifts above the overlaid footer  -->
+									<Border
+										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource DurationMarginConverter}}"
+										Padding="6,2"
+										HorizontalAlignment="Right"
+										VerticalAlignment="Bottom"
+										Background="#B3000000"
+										CornerRadius="4"
+										Visibility="{x:Bind Item.MediaDuration, Mode=OneWay, Converter={StaticResource EmptyObjectToObjectConverter}}">
+										<TextBlock
+											FontFamily="Consolas"
+											FontSize="11"
+											Foreground="White"
+											Text="{x:Bind Item.MediaDuration, Mode=OneWay}" />
+									</Border>
+
+									<!--  Media tools: trim/extract (pill), convert and video tools, bottom left  -->
+									<StackPanel
+										Margin="8"
+										HorizontalAlignment="Left"
+										VerticalAlignment="Bottom"
+										Orientation="Horizontal"
+										Spacing="6">
+										<Button
+											Padding="8,3"
+											AutomationProperties.Name="{x:Bind TrimButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="VideoTrim_Click"
+											CornerRadius="4"
+											ToolTipService.ToolTip="{x:Bind TrimButtonTooltip, Mode=OneWay}">
+											<StackPanel Orientation="Horizontal" Spacing="5">
+												<FontIcon
+													FontSize="11"
+													Foreground="White"
+													Glyph="&#xE8A6;" />
+												<TextBlock
+													FontSize="11"
+													Foreground="White"
+													Text="{x:Bind TrimButtonText, Mode=OneWay}" />
+											</StackPanel>
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind ConvertButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="VideoConvert_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{x:Bind ConvertButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8AB;" />
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind VideoToolsButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="VideoTools_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{x:Bind VideoToolsButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE714;" />
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind SplitButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="VideoSplit_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{x:Bind SplitButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8C6;" />
+										</Button>
+									</StackPanel>
+									<ContentControl
+										HorizontalContentAlignment="Stretch"
+										VerticalContentAlignment="Stretch"
+										Content="{x:Bind}"
+										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+										IsTabStop="False" />
+								</Grid>
+							</Border>
+	
+							<!--  Landscape: below the frame (row 1). Portrait: overlaid on the frame's bottom edge (row 0).  -->
+							<ContentControl
+								Grid.Row="{x:Bind FooterRow, Mode=OneWay}"
+								HorizontalContentAlignment="Stretch"
+								VerticalAlignment="Bottom"
+								VerticalContentAlignment="Bottom"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<!--  Audio: cover art (shell thumbnail) or waveform glyph, duration badge  -->
+		<DataTemplate x:Key="PulseAudioTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Background="#120F2E"
+								CornerRadius="9,9,0,0">
+								<!--  While a track is loaded, a click in the strip seeks (Tapped is handled there so it does not
+								select or rename); otherwise taps bubble to the card like everywhere else  -->
+								<Grid
+									Background="Transparent"
+									DoubleTapped="AudioStrip_DoubleTapped"
+									Tapped="AudioStrip_Tapped">
+									<!--  Placeholder bars while the spectral analysis is queued  -->
+									<ItemsControl
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										IsHitTestVisible="False"
+										IsTabStop="False"
+										Opacity="0.35"
+										Visibility="{x:Bind HasWaveform, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}">
+										<ItemsControl.ItemsPanel>
+											<ItemsPanelTemplate>
+												<StackPanel Orientation="Horizontal" Spacing="3" />
+											</ItemsPanelTemplate>
+										</ItemsControl.ItemsPanel>
+										<Rectangle Width="3" Height="18" Fill="#8A7CFF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="34" Fill="#5FA8FF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="52" Fill="#3FE0FF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="28" Fill="#5CFF7A" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="44" Fill="#F7F250" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="22" Fill="#FF9A3C" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="60" Fill="#E8E8F6" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="36" Fill="#F7F250" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="14" Fill="#5CFF7A" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="40" Fill="#3FE0FF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="26" Fill="#5FA8FF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="48" Fill="#8A7CFF" RadiusX="1.5" RadiusY="1.5" />
+										<Rectangle Width="3" Height="20" Fill="#B46CFF" RadiusX="1.5" RadiusY="1.5" />
+									</ItemsControl>
+
+									<!--  Spectral waveform (Traktor-style): bass violet/blue, mids rainbow, highs silver. Fill stretches
+									the 512x128 strip over the whole preview area whatever the card's width.  -->
+									<Image
+										HorizontalAlignment="Stretch"
+										VerticalAlignment="Stretch"
+										Source="{x:Bind WaveformImage, Mode=OneWay}"
+										Stretch="Fill"
+										Visibility="{x:Bind HasWaveform, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+									<!--  Playhead: 1 px line gliding on the compositor clock; the player's reports only re-sync it  -->
+									<pulseuc:PulsePlayhead
+										Duration="{x:Bind PlaybackDuration, Mode=OneWay}"
+										IsPlaying="{x:Bind IsPlaying, Mode=OneWay}"
+										Progress="{x:Bind PlaybackProgress, Mode=OneWay}"
+										Visibility="{x:Bind IsPlaybackActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+									<!--  Transport: play/pause in the center, stop (rewind) next to it while a track is loaded  -->
+									<StackPanel
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Orientation="Horizontal"
+										Spacing="8">
+										<Button
+											Width="44"
+											Height="44"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind PlayPauseLabel, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="AudioPlayPause_Click"
+											CornerRadius="22"
+											ToolTipService.ToolTip="{x:Bind PlayPauseLabel, Mode=OneWay}">
+											<FontIcon
+												FontSize="16"
+												Foreground="White"
+												Glyph="{x:Bind PlayPauseGlyph, Mode=OneWay}" />
+										</Button>
+										<Button
+											Width="34"
+											Height="34"
+											Padding="0"
+											AutomationProperties.Name="{helpers:ResourceString Name=PulseStop}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="AudioStop_Click"
+											CornerRadius="17"
+											ToolTipService.ToolTip="{helpers:ResourceString Name=PulseStop}"
+											Visibility="{x:Bind IsPlaybackActive, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE71A;" />
+										</Button>
+										<Button
+											Width="34"
+											Height="34"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind TrimButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="AudioTrim_Click"
+											CornerRadius="17"
+											ToolTipService.ToolTip="{x:Bind TrimButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8A6;" />
+										</Button>
+										<Button
+											Width="34"
+											Height="34"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind ConvertButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="AudioConvert_Click"
+											CornerRadius="17"
+											ToolTipService.ToolTip="{x:Bind ConvertButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8AB;" />
+										</Button>
+										<Button
+											Width="34"
+											Height="34"
+											Padding="0"
+											AutomationProperties.Name="{x:Bind SplitButtonTooltip, Mode=OneWay}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="AudioSplit_Click"
+											CornerRadius="17"
+											ToolTipService.ToolTip="{x:Bind SplitButtonTooltip, Mode=OneWay}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE8C6;" />
+										</Button>
+									</StackPanel>
+
+									<!--  Duration, or position / duration while the track is loaded  -->
+									<Border
+										Margin="8"
+										Padding="6,2"
+										HorizontalAlignment="Right"
+										VerticalAlignment="Bottom"
+										Background="#B3000000"
+										CornerRadius="4"
+										Visibility="{x:Bind PlaybackBadgeText, Mode=OneWay, Converter={StaticResource EmptyObjectToObjectConverter}}">
+										<TextBlock
+											FontFamily="Consolas"
+											FontSize="11"
+											Foreground="White"
+											Text="{x:Bind PlaybackBadgeText, Mode=OneWay}" />
+									</Border>
+
+									<ContentControl
+										HorizontalContentAlignment="Stretch"
+										VerticalContentAlignment="Stretch"
+										Content="{x:Bind}"
+										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+										IsTabStop="False" />
+								</Grid>
+							</Border>
+	
+							<ContentControl
+								Grid.Row="1"
+								HorizontalContentAlignment="Stretch"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<!--  Markdown: structural excerpt instead of a file icon  -->
+		<DataTemplate x:Key="PulseMarkdownTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Background="{ThemeResource LayerFillColorAltBrush}"
+								CornerRadius="9,9,0,0">
+								<Grid>
+								<Grid Padding="12,10,12,10" RowSpacing="4">
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="Auto" />
+										<RowDefinition Height="*" />
+										<RowDefinition Height="Auto" />
+									</Grid.RowDefinitions>
+	
+									<!--  Badge row: MD + optional AGENT SPEC  -->
+									<StackPanel
+										Grid.Row="0"
+										Orientation="Horizontal"
+										Spacing="6">
+										<Border
+											Padding="5,1"
+											Background="{ThemeResource AccentFillColorDefaultBrush}"
+											CornerRadius="4">
+											<TextBlock
+												FontSize="10"
+												FontWeight="Bold"
+												Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+												Text="MD" />
+										</Border>
+										<Border
+											Padding="5,1"
+											Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+											CornerRadius="4"
+											Visibility="{x:Bind IsAgentSpec, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+											<StackPanel Orientation="Horizontal" Spacing="4">
+												<FontIcon FontSize="10" Glyph="&#xE945;" />
+<TextBlock
+													FontSize="10"
+													FontWeight="Bold"
+													Text="{helpers:ResourceString Name=PulseMarkdownAgentSpec}" />
+										</StackPanel>
+									</Border>
+								</StackPanel>
+	
+									<!--  Title (first H1) or file name while loading  -->
+									<TextBlock
+										Grid.Row="1"
+										FontSize="14"
+										FontWeight="SemiBold"
+										MaxLines="2"
+										Text="{x:Bind MarkdownExcerpt.Title, Mode=OneWay, FallbackValue=''}"
+										TextTrimming="CharacterEllipsis"
+										TextWrapping="Wrap" />
+	
+									<!--  Preview lines  -->
+									<ItemsControl
+										Grid.Row="2"
+										IsTabStop="False"
+										ItemsSource="{x:Bind MarkdownExcerpt.Lines, Mode=OneWay}">
+										<ItemsControl.ItemTemplate>
+											<DataTemplate x:DataType="x:String">
+												<TextBlock
+													FontFamily="Consolas"
+													FontSize="11"
+													Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+													Text="{x:Bind}"
+													TextTrimming="CharacterEllipsis"
+													TextWrapping="NoWrap" />
+											</DataTemplate>
+										</ItemsControl.ItemTemplate>
+									</ItemsControl>
+	
+									<!--  Stats  -->
+									<TextBlock
+										Grid.Row="3"
+										FontSize="10.5"
+										Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+										Text="{x:Bind MarkdownExcerpt.Stats, Mode=OneWay, FallbackValue=''}"
+										Visibility="{x:Bind HasMarkdownExcerpt, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+								</Grid>
+								<ContentControl
+									HorizontalContentAlignment="Stretch"
+									VerticalContentAlignment="Stretch"
+									Content="{x:Bind}"
+									ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+									IsTabStop="False" />
+								</Grid>
+							</Border>
+	
+							<ContentControl
+								Grid.Row="1"
+								HorizontalContentAlignment="Stretch"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<!--  Document (PDF/Office): first page as cover when the shell provides it  -->
+		<DataTemplate x:Key="PulseDocumentTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+								CornerRadius="9,9,0,0">
+								<Grid>
+									<Border
+										Margin="14,12,14,0"
+										Background="White"
+										BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+										BorderThickness="1,1,1,0"
+										CornerRadius="4,4,0,0">
+										<Image
+											Source="{x:Bind Item.FileImage, Mode=OneWay}"
+											Stretch="UniformToFill"
+											VerticalAlignment="Top" />
+									</Border>
+									<ContentControl
+										HorizontalContentAlignment="Stretch"
+										VerticalContentAlignment="Stretch"
+										Content="{x:Bind}"
+										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+										IsTabStop="False" />
+								</Grid>
+							</Border>
+	
+							<ContentControl
+								Grid.Row="1"
+								HorizontalContentAlignment="Stretch"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<!--  Generic: compact utility card (folders, archives, executables, everything else)  -->
+		<DataTemplate x:Key="PulseGenericTemplate" x:DataType="pulse:PulseCardViewModel">
+			<ItemContainer>
+				<Grid
+					Background="Transparent"
+					DataContext="{x:Bind}"
+					DoubleTapped="Card_DoubleTapped"
+					Loaded="Card_Loaded"
+					PointerPressed="Card_PointerPressed"
+					Tapped="Card_Tapped"
+					RightTapped="Card_RightTapped"
+					Unloaded="Card_Unloaded">
+					<ContentControl
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackFanTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False"
+						Visibility="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<Border Margin="{x:Bind IsStack, Mode=OneWay, Converter={StaticResource StackMarginConverter}}" Style="{StaticResource PulseCardBorderStyle}">
+						<Grid Opacity="{x:Bind Item.Opacity, Mode=OneWay}">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="*" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+	
+							<Border
+								Grid.Row="0"
+								Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+								CornerRadius="9,9,0,0">
+								<Grid>
+									<Image
+										Width="64"
+										Height="64"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Source="{x:Bind Item.FileImage, Mode=OneWay}"
+										Stretch="Uniform" />
+									<ContentControl
+										HorizontalContentAlignment="Stretch"
+										VerticalContentAlignment="Stretch"
+										Content="{x:Bind}"
+										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
+										IsTabStop="False" />
+								</Grid>
+							</Border>
+
+							<ContentControl
+								Grid.Row="1"
+								HorizontalContentAlignment="Stretch"
+								Content="{x:Bind}"
+								ContentTemplate="{StaticResource PulseCardFooterTemplate}"
+								IsTabStop="False" />
+						</Grid>
+					</Border>
+					<ContentControl
+						HorizontalAlignment="Left"
+						VerticalAlignment="Top"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseStackBadgeTemplate}"
+						IsTabStop="False"
+						Visibility="{x:Bind HasStack, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+					<!--  Selection ring, drawn over the whole card but never hit-testable  -->
+					<ContentControl
+						HorizontalContentAlignment="Stretch"
+						VerticalContentAlignment="Stretch"
+						Content="{x:Bind}"
+						ContentTemplate="{StaticResource PulseSelectionOverlayTemplate}"
+						IsHitTestVisible="False"
+						IsTabStop="False" />
+				</Grid>
+			</ItemContainer>
+		</DataTemplate>
+
+		<selectors:PulseFeedTemplateSelector
+			x:Key="PulseFeedTemplateSelector"
+			AudioTemplate="{StaticResource PulseAudioTemplate}"
+			DocumentTemplate="{StaticResource PulseDocumentTemplate}"
+			GenericTemplate="{StaticResource PulseGenericTemplate}"
+			ImageTemplate="{StaticResource PulseImageTemplate}"
+			MarkdownTemplate="{StaticResource PulseMarkdownTemplate}"
+			VideoTemplate="{StaticResource PulseVideoTemplate}" />
+
+		<!--  One day of the feed  -->
+		<DataTemplate x:Key="PulseSectionTemplate" x:DataType="pulse:PulseSection">
+			<pulseuc:PulseSectionView Section="{x:Bind}" />
+		</DataTemplate>
+
+		<!--  Filter chips  -->
+		<Style
+			x:Key="PulseChipStyle"
+			BasedOn="{StaticResource DefaultToggleButtonStyle}"
+			TargetType="ToggleButton">
+			<Setter Property="Padding" Value="12,4" />
+			<Setter Property="MinHeight" Value="28" />
+			<Setter Property="CornerRadius" Value="14" />
+			<Setter Property="FontSize" Value="12" />
+		</Style>
+	</local:BaseGroupableLayoutPage.Resources>
+
+	<Grid x:Name="RootGrid" ContextFlyout="{x:Bind BaseContextMenuFlyout}">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+
+		<!--  Hidden list: keeps selection/rename/commands plumbing of the base layout without rendering. Kept Visible
+		(zero-sized, transparent, not focusable) so the Selector raises SelectionChanged for programmatic changes.  -->
+		<ListView
+			x:Name="FileList"
+			Width="0"
+			Height="0"
+			HorizontalAlignment="Left"
+			VerticalAlignment="Top"
+			IsHitTestVisible="False"
+			IsTabStop="False"
+			Opacity="0"
+			PreviewKeyDown="FileList_PreviewKeyDown"
+			SelectionChanged="FileList_SelectionChanged"
+			SelectionMode="Extended" />
+
+		<!--  Pulse · All · Photos · Videos · Audio · Markdown · Docs  -->
+		<StackPanel
+			Grid.Row="0"
+			x:Name="FilterChips"
+			Padding="12,8,12,4"
+			Orientation="Horizontal"
+			Spacing="6">
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=PulseFilterAll}"
+				IsChecked="{x:Bind IsAllFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="All" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=Pictures}"
+				IsChecked="{x:Bind IsPhotosFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Photos" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=Videos}"
+				IsChecked="{x:Bind IsVideosFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Videos" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=Music}"
+				IsChecked="{x:Bind IsAudioFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Audio" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=PulseFilterMarkdown}"
+				IsChecked="{x:Bind IsMarkdownFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Markdown" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=Documents}"
+				IsChecked="{x:Bind IsDocumentsFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Documents" />
+			<ToggleButton
+				Click="FilterChip_Click"
+				Content="{helpers:ResourceString Name=PulseFilterArchives}"
+				IsChecked="{x:Bind IsArchivesFilter, Mode=OneWay}"
+				Style="{StaticResource PulseChipStyle}"
+				Tag="Archives" />
+		</StackPanel>
+
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<!--  Empty Indicator  -->
+			<uc:FolderEmptyIndicator
+				Grid.ColumnSpan="2"
+				Margin="0,125,0,0"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Top"
+				Canvas.ZIndex="0"
+				EmptyTextType="{x:Bind ParentShellPageInstance.ShellViewModel.EmptyTextType, Mode=OneWay}" />
+
+			<!--  Location Unavailable Indicator  -->
+			<uc:LocationUnavailableIndicator
+				Title="{x:Bind ParentShellPageInstance.ShellViewModel.LocationUnavailableTitle, Mode=OneWay}"
+				Grid.ColumnSpan="2"
+				MaxWidth="400"
+				Margin="24,125,24,0"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Top"
+				Canvas.ZIndex="0"
+				Glyph="{x:Bind ParentShellPageInstance.ShellViewModel.LocationUnavailableGlyph, Mode=OneWay}"
+				Message="{x:Bind ParentShellPageInstance.ShellViewModel.LocationUnavailableMessage, Mode=OneWay}"
+				Visibility="{x:Bind ParentShellPageInstance.ShellViewModel.IsLocationUnavailable, Mode=OneWay}" />
+
+			<!--  Invalid Item Name Tip  -->
+			<TeachingTip
+				x:Name="FileNameTeachingTip"
+				CloseButtonContent="{helpers:ResourceString Name=OK}"
+				PreferredPlacement="Auto"
+				Subtitle="{helpers:ResourceString Name=FileNameTeachingTip/Subtitle}"
+				Visibility="Collapsed" />
+
+			<!--  Satisfies the base class contract only; Pulse drives its own day grouping inside the feed  -->
+			<SemanticZoom
+				x:Name="RootPulseZoom"
+				Grid.Column="0"
+				CanChangeViews="False"
+				IsTabStop="False"
+				Visibility="Collapsed">
+				<SemanticZoom.ZoomedInView>
+					<ListView IsTabStop="False" />
+				</SemanticZoom.ZoomedInView>
+				<SemanticZoom.ZoomedOutView>
+					<ListView IsTabStop="False" />
+				</SemanticZoom.ZoomedOutView>
+			</SemanticZoom>
+
+			<!--  Feed: one gallery per day, stacked vertically  -->
+			<ScrollViewer
+				x:Name="FeedScroller"
+				Grid.Column="0"
+				Padding="12,0,8,12"
+				AllowDrop="{x:Bind InstanceViewModel.IsPageTypeSearchResults, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+				DragOver="ItemsLayout_DragOver"
+				Drop="ItemsLayout_Drop"
+				HorizontalScrollMode="Disabled"
+				IsTabStop="True"
+				PreviewKeyDown="Feed_PreviewKeyDown"
+				UseSystemFocusVisuals="False"
+				VerticalScrollBarVisibility="Auto"
+				Visibility="{x:Bind FolderSettings.IsLayoutModeChanging, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}">
+				<ItemsRepeater
+					x:Name="SectionsRepeater"
+					ElementClearing="SectionsRepeater_ElementClearing"
+					ElementPrepared="SectionsRepeater_ElementPrepared"
+					ItemTemplate="{StaticResource PulseSectionTemplate}"
+					Loaded="SectionsRepeater_Loaded">
+					<ItemsRepeater.Layout>
+						<StackLayout Orientation="Vertical" Spacing="6" />
+					</ItemsRepeater.Layout>
+				</ItemsRepeater>
+			</ScrollViewer>
+
+			<!--  Time rail  -->
+			<pulseuc:PulseTimeRail
+				x:Name="TimeRail"
+				Grid.Column="1"
+				DayRequested="TimeRail_DayRequested" />
+		</Grid>
+
+		<!--  Rubber-band selection rectangle (Explorer parity): drawn over the whole page while the
+		user drags on empty space. Never hit-testable, so it cannot intercept any pointer input. The
+		canvas itself stays visible so pointer math against it is always valid; only the rect toggles.  -->
+		<Canvas
+			x:Name="MarqueeCanvas"
+			Grid.RowSpan="2"
+			Canvas.ZIndex="50"
+			IsHitTestVisible="False">
+			<Border
+				x:Name="MarqueeRect"
+				BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+				BorderThickness="1"
+				Background="{ThemeResource AccentFillColorDefaultBrush}"
+				Opacity="0.22"
+				Visibility="Collapsed" />
+		</Canvas>
+	</Grid>
+</local:BaseGroupableLayoutPage>

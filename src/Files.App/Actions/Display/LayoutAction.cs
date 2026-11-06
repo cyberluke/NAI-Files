@@ -119,6 +119,42 @@ namespace Files.App.Actions
 	}
 
 	[GeneratedRichCommand]
+	internal sealed partial class LayoutPulseAction : ToggleLayoutAction
+	{
+		private readonly IContentPageContext ContentPageContext = Ioc.Default.GetRequiredService<IContentPageContext>();
+
+		protected override LayoutTypes LayoutType
+			=> LayoutTypes.Pulse;
+
+		public override string Label
+			=> Strings.Pulse.GetLocalizedResource();
+
+		public override string Description
+			=> Strings.LayoutPulseDescription.GetLocalizedResource();
+
+		public override RichGlyph Glyph
+			=> new(themedIconStyle: "App.ThemedIcons.IconLayout.Pulse");
+
+		public override HotKey HotKey
+			=> new(Keys.Number7, KeyModifiers.CtrlShift);
+
+		// The feed is a view of real folder contents; the Recycle Bin has no usable timestamps or previews
+		public override bool IsExecutable
+			=> ContentPageContext.PageType is not ContentPageTypes.RecycleBin;
+
+		public LayoutPulseAction()
+		{
+			ContentPageContext.PropertyChanged += ContentPageContext_PropertyChanged;
+		}
+
+		private void ContentPageContext_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName is nameof(IContentPageContext.PageType))
+				OnPropertyChanged(nameof(IsExecutable));
+		}
+	}
+
+	[GeneratedRichCommand]
 	internal sealed partial class LayoutAdaptiveAction : ToggleLayoutAction
 	{
 		protected override LayoutTypes LayoutType
@@ -352,6 +388,7 @@ namespace Files.App.Actions
 			FolderLayoutModes.CardsView,
 			FolderLayoutModes.GridView,
 			FolderLayoutModes.ColumnView,
+			FolderLayoutModes.PulseView,
 		];
 
 		public static void Cycle(LayoutPreferencesManager folderSettings, bool isRecycleBin, bool forward)
@@ -367,8 +404,8 @@ namespace Files.App.Actions
 			{
 				var next = Order[((currentIndex + step * i) % count + count) % count];
 
-				// Columns view is not supported inside the Recycle Bin.
-				if (next is FolderLayoutModes.ColumnView && isRecycleBin)
+				// Columns and Pulse views are not supported inside the Recycle Bin.
+				if (next is FolderLayoutModes.ColumnView or FolderLayoutModes.PulseView && isRecycleBin)
 					continue;
 
 				// Reset the new layout's size so the next keystroke keeps growing / shrinking.
@@ -394,6 +431,9 @@ namespace Files.App.Actions
 					case FolderLayoutModes.ColumnView:
 						settings.ColumnsViewSize = forward ? ColumnsViewSizeKind.Compact : ColumnsViewSizeKind.ExtraLarge;
 						folderSettings.ToggleLayoutModeColumnView(true);
+						return;
+					case FolderLayoutModes.PulseView:
+						folderSettings.ToggleLayoutModePulseView(true);
 						return;
 				}
 			}

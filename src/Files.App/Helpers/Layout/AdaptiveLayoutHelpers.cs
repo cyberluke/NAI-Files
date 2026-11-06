@@ -12,6 +12,30 @@ namespace Files.App.Helpers
 		private static IContentPageContext ContentPageContext { get; } = Ioc.Default.GetRequiredService<IContentPageContext>();
 		private static IWindowsIniService WindowsIniService { get; } = Ioc.Default.GetRequiredService<IWindowsIniService>();
 
+		// Folders whose contents are a stream of recent work rather than a hierarchy: Pulse is their natural view
+		private static readonly Lazy<string[]> PulseFolders = new(() =>
+		[
+			Constants.UserEnvironmentPaths.DownloadsPath,
+			Windows.Storage.UserDataPaths.GetDefault().Pictures,
+			Windows.Storage.UserDataPaths.GetDefault().Videos,
+		]);
+
+		/// <summary>True for the Downloads, Pictures and Videos folders (not their subfolders).</summary>
+		public static bool IsPulseFolder(string? path)
+		{
+			if (string.IsNullOrEmpty(path))
+				return false;
+
+			var normalized = path.TrimEnd('\\', '/');
+			foreach (var folder in PulseFolders.Value)
+			{
+				if (!string.IsNullOrEmpty(folder) && string.Equals(normalized, folder.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
+					return true;
+			}
+
+			return false;
+		}
+
 		// Predicts the layout from desktop.ini or a small directory sample, so navigation opens in the right layout without a post-enumeration switch
 		public static bool TryPredictLayout(string? path, out FolderLayoutModes layout)
 		{
@@ -19,6 +43,12 @@ namespace Files.App.Helpers
 
 			if (path is null)
 				return false;
+
+			if (IsPulseFolder(path))
+			{
+				layout = FolderLayoutModes.PulseView;
+				return true;
+			}
 
 			try
 			{
@@ -32,7 +62,7 @@ namespace Files.App.Helpers
 				if (viewStateSection is not null)
 				{
 					var viewMode = viewStateSection.Parameters.FirstOrDefault(x => x.Key == "Mode").Value;
-					layout = viewMode is "Pictures" or "Videos" ? FolderLayoutModes.GridView : FolderLayoutModes.DetailsView;
+					layout = viewMode is "Pictures" or "Videos" ? FolderLayoutModes.PulseView : FolderLayoutModes.DetailsView;
 					return true;
 				}
 
@@ -48,7 +78,7 @@ namespace Files.App.Helpers
 				if (total is 0)
 					return false;
 
-				layout = 100f * media / total > 60f ? FolderLayoutModes.GridView : FolderLayoutModes.DetailsView;
+				layout = 100f * media / total > 60f ? FolderLayoutModes.PulseView : FolderLayoutModes.DetailsView;
 				return true;
 			}
 			catch (Exception ex) when (ex is SystemIO.IOException or UnauthorizedAccessException or ArgumentException)
@@ -69,14 +99,17 @@ namespace Files.App.Helpers
 				case Layouts.Detail when folderSettings.LayoutMode is not FolderLayoutModes.DetailsView:
 					folderSettings.ToggleLayoutModeDetailsView(false);
 					break;
-				case Layouts.Grid when folderSettings.LayoutMode is not FolderLayoutModes.GridView:
-					folderSettings.ToggleLayoutModeGridView(false);
+				case Layouts.Pulse when folderSettings.LayoutMode is not FolderLayoutModes.PulseView:
+					folderSettings.ToggleLayoutModePulseView(false);
 					break;
 			}
 		}
 
 		private static Layouts GetAdaptiveLayout(IList<ListedItem> filesAndFolders)
 		{
+			if (IsPulseFolder(ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory))
+				return Layouts.Pulse;
+
 			var pathLayout = GetPathLayout();
 			if (pathLayout is not Layouts.None)
 				return pathLayout;
@@ -98,8 +131,8 @@ namespace Files.App.Helpers
 
 			return viewMode switch
 			{
-				"Pictures" => Layouts.Grid,
-				"Videos" => Layouts.Grid,
+				"Pictures" => Layouts.Pulse,
+				"Videos" => Layouts.Pulse,
 				_ => Layouts.Detail,
 			};
 		}
@@ -113,7 +146,7 @@ namespace Files.App.Helpers
 			float mediaPercentage = 100f * filesAndFolders.Count(IsMedia) / itemCount;
 
 			if (mediaPercentage > 60f)
-				return Layouts.Grid;
+				return Layouts.Pulse;
 			return Layouts.Detail;
 
 			static bool IsMedia(ListedItem item)
@@ -130,7 +163,7 @@ namespace Files.App.Helpers
 		{
 			None, // Don't decide. Another function to decide can be called afterwards if available.
 			Detail, // Apply the layout Detail.
-			Grid, // Apply the layout Grid.
+			Pulse, // Apply the Pulse feed layout (media-centric folders).
 		}
 	}
 }

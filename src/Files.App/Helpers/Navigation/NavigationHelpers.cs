@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Helpers.Application;
 using Files.Shared.Helpers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -52,6 +53,7 @@ namespace Files.App.Helpers
 
 		public static async Task AddNewTabByPathAsync(Type type, string? path, bool switchToNewTab, int atIndex = -1)
 		{
+			NaiLanguageBridge.StartupStage("add-tab-start:" + path);
 			if (string.IsNullOrEmpty(path))
 			{
 				path = "Home";
@@ -85,6 +87,7 @@ namespace Files.App.Helpers
 
 			if (switchToNewTab)
 				App.AppModel.TabStripSelectedIndex = index;
+			NaiLanguageBridge.StartupStage("add-tab-done:" + path);
 		}
 
 		public static async Task AddNewTabByParamAsync(Type type, object? tabViewItemArgs, int atIndex = -1, bool switchToNewTab = true)
@@ -227,6 +230,8 @@ namespace Files.App.Helpers
 			}
 			else if (path == "ReleaseNotes")
 				imageSource = new BitmapImage(new Uri(AppLifecycleHelper.AppIconPath));
+			else if (NaiWorkspaceRoutes.IsRoute(path))
+				imageSource = new BitmapImage(new Uri(AppLifecycleHelper.AppIconPath));
 			else if (path == "Settings")
 				// Settings uses its own animated icon in the sidebar, so we intentionally skip a file-based icon here.
 				imageSource = null;
@@ -264,7 +269,7 @@ namespace Files.App.Helpers
 			if (string.IsNullOrEmpty(currentPath) || currentPath == "Home")
 			{
 				tabLocationHeader = Strings.Home.GetLocalizedResource();
-				((ImageIconSource)iconSource).ImageSource = new BitmapImage(new Uri(SidebarSectionIcons.For(SectionType.Home)!));
+				((ImageIconSource)iconSource).ImageSource = await SidebarSectionIcons.LoadIconAsync(SectionType.Home);
 			}
 			else if (currentPath == "ReleaseNotes")
 			{
@@ -276,6 +281,12 @@ namespace Files.App.Helpers
 				tabLocationHeader = Strings.Settings.GetLocalizedResource();
 				iconSource = new FontIconSource() { Glyph = "\uE713" };
 				toolTipText = Strings.Settings.GetLocalizedResource();
+			}
+			else if (NaiWorkspaceRoutes.IsRoute(currentPath))
+			{
+				tabLocationHeader = NaiWorkspaceRoutes.Title(currentPath);
+				toolTipText = tabLocationHeader;
+				iconSource = new SymbolIconSource { Symbol = Symbol.Pictures };
 			}
 			else if (currentPath.Equals(Constants.UserEnvironmentPaths.DesktopPath, StringComparison.OrdinalIgnoreCase))
 				tabLocationHeader = Strings.Desktop.GetLocalizedResource();
@@ -473,7 +484,9 @@ namespace Files.App.Helpers
 				return;
 
 			var arguments = string.Join(" ", items.Select(item => $"\"{item.Path}\""));
-			await Win32Helper.InvokeWin32ComponentAsync(executablePath, associatedInstance, arguments);
+			if (await Win32Helper.InvokeWin32ComponentAsync(executablePath, associatedInstance, arguments))
+				foreach (var item in items)
+					await NaiDocumentHistory.RecordOpenedAsync(item.Path);
 		}
 
 		/// <summary>
@@ -676,7 +689,7 @@ namespace Files.App.Helpers
 				// Empty or non-rooted shell target (e.g. a shell:appsfolder app): launch the .lnk so the shell activates it
 				if (string.IsNullOrEmpty(shortcutInfo.TargetPath) || !Path.IsPathRooted(shortcutInfo.TargetPath))
 				{
-					await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
+					opened = (FilesystemResult)await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
 				}
 				else
 				{
@@ -687,13 +700,12 @@ namespace Files.App.Helpers
 						if (childFileResult.Result is { Item: SystemStorageFile } childFile)
 							WindowsRecentItemsService.Add(childFile.Path);
 					}
-					await Win32Helper.InvokeWin32ComponentAsync(shortcutInfo.TargetPath, associatedInstance, $"{args} {shortcutInfo.Arguments}", shortcutInfo.RunAsAdmin, shortcutInfo.WorkingDirectory);
+					opened = (FilesystemResult)await Win32Helper.InvokeWin32ComponentAsync(shortcutInfo.TargetPath, associatedInstance, $"{args} {shortcutInfo.Arguments}", shortcutInfo.RunAsAdmin, shortcutInfo.WorkingDirectory);
 				}
-				opened = (FilesystemResult)true;
 			}
 			else if (isHiddenItem)
 			{
-				await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
+				opened = (FilesystemResult)await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
 			}
 			else
 			{
@@ -718,7 +730,9 @@ namespace Files.App.Helpers
 								{
 									DisplayApplicationPicker = true
 								});
-								if (!await Launcher.LaunchFileAsync(storageFile, options))
+								if (await Launcher.LaunchFileAsync(storageFile, options))
+									await NaiDocumentHistory.RecordOpenedAsync(path);
+								else
 									await ContextMenu.InvokeVerb("openas", path);
 							}
 							else
@@ -811,13 +825,17 @@ namespace Files.App.Helpers
 									{
 										await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
 									}
-									else if (!await Launcher.LaunchFileAsync(storageItem, options))
+									else if (await Launcher.LaunchFileAsync(storageItem, options))
+										await NaiDocumentHistory.RecordOpenedAsync(path);
+									else
 									{
 										var pickerOptions = InitializeWithWindow(new LauncherOptions
 										{
 											DisplayApplicationPicker = true
 										});
-										if (!await Launcher.LaunchFileAsync(storageItem, pickerOptions))
+										if (await Launcher.LaunchFileAsync(storageItem, pickerOptions))
+											await NaiDocumentHistory.RecordOpenedAsync(path);
+										else
 											await Win32Helper.InvokeWin32ComponentAsync(path, associatedInstance, args);
 									}
 								}

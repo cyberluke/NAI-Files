@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.Helpers.Application;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -28,7 +29,7 @@ namespace Files.App
 		private readonly Lock _canWindowToFrontLock = new();
 		private bool _isWindowIconInitialized;
 
-		protected override bool PersistPlacement => true;
+		protected override bool PersistPlacement => !DialogSession.IsDialogLaunch && !App.IsDialogMode;
 
 		public MainWindow() : base(416, 316)
 		{
@@ -95,10 +96,12 @@ namespace Files.App
 		[DynamicWindowsRuntimeCast(typeof(OverlappedPresenter))]
 		public async Task InitializeApplicationAsync(object? activatedEventArgs)
 		{
+			NaiLanguageBridge.StartupStage("init-app-start");
 			var rootFrame = EnsureWindowIsInitialized();
 
 			if (rootFrame is null)
 				return;
+			NaiLanguageBridge.StartupStage("init-app-before-nav");
 
 			switch (activatedEventArgs)
 			{
@@ -110,6 +113,7 @@ namespace Files.App
 					{
 						// WINUI3: When launching from commandline the argument is not ICommandLineActivatedEventArgs (#10370)
 						var ppm = CommandLineParser.ParseUntrustedCommands(launchArgs.Arguments);
+						ApplyDialogActivationState(ppm);
 						if (ppm.IsEmpty())
 							rootFrame.Navigate(typeof(MainPage), null, new SuppressNavigationTransitionInfo());
 						else
@@ -148,7 +152,7 @@ namespace Files.App
 					else
 					{
 						var parsedArgs = eventArgs.Uri.Query.TrimStart('?').Split('=');
-						var unescapedValue = Uri.UnescapeDataString(parsedArgs[1].Split('&')[0]);
+						var unescapedValue = Program.DecodeDialogCommand(parsedArgs[1].Split('&')[0]);
 						if (parsedArgs[0] == "tab" && parsedArgs.Length > 3 &&
 							int.TryParse(parsedArgs[2].Split('&')[0], out var dx) &&
 							int.TryParse(parsedArgs[3], out var dy))
@@ -175,6 +179,7 @@ namespace Files.App
 
 							case "cmd":
 								var ppm = CommandLineParser.ParseUntrustedCommands(unescapedValue);
+								ApplyDialogActivationState(ppm);
 								if (ppm.IsEmpty())
 									rootFrame.Navigate(typeof(MainPage), null, new SuppressNavigationTransitionInfo());
 								else
@@ -195,6 +200,7 @@ namespace Files.App
 					var parsedCommands = CommandLineParser.ParseUntrustedCommands(cmdLineString);
 					if (parsedCommands is not null && parsedCommands.Count > 0)
 					{
+						ApplyDialogActivationState(parsedCommands);
 						await InitializeFromCmdLineArgsAsync(rootFrame, parsedCommands, activationPath);
 					}
 					else
@@ -246,12 +252,16 @@ namespace Files.App
 					break;
 
 				default:
+					NaiLanguageBridge.StartupStage("init-app-navigating-mainpage");
 					// Just launch the app with no arguments
 					rootFrame.Navigate(typeof(MainPage), null, new SuppressNavigationTransitionInfo());
+					NaiLanguageBridge.StartupStage("init-app-navigated");
 					break;
 			}
 
 			var appWindow = AppWindow;
+			if (App.IsDialogMode)
+				ConfigureDialogWindow(appWindow);
 			if (appWindow is not null && !appWindow.IsVisible)
 			{
 				// When resuming the cached instance
@@ -274,6 +284,81 @@ namespace Files.App
 			{
 				var paneHolder = shellPage.GetRequiredPaneHolder();
 				paneHolder.FocusActivePane();
+			}
+		}
+
+		/// <summary>
+		/// Open/save dialogs get a compact, centered, non-maximizable window — the
+		/// native dialog footprint instead of the full workspace.
+		/// </summary>
+		private static void ConfigureDialogWindow(AppWindow? appWindow)
+		{
+			if (appWindow is null)
+				return;
+
+			// A native open/save dialog must not extend its content into the title bar: the OS caption
+			// buttons (close/min) stay in their own row so Files' own top-right buttons (queue/status)
+			// never collide with them. Normal windows keep the custom title bar + drag regions.
+			Instance.ExtendsContentIntoTitleBar = false;
+			appWindow.TitleBar.ExtendsContentIntoTitleBar = false;
+
+// Classic 5:4 ("multisync") footprint, sized to the display's work area so the
+			// picker stays a comfortable, perfectly centered window on any resolution/DPI
+			// (4K included). The ratio is a hard identity — persisted per-caller sizes are
+			// snapped back to 5:4, never honored width-blind.
+			const float DialogAspect = 5f / 4f;
+			// Default height ≈ 72% of the work area; width follows at 5:4.
+			const double DialogHeightFraction = 0.72;
+			var dialogWidth = 0;
+			var dialogHeight = 0;
+			var title = DialogSession.Current?.Request.Title;
+			appWindow.Title = !string.IsNullOrWhiteSpace(title) ? title
+				: App.DialogMode == "save" ? Strings.Save.GetLocalizedResource()
+				: App.DialogMode == "folder" ? Strings.NaiChooseFolder.GetLocalizedResource() : Strings.Open.GetLocalizedResource();
+
+			if (Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(appWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Nearest) is { } area)
+			{
+				var workArea = area.WorkArea;
+				// Start from the persisted/remembered size, then snap it onto the 5:4 line.
+				var rememberedWidth = Math.Max(0, DialogSession.Current?.State.Width ?? 0);
+				var rememberedHeight = Math.Max(0, DialogSession.Current?.State.Height ?? 0);
+				var hasRemembered = rememberedWidth > 0 && rememberedHeight > 0;
+
+				if (hasRemembered)
+				{
+					// Snap the remembered footprint onto 5:4, anchored by the smaller dimension.
+					if (rememberedWidth >= rememberedHeight)
+					{
+						dialogWidth = rememberedWidth;
+						dialogHeight = (int)Math.Round(rememberedWidth / DialogAspect);
+					}
+					else
+					{
+						dialogHeight = rememberedHeight;
+						dialogWidth = (int)Math.Round(rememberedHeight * DialogAspect);
+					}
+				}
+				else
+				{
+					// Fresh footprint: 72% of work-area height at exactly 5:4.
+					dialogHeight = (int)Math.Round(workArea.Height * DialogHeightFraction);
+					dialogWidth = (int)Math.Round(dialogHeight * DialogAspect);
+				}
+
+				// Guard against absurdly small remembered sizes and clamp to the work area.
+				dialogHeight = Math.Clamp(dialogHeight, 480, workArea.Height);
+				dialogWidth = Math.Clamp(dialogWidth, 600, workArea.Width);
+
+				appWindow.Resize(new Windows.Graphics.SizeInt32(dialogWidth, dialogHeight));
+				appWindow.Move(new Windows.Graphics.PointInt32(
+					workArea.X + (workArea.Width - dialogWidth) / 2,
+					workArea.Y + (workArea.Height - dialogHeight) / 2));
+			}
+
+			if (appWindow.Presenter is OverlappedPresenter overlapped)
+			{
+				overlapped.IsMaximizable = false;
+				overlapped.IsMinimizable = false;
 			}
 		}
 
@@ -318,6 +403,64 @@ namespace Files.App
 			{
 				return null;
 			}
+		}
+
+		/// <summary>
+		/// Applies the dialog activation state (mode / output path / suggested file
+		/// name) as early as possible — before the MainPage is navigated to — so the
+		/// dialog layout (compact window, bottom action bar, tab-bar gating) and the
+		/// toolbar CTA bindings see <see cref="App.IsDialogMode"/> from the start.
+		/// The regular command apply pass re-runs these cases idempotently.
+		/// </summary>
+		private static void ApplyDialogActivationState(ParsedCommands commands)
+		{
+			if (commands.Any(command => command.Type == ParsedCommandType.OutputPath))
+			{
+				App.DialogConfirmRequested = false;
+				App.DialogFileName = null;
+				App.DialogRequestError = null;
+				App.DialogMode = "open";
+				App.DialogTraceRequested = commands.Any(command => command.Type == ParsedCommandType.DialogTrace);
+				App.DialogTraceForWriter = commands.Any(command => command.Type == ParsedCommandType.DialogTrace && command.Payload == "writer");
+			}
+			foreach (var command in commands)
+			{
+				switch (command.Type)
+				{
+					case ParsedCommandType.DialogMode:
+						App.DialogMode = command.Payload;
+						break;
+					case ParsedCommandType.OutputPath:
+						App.OutputPath = command.Payload;
+						DialogResultWriter.Started(command.Payload);
+						break;
+				}
+			}
+
+			foreach (var command in commands)
+			{
+				if (command.Type == ParsedCommandType.SelectItem)
+					App.DialogFileName = System.IO.Path.GetFileName(command.Payload) ?? string.Empty;
+				else if (command.Type == ParsedCommandType.OpenDirectory && App.DialogMode == "folder")
+					App.DialogFileName = command.Payload;
+			}
+			if (App.OutputPath is { } output && commands.FirstOrDefault(command => command.Type == ParsedCommandType.DialogRequest) is { } request)
+			{
+				try { DialogSession.Load(output, request.Payload); }
+				catch (Exception ex)
+				{
+					App.Logger.LogError(ex, "Dialog request could not be read");
+					App.DialogRequestError = ex.Message;
+				}
+				if (DialogSession.Current is { } session)
+				{
+					App.DialogMode = session.Request.Mode;
+					var name = session.Request.SuggestedName;
+					App.DialogFileName = name;
+				}
+			}
+
+			App.Logger.LogInformation("DIALOGSTATE early-apply mode={Mode} output={Output} save={Save}", App.DialogMode, App.OutputPath, App.DialogFileName);
 		}
 
 		private async Task InitializeFromCmdLineArgsAsync(Frame rootFrame, ParsedCommands parsedCommands, string activationPath = "")
@@ -375,6 +518,12 @@ namespace Files.App
 				else
 					rootFrame.Navigate(typeof(MainPage), paneNavigationArgs, new SuppressNavigationTransitionInfo());
 			}
+			if (DialogSession.Current is { } dialog && !App.DialogTraceRequested)
+			{
+				var initialFolder = await Task.Run(dialog.InitialFolder);
+				await PerformNavigationAsync(initialFolder, IO.Path.GetFileName(App.DialogFileName));
+				return;
+			}
 			foreach (var command in parsedCommands)
 			{
 				switch (command.Type)
@@ -388,7 +537,18 @@ namespace Files.App
 
 					case ParsedCommandType.SelectItem:
 						if (IO.Path.IsPathRooted(command.Payload))
+						{
+							App.DialogFileName = IO.Path.GetFileName(command.Payload) ?? string.Empty;
 							await PerformNavigationAsync(IO.Path.GetDirectoryName(command.Payload), IO.Path.GetFileName(command.Payload));
+						}
+						else if (!string.IsNullOrWhiteSpace(command.Payload))
+						{
+							App.DialogFileName = command.Payload;
+						}
+						break;
+
+					case ParsedCommandType.DialogMode:
+						App.DialogMode = command.Payload;
 						break;
 
 					case ParsedCommandType.TagFiles:
@@ -431,6 +591,12 @@ namespace Files.App
 						App.OutputPath = command.Payload;
 						break;
 				}
+			}
+			if (App.IsDialogMode && rootFrame.Content is not MainPage)
+			{
+				// OutputPath/mode alone still represent a complete picker request.
+				// Without this, activation leaves an empty window and no shell context.
+				await PerformNavigationAsync(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), App.DialogFileName);
 			}
 		}
 

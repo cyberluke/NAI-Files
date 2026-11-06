@@ -181,10 +181,10 @@
     <value>Naposledy otevřeno:</value>
   </data>
   <data name="RecentItemClearAllText" xml:space="preserve">
-    <value>Clear all items</value>
+    <value>Vymazat všechny položky</value>
   </data>
   <data name="NavigationToolbarVisiblePathPlaceholderText" xml:space="preserve">
-    <value>Enter a path to navigate to or type "&gt;" to open the command palette</value>
+    <value>Zadejte cestu, kterou chcete otevřít, nebo napište „&gt;“ pro otevření palety příkazů</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Hledat</value>
@@ -199,7 +199,7 @@
     <value>Soubory, které jste dříve otevřeli, se zobrazí zde</value>
   </data>
   <data name="RecentItemRemoveText" xml:space="preserve">
-    <value>Remove this item</value>
+    <value>Odebrat tuto položku</value>
   </data>
   <data name="OpenGitHubRepo" xml:space="preserve">
     <value>GitHub repozitář</value>
@@ -208,7 +208,7 @@
     <value>O aplikaci</value>
   </data>
   <data name="OpenSource" xml:space="preserve">
-    <value>Open Source</value>
+    <value>Otevřený zdrojový kód</value>
   </data>
   <data name="DateFormat" xml:space="preserve">
     <value>Časový formát</value>
@@ -244,16 +244,16 @@
     <value>Maximální velikost místa na disku pro mezipaměť náhledů (100-5000 MiB).</value>
   </data>
   <data name="CacheSizeLimit" xml:space="preserve">
-    <value>Cache size limit</value>
+    <value>Maximální velikost mezipaměti</value>
   </data>
   <data name="ClearCachedThumbnails" xml:space="preserve">
-    <value>Clear cached thumbnails to free up space</value>
+    <value>Uvolnit místo vymazáním miniatur z mezipaměti</value>
   </data>
   <data name="CurrentCacheSize" xml:space="preserve">
-    <value>Current cache size: </value>
+    <value>Aktuální velikost mezipaměti: </value>
   </data>
   <data name="ClearCache" xml:space="preserve">
-    <value>Clear cache</value>
+    <value>Vymazat mezipaměť</value>
   </data>
   <data name="SettingsOnStartupContinueWhereYouLeftOff.Content" xml:space="preserve">
     <value>Pokračovat, kde jste přestali</value>
@@ -313,13 +313,13 @@
     <value>Připnout na postranní panel</value>
   </data>
   <data name="WelcomeDialogTitle" xml:space="preserve">
-    <value>Welcome to Files!</value>
+    <value>Vítejte v aplikaci Files!</value>
   </data>
   <data name="WelcomeDialog.PrimaryButtonText" xml:space="preserve">
     <value>Udělit oprávnění</value>
   </data>
   <data name="WelcomeDialogTextBlockText" xml:space="preserve">
-    <value>To get started, you'll need to grant us permission to display your files. This will open a Settings page where you can grant us this permission. You'll need to reopen the app once you've completed this step. </value>
+    <value>Nejprve je třeba aplikaci udělit oprávnění k zobrazení vašich souborů. Otevře se stránka Nastavení, kde můžete toto oprávnění udělit. Po dokončení tohoto kroku bude nutné aplikaci znovu spustit. </value>
   </data>
   <data name="Display" xml:space="preserve">
     <value>Zobrazení</value>
@@ -337,13 +337,13 @@
     <value>Tmavý</value>
   </data>
   <data name="DefaultTheme" xml:space="preserve">
-    <value>System Theme</value>
+    <value>Systémový motiv</value>
   </data>
   <data name="LightThemeLabel" xml:space="preserve">
-    <value>Light Theme</value>
+    <value>Světlý motiv</value>
   </data>
   <data name="DarkThemeLabel" xml:space="preserve">
-    <value>Dark Theme</value>
+    <value>Tmavý motiv</value>
   </data>
   <data name="UseSystemSetting" xml:space="preserve">
     <value>Použít systémové nastavení</value>
@@ -391,16 +391,16 @@
     <value>Nastavit jako pozadí aplikace</value>
   </data>
   <data name="AccessDeniedDeleteDialogText" xml:space="preserve">
-    <value>We weren't able to delete this item</value>
+    <value>Tuto položku se nepodařilo odstranit</value>
   </data>
   <data name="DriveUnpluggedDialogText" xml:space="preserve">
-    <value>Please insert the necessary drive to access this item.</value>
+    <value>Pro přístup k této položce připojte příslušnou jednotku.</value>
   </data>
   <data name="DriveUnpluggedDialogTitle" xml:space="preserve">
-    <value>Drive unplugged</value>
+    <value>Jednotka byla odpojena</value>
   </data>
   <data name="FileNotFoundDialogText" xml:space="preserve">
-    <value>The file you are attempting to access may have been moved or deleted.</value>
+    <value>Soubor, ke kterému se pokoušíte přistoupit, mohl být přesunut nebo odstraněn.</value>
   </data>
   <data name="CannotAccessPropertiesTitle" xml:space="preserve">
     <value>Nelze otevřít vlastnosti tohoto souboru</value>
@@ -409,28 +409,28 @@
     <value>Soubor, ke kterému se snažíte přistoupit, mohl být přesunut nebo odstraněn.</value>
   </data>
   <data name="FileNotFoundDialogTitle" xml:space="preserve">
-    <value>File Not Found</value>
+    <value>Soubor nebyl nalezen</value>
   </data>
   <data name="FolderNotFoundDialogText" xml:space="preserve">
-    <value>The folder you are attempting to access may have been moved or deleted.</value>
+    <value>Složka, ke které se pokoušíte přistoupit, mohla být přesunuta nebo odstraněna.</value>
   </data>
   <data name="FolderNotFoundDialogTitle" xml:space="preserve">
-    <value>Did you delete this folder?</value>
+    <value>Odstranili jste tuto složku?</value>
   </data>
   <data name="FileInUseByDialogText" xml:space="preserve">
-    <value>The file you are attempting to access is currently being used by {0}</value>
+    <value>Soubor, ke kterému se pokoušíte přistoupit, právě používá aplikace {0}</value>
   </data>
   <data name="FileInUseDialogText" xml:space="preserve">
-    <value>The file you are attempting to access is currently being used by another application</value>
+    <value>Soubor, ke kterému se pokoušíte přistoupit, právě používá jiná aplikace</value>
   </data>
   <data name="FileInUseDialogTitle" xml:space="preserve">
-    <value>File is in use</value>
+    <value>Soubor se používá</value>
   </data>
   <data name="CannotRunFileDialogTitle" xml:space="preserve">
-    <value>This app can't run on your PC</value>
+    <value>Tuto aplikaci nelze na vašem počítači spustit</value>
   </data>
   <data name="CannotRunFileDialogText" xml:space="preserve">
-    <value>To find a version for your PC, check with the software publisher.</value>
+    <value>Informace o verzi pro váš počítač získáte od vydavatele softwaru.</value>
   </data>
   <data name="Layout" xml:space="preserve">
     <value>Rozvržení</value>
@@ -537,7 +537,7 @@
     <value>{0, number} {0, plural, one {soubor} few {soubory} other {souborů}}, {1, number} {1, plural, one {složka} few {složky} other {složek}} {2, plural, one {z} few {ze} other {z}} {2, number} umístění</value>
   </data>
   <data name="BaseLayoutContextFlyoutRunAsAnotherUserText" xml:space="preserve">
-    <value>Run as another user</value>
+    <value>Spustit jako jiný uživatel</value>
   </data>
   <data name="PropertiesDriveItemTypesEquals" xml:space="preserve">
     <value>Všechny typy {0}</value>
@@ -648,22 +648,22 @@
     <value>Sdílení {0} {1}</value>
   </data>
   <data name="RenameErrorItemDeletedText" xml:space="preserve">
-    <value>The item you're attempting to rename no longer exists. Please verify the correct location of the item you need to rename.</value>
+    <value>Položka, kterou se pokoušíte přejmenovat, již neexistuje. Ověřte správné umístění položky, kterou chcete přejmenovat.</value>
   </data>
   <data name="RenameErrorItemDeletedTitle" xml:space="preserve">
-    <value>Item no longer exists</value>
+    <value>Položka již neexistuje</value>
   </data>
   <data name="RenameErrorNameInvalidText" xml:space="preserve">
-    <value>The name specified was invalid. Please check the desired item name and try again.</value>
+    <value>Zadaný název není platný. Zkontrolujte požadovaný název položky a zkuste to znovu.</value>
   </data>
   <data name="RenameErrorNameInvalidTitle" xml:space="preserve">
-    <value>Invalid item name</value>
+    <value>Neplatný název položky</value>
   </data>
   <data name="RenameErrorTooLongText" xml:space="preserve">
-    <value>The length of the item name specified exceeds the maximum limit. Please check the desired name and try again.</value>
+    <value>Zadaný název položky překračuje maximální povolenou délku. Zkontrolujte požadovaný název a zkuste to znovu.</value>
   </data>
   <data name="RenameErrorTooLongTitle" xml:space="preserve">
-    <value>Item name was too long</value>
+    <value>Název položky je příliš dlouhý</value>
   </data>
   <data name="ShowMoreOptions" xml:space="preserve">
     <value>Zobrazit více možností</value>
@@ -675,13 +675,13 @@
     <value>Podpořte nás na GitHubu</value>
   </data>
   <data name="AccessDeniedCreateDialogText" xml:space="preserve">
-    <value>We weren't able to create this item</value>
+    <value>Tuto položku se nepodařilo vytvořit</value>
   </data>
   <data name="AccessDenied" xml:space="preserve">
     <value>Přístup odepřen</value>
   </data>
   <data name="BaseLayoutItemContextFlyoutSetAsText" xml:space="preserve">
-    <value>Set as</value>
+    <value>Nastavit jako</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Zrušit</value>
@@ -696,7 +696,7 @@
     <value>Soubor</value>
   </data>
   <data name="Files" xml:space="preserve">
-    <value>Files</value>
+    <value>Soubory</value>
   </data>
   <data name="AddDialogListFileSubHeader" xml:space="preserve">
     <value>Vytvořit prázdný soubor</value>
@@ -705,7 +705,7 @@
     <value>Složka</value>
   </data>
   <data name="Folders" xml:space="preserve">
-    <value>Folders</value>
+    <value>Složky</value>
   </data>
   <data name="AddDialogListFolderSubHeader" xml:space="preserve">
     <value>Vytvoří prázdnou složku</value>
@@ -723,10 +723,10 @@
     <value>Vyžadovat potvrzení při mazání souborů</value>
   </data>
   <data name="PropertySaveErrorMessageText" xml:space="preserve">
-    <value>There was an issue saving some properties.</value>
+    <value>Při ukládání některých vlastností došlo k chybě.</value>
   </data>
   <data name="PropertySaveErrorDialogTitle" xml:space="preserve">
-    <value>Error</value>
+    <value>Chyba</value>
   </data>
   <data name="PropertySaveErrorDialog.SecondaryButtonText" xml:space="preserve">
     <value>Přesto zavřít</value>
@@ -1110,10 +1110,10 @@
     <value>Otevřít v novém panelu</value>
   </data>
   <data name="OpenInOtherPane" xml:space="preserve">
-    <value>Open in other pane</value>
+    <value>Otevřít v druhém panelu</value>
   </data>
   <data name="OpenCurrentFolderInOtherPane" xml:space="preserve">
-    <value>Open current folder in other pane</value>
+    <value>Otevřít aktuální složku v druhém panelu</value>
   </data>
   <data name="FilesAndFolders" xml:space="preserve">
     <value>Soubory &amp; složky</value>
@@ -1161,10 +1161,10 @@
     <value>Přepnout viditelnost panelu vyhledávání</value>
   </data>
   <data name="ToggleDualPane" xml:space="preserve">
-    <value>Toggle dual pane</value>
+    <value>Přepnout režim dvou panelů</value>
   </data>
   <data name="ToggleDualPaneDescription" xml:space="preserve">
-    <value>Toggle dual pane mode</value>
+    <value>Zapnout nebo vypnout režim dvou panelů</value>
   </data>
   <data name="DetailsPanePreviewNotAvaliableText" xml:space="preserve">
     <value>Není dostupný žádný náhled</value>
@@ -1173,7 +1173,7 @@
     <value>Název položky</value>
   </data>
   <data name="Unpin" xml:space="preserve">
-    <value>Unpin</value>
+    <value>Odepnout</value>
   </data>
   <data name="UnpinFolderFromSidebar" xml:space="preserve">
     <value>Odepnout z postranního panelu</value>
@@ -1215,13 +1215,13 @@
     <value>Není vypočteno</value>
   </data>
   <data name="ViewSize" xml:space="preserve">
-    <value>View size</value>
+    <value>Velikost zobrazení</value>
   </data>
   <data name="CloudDriveSyncStatus_Unknown" xml:space="preserve">
     <value>Neznámý</value>
   </data>
   <data name="RenameFileDialogText" xml:space="preserve">
-    <value>If you change a file extension, the file might become unusable. Are you sure you want to change it?</value>
+    <value>Změna přípony souboru může způsobit, že soubor nebude použitelný. Opravdu ji chcete změnit?</value>
   </data>
   <data name="DriveTypeCDRom" xml:space="preserve">
     <value>Jednotka CD-ROM</value>
@@ -1260,7 +1260,7 @@
     <value>Více možností...</value>
   </data>
   <data name="DrivesWidgetOptionsFlyoutMapNetDriveMenuItemText" xml:space="preserve">
-    <value>Map network drive</value>
+    <value>Připojit síťovou jednotku</value>
   </data>
   <data name="Pinned" xml:space="preserve">
     <value>Připnuto</value>
@@ -1293,10 +1293,10 @@
     <value>Sloupce (Ctrl+Shift+6)</value>
   </data>
   <data name="PinItemToStartText" xml:space="preserve">
-    <value>Pin to the Start Menu</value>
+    <value>Připnout do nabídky Start</value>
   </data>
   <data name="UnpinItemFromStartText" xml:space="preserve">
-    <value>Unpin from the Start Menu</value>
+    <value>Odepnout z nabídky Start</value>
   </data>
   <data name="Library" xml:space="preserve">
     <value>Knihovna</value>
@@ -1383,7 +1383,7 @@
     <value>Vytvořit složku s výběrem</value>
   </data>
   <data name="CreateShortcutWithSelection" xml:space="preserve">
-    <value>Create shortcuts with selection</value>
+    <value>Vytvořit zástupce vybraných položek</value>
   </data>
   <data name="ItemType" xml:space="preserve">
     <value>Typ:</value>
@@ -1395,7 +1395,7 @@
     <value>Otevřít v</value>
   </data>
   <data name="ChooseAnotherApp" xml:space="preserve">
-    <value>Choose another app</value>
+    <value>Zvolit jinou aplikaci</value>
   </data>
   <data name="FileBrowserThumbnailIconColumnGrid.AutomationProperties.Name" xml:space="preserve">
     <value>Ikona souboru</value>
@@ -1542,13 +1542,13 @@
     <value>Neznámý účet</value>
   </data>
   <data name="SecurityCannotReadPropertiesText" xml:space="preserve">
-    <value>You do not have permissions to view the security properties of this object. Click "Advanced permissions" to proceed.</value>
+    <value>Nemáte oprávnění k zobrazení vlastností zabezpečení tohoto objektu. Pokračujte kliknutím na „Pokročilá oprávnění“.</value>
   </data>
   <data name="SecurityOwnerLabel.Text" xml:space="preserve">
     <value>Majitel:</value>
   </data>
   <data name="SecurityUnknownOwnerTextText" xml:space="preserve">
-    <value>Unknown owner</value>
+    <value>Neznámý vlastník</value>
   </data>
   <data name="ExtractArchive" xml:space="preserve">
     <value>Rozbalit archiv</value>
@@ -1560,10 +1560,10 @@
     <value>Rozbalit do {0}\</value>
   </data>
   <data name="SideBarCreateNewLibraryText" xml:space="preserve">
-    <value>Create new library</value>
+    <value>Vytvořit novou knihovnu</value>
   </data>
   <data name="SideBarRestoreLibrariesText" xml:space="preserve">
-    <value>Restore default libraries</value>
+    <value>Obnovit výchozí knihovny</value>
   </data>
   <data name="DialogRestoreLibrariesSubtitleText" xml:space="preserve">
     <value>Opravdu chcete obnovit výchozí knihovny? Všechny vaše soubory zůstanou v úložišti.</value>
@@ -1575,7 +1575,7 @@
     <value>Vlastník</value>
   </data>
   <data name="SecuritySpecialLabelText" xml:space="preserve">
-    <value>Special</value>
+    <value>Zvláštní</value>
   </data>
   <data name="Access" xml:space="preserve">
     <value>Přístup</value>
@@ -1602,7 +1602,7 @@
     <value>Oprávnění</value>
   </data>
   <data name="SecurityAdvancedCannotReadPropertiesText" xml:space="preserve">
-    <value>You do not have permissions to view the security properties of this object. You can try to take ownership of this object.</value>
+    <value>Nemáte oprávnění k zobrazení vlastností zabezpečení tohoto objektu. Můžete zkusit převzít jeho vlastnictví.</value>
   </data>
   <data name="SecurityAdvancedFolderFiles.Text" xml:space="preserve">
     <value>Tato složka a soubory</value>
@@ -1626,49 +1626,49 @@
     <value>Tato složka a podsložky</value>
   </data>
   <data name="SecurityAppendDataLabelText" xml:space="preserve">
-    <value>Append data</value>
+    <value>Připojovat data</value>
   </data>
   <data name="SecurityChangePermissionsLabelText" xml:space="preserve">
-    <value>Change permission</value>
+    <value>Měnit oprávnění</value>
   </data>
   <data name="SecurityCreateDirectoriesLabelText" xml:space="preserve">
-    <value>Create folders</value>
+    <value>Vytvářet složky</value>
   </data>
   <data name="SecurityCreateFilesLabelText" xml:space="preserve">
-    <value>Create files</value>
+    <value>Vytvářet soubory</value>
   </data>
   <data name="SecurityDeleteSubdirectoriesAndFilesLabelText" xml:space="preserve">
-    <value>Delete subdirectories and files</value>
+    <value>Odstraňovat podsložky a soubory</value>
   </data>
   <data name="SecurityExecuteFileLabelText" xml:space="preserve">
-    <value>Execute files</value>
+    <value>Spouštět soubory</value>
   </data>
   <data name="SecurityReadAttributesLabelText" xml:space="preserve">
-    <value>Read attributes</value>
+    <value>Číst atributy</value>
   </data>
   <data name="SecurityReadDataLabelText" xml:space="preserve">
-    <value>Read data</value>
+    <value>Číst data</value>
   </data>
   <data name="SecurityReadExtendedAttributesLabelText" xml:space="preserve">
-    <value>Read extended attributes</value>
+    <value>Číst rozšířené atributy</value>
   </data>
   <data name="SecurityReadPermissionsLabelText" xml:space="preserve">
-    <value>Read permissions</value>
+    <value>Číst oprávnění</value>
   </data>
   <data name="SecurityTakeOwnershipLabelText" xml:space="preserve">
-    <value>Take ownership</value>
+    <value>Převzít vlastnictví</value>
   </data>
   <data name="SecurityTraverseLabelText" xml:space="preserve">
-    <value>Visit folder</value>
+    <value>Procházet složku</value>
   </data>
   <data name="SecurityWriteAttributesLabelText" xml:space="preserve">
-    <value>Write attributes</value>
+    <value>Zapisovat atributy</value>
   </data>
   <data name="SecurityWriteDataLabelText" xml:space="preserve">
-    <value>Write data</value>
+    <value>Zapisovat data</value>
   </data>
   <data name="SecurityWriteExtendedAttributesLabelText" xml:space="preserve">
-    <value>Write extended attributes</value>
+    <value>Zapisovat rozšířené atributy</value>
   </data>
   <data name="SecurityAdvancedInheritedConvert.Text" xml:space="preserve">
     <value>Převést zděděná oprávnění na výslovná oprávnění</value>
@@ -1725,7 +1725,7 @@
     <value>WSL</value>
   </data>
   <data name="SideBarHideSectionFromSideBarText" xml:space="preserve">
-    <value>Hide {0} section</value>
+    <value>Skrýt sekci {0}</value>
   </data>
   <data name="AddFile" xml:space="preserve">
     <value>Přidat soubor</value>
@@ -1755,7 +1755,7 @@
     <value>Rozbalování dokončeno!</value>
   </data>
   <data name="BaseLayoutItemContextFlyoutOpenParentFolderText" xml:space="preserve">
-    <value>Open parent folder</value>
+    <value>Otevřít nadřazenou složku</value>
   </data>
   <data name="Unknown" xml:space="preserve">
     <value>Neznámý</value>
@@ -1770,10 +1770,10 @@
     <value>Otevřít disk</value>
   </data>
   <data name="InsertDiscDialogText" xml:space="preserve">
-    <value>Please insert a disc into drive {0}</value>
+    <value>Vložte disk do jednotky {0}</value>
   </data>
   <data name="InsertDiscDialogTitle" xml:space="preserve">
-    <value>Insert a disc</value>
+    <value>Vložte disk</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -1788,13 +1788,13 @@
     <value>Poskytněte vaše údaje:</value>
   </data>
   <data name="CredentialDialogIncorrectPassword" xml:space="preserve">
-    <value>The password is incorrect. Try again.</value>
+    <value>Heslo není správné. Zkuste to znovu.</value>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
-    <value>Password required</value>
+    <value>Je vyžadováno heslo</value>
   </data>
   <data name="PasswordRequiredMessage" xml:space="preserve">
-    <value>This location is password protected. Refresh to enter the password.</value>
+    <value>Toto umístění je chráněno heslem. Obnovte zobrazení a zadejte heslo.</value>
   </data>
   <data name="CredentialDialogUserName.PlaceholderText" xml:space="preserve">
     <value>Uživatelské jméno</value>
@@ -1848,7 +1848,7 @@
     <value>Štítek</value>
   </data>
   <data name="OpenFilesWithOneClick" xml:space="preserve">
-    <value>Open files with a single click</value>
+    <value>Otevírat soubory jedním kliknutím</value>
   </data>
   <data name="FolderPath" xml:space="preserve">
     <value>Cesta ke složce</value>
@@ -2082,7 +2082,7 @@
     <value>Vlastní</value>
   </data>
   <data name="Slideshow" xml:space="preserve">
-    <value>Slideshow</value>
+    <value>Prezentace</value>
   </data>
   <data name="SetAsSlideshow" xml:space="preserve">
     <value>Nastavit jako prezentaci plochy</value>
@@ -2091,13 +2091,13 @@
     <value>Nastavit velikost všech sloupců tak, aby se vešly</value>
   </data>
   <data name="AutoFitColumns" xml:space="preserve">
-    <value>Auto-fit columns</value>
+    <value>Přizpůsobit šířku sloupců</value>
   </data>
   <data name="AutoFitColumnsDescription" xml:space="preserve">
-    <value>Resize columns to fit their content</value>
+    <value>Přizpůsobit šířku sloupců jejich obsahu</value>
   </data>
   <data name="AutoSizeColumnsInDetailsLayout" xml:space="preserve">
-    <value>Automatically fit columns to content</value>
+    <value>Automaticky přizpůsobovat sloupce obsahu</value>
   </data>
   <data name="Adaptive" xml:space="preserve">
     <value>Adaptivní rozvržení</value>
@@ -2163,13 +2163,13 @@
     <value>Otevírat složky jedním kliknutím</value>
   </data>
   <data name="OpenFolderWithOneClickInColumnsView" xml:space="preserve">
-    <value>Open folders with a single click in Columns View</value>
+    <value>Otevírat složky jedním kliknutím ve sloupcovém zobrazení</value>
   </data>
   <data name="SingleClickToOpen" xml:space="preserve">
-    <value>Open items with a single click</value>
+    <value>Otevírat položky jedním kliknutím</value>
   </data>
   <data name="SingleClickFoldersInColumnsViewHeader" xml:space="preserve">
-    <value>Folders in Columns View</value>
+    <value>Složky ve sloupcovém zobrazení</value>
   </data>
   <data name="OpeningItems" xml:space="preserve">
     <value>Otevírání položek</value>
@@ -2241,16 +2241,16 @@
     <value>Vytvořit archiv</value>
   </data>
   <data name="CompressSkippedItemsDialogTitle" xml:space="preserve">
-    <value>Some items can't be compressed</value>
+    <value>Některé položky nelze komprimovat</value>
   </data>
   <data name="CompressSkippedItemsDialogText" xml:space="preserve">
-    <value>The following {0, plural, one {item} other {items}} can''t be compressed. Would you like to skip {0, plural, one {this item} other {these items}}?</value>
+    <value>{0, plural, one {Následující položku} other {Následující položky}} nelze komprimovat. Chcete {0, plural, one {tuto položku} other {tyto položky}} přeskočit?</value>
   </data>
   <data name="CompressIntoZip" xml:space="preserve">
-    <value>Create zip archive</value>
+    <value>Vytvořit archiv ZIP</value>
   </data>
   <data name="CompressIntoSevenZip" xml:space="preserve">
-    <value>Create 7z archive</value>
+    <value>Vytvořit archiv 7z</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Vytvořit</value>
@@ -2289,19 +2289,19 @@
     <value>Nerozdělovat</value>
   </data>
   <data name="Auto" xml:space="preserve">
-    <value>Auto</value>
+    <value>Automaticky</value>
   </data>
   <data name="DictionarySize" xml:space="preserve">
-    <value>Dictionary size</value>
+    <value>Velikost slovníku</value>
   </data>
   <data name="WordSize" xml:space="preserve">
-    <value>Word size</value>
+    <value>Velikost slova</value>
   </data>
   <data name="EstimatedMemoryUsage" xml:space="preserve">
-    <value>Estimated memory usage: {0}</value>
+    <value>Odhadované využití paměti: {0}</value>
   </data>
   <data name="AvailableMemory" xml:space="preserve">
-    <value>Available memory: {0}</value>
+    <value>Dostupná paměť: {0}</value>
   </data>
   <data name="CD" xml:space="preserve">
     <value>CD</value>
@@ -2460,10 +2460,10 @@
     <value>Opravdu chcete odstranit tento štítek?</value>
   </data>
   <data name="PlayAll" xml:space="preserve">
-    <value>Play All</value>
+    <value>Přehrát vše</value>
   </data>
   <data name="Play" xml:space="preserve">
-    <value>Play</value>
+    <value>Přehrát</value>
   </data>
   <data name="Height" xml:space="preserve">
     <value>Výška</value>
@@ -2556,19 +2556,19 @@
     <value>Přepnout režim kompaktního překrytí</value>
   </data>
   <data name="ToggleTheme" xml:space="preserve">
-    <value>Toggle Theme</value>
+    <value>Přepnout motiv</value>
   </data>
   <data name="ToggleThemeDescription" xml:space="preserve">
-    <value>Toggle the app theme</value>
+    <value>Přepnout motiv aplikace</value>
   </data>
   <data name="SwitchToLightThemeDescription" xml:space="preserve">
-    <value>Switch to Light Theme</value>
+    <value>Přepnout na světlý motiv</value>
   </data>
   <data name="SwitchToDarkThemeDescription" xml:space="preserve">
-    <value>Switch to Dark Theme</value>
+    <value>Přepnout na tmavý motiv</value>
   </data>
   <data name="SwitchToDefaultThemeDescription" xml:space="preserve">
-    <value>Switch to System Theme</value>
+    <value>Přepnout na systémový motiv</value>
   </data>
   <data name="SearchDescription" xml:space="preserve">
     <value>Spustit vyhledávání v OmniBaru</value>
@@ -2785,6 +2785,56 @@
   </data>
   <data name="LayoutColumnsDescription" xml:space="preserve">
     <value>Přepnout na sloupcové zobrazení</value>
+  </data>
+  <data name="Pulse" xml:space="preserve">
+    <value>Pulse</value>
+  </data>
+  <data name="LayoutPulseDescription" xml:space="preserve">
+    <value>Přepnout na zobrazení Pulse: chronologický multimediální feed</value>
+  </data>
+  <data name="PulseVersionsCount" xml:space="preserve">
+    <value>{0} verzí</value>
+    <comment>{0} is the number of files stacked as versions of one document</comment>
+  </data>
+  <data name="PulseLatestVersion" xml:space="preserve">
+    <value>Nejnovější</value>
+    <comment>Label before the timestamp of the newest file in a stack</comment>
+  </data>
+  <data name="PulseMarkdownStats" xml:space="preserve">
+    <value>{0} nadpisů · {1} bloků kódu</value>
+  </data>
+  <data name="PulseMarkdownAgentSpec" xml:space="preserve">
+    <value>Agent spec</value>
+    <comment>Badge on markdown files that look like AI agent specifications/prompts</comment>
+  </data>
+  <data name="PulseExpandStack" xml:space="preserve">
+    <value>Zobrazit všechny verze</value>
+  </data>
+  <data name="PulseCollapseStack" xml:space="preserve">
+    <value>Sbalit verze</value>
+  </data>
+  <data name="PulseTimeRail" xml:space="preserve">
+    <value>Přejít na datum</value>
+  </data>
+  <data name="PulseFilterAll" xml:space="preserve">
+    <value>Vše</value>
+  </data>
+  <data name="PulseFilterMarkdown" xml:space="preserve">
+    <value>Markdown</value>
+  </data>
+  <data name="PulsePause" xml:space="preserve">
+    <value>Pozastavit</value>
+  </data>
+  <data name="PulseStop" xml:space="preserve">
+    <value>Zastavit</value>
+    <comment>Audio card: stop playback and rewind to the beginning</comment>
+  </data>
+  <data name="PulseFilterArchives" xml:space="preserve">
+    <value>Archivy</value>
+  </data>
+  <data name="PulseAutoGroupVersions" xml:space="preserve">
+    <value>Automaticky seskupovat verze souborů</value>
+    <comment>Pulse view toggle: collapse "report.pdf", "report (1).pdf", "report-v2.pdf" into one stack</comment>
   </data>
   <data name="LayoutAdaptiveDescription" xml:space="preserve">
     <value>Přepínat zobrazení adaptivně</value>
@@ -3262,13 +3312,13 @@
     <value>V této větvi máte neprovedené změny. Co s nimi chcete udělat?</value>
   </data>
   <data name="MergeInProgress" xml:space="preserve">
-    <value>You have an ongoing merge with unresolved conflicts. Please resolve the conflicts or abort the merge to switch branches.</value>
+    <value>Probíhá slučování s nevyřešenými konflikty. Před přepnutím větve vyřešte konflikty nebo slučování přerušte.</value>
   </data>
   <data name="AbortMergeAndSwitch" xml:space="preserve">
-    <value>Abort merge and switch to '{0}'</value>
+    <value>Přerušit slučování a přepnout na „{0}“</value>
   </data>
   <data name="StayAndResolveConflicts" xml:space="preserve">
-    <value>Stay on '{0}' and resolve conflicts</value>
+    <value>Zůstat na „{0}“ a vyřešit konflikty</value>
   </data>
   <data name="SwitchBranch" xml:space="preserve">
     <value>Přepnout větev</value>
@@ -3349,7 +3399,7 @@
     <value>git vložení selhalo kvůli vypršení limitu spojení</value>
   </data>
   <data name="PullUncommittedChangesError" xml:space="preserve">
-    <value>Can't pull because your uncommitted changes would be overwritten. Commit, stash, or discard your changes, then try again.</value>
+    <value>Změny nelze stáhnout a sloučit, protože by došlo k přepsání vašich nepotvrzených změn. Potvrďte je, dočasně odložte nebo zahoďte a poté to zkuste znovu.</value>
   </data>
   <data name="MultipleValues" xml:space="preserve">
     <value>(vícero hodnot)</value>
@@ -3467,10 +3517,10 @@
     <value>Otevřít vybranou složku v novém panelu</value>
   </data>
   <data name="OpenDirectoryInOtherPaneDescription" xml:space="preserve">
-    <value>Open selected directory in the other pane</value>
+    <value>Otevřít vybraný adresář v druhém panelu</value>
   </data>
   <data name="OpenCurrentFolderInOtherPaneDescription" xml:space="preserve">
-    <value>Open the current folder in the other pane</value>
+    <value>Otevřít aktuální složku v druhém panelu</value>
   </data>
   <data name="OpenDirectoryInNewTabDescription" xml:space="preserve">
     <value>Otevřít vybranou složku na nové kartě</value>
@@ -3649,27 +3699,27 @@
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressComplete_Header" xml:space="preserve">
-    <value>Compressed {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Dokončena komprese {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressComplete_SubHeader" xml:space="preserve">
-    <value>Compressed {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Dokončena komprese {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressFailed_Header" xml:space="preserve">
-    <value>Error compressing {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Chyba při komprimování {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressFailed_SubHeader" xml:space="preserve">
-    <value>Failed to compress {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Komprese {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“ se nezdařila</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressInProgress_Header" xml:space="preserve">
-    <value>Compressing {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Komprimování {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CompressInProgress_SubHeader" xml:space="preserve">
-    <value>Compressing {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Komprimování {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_GitCloneCanceled_Header" xml:space="preserve">
@@ -3705,87 +3755,87 @@
     <comment>Shown in Status Center for Git clone. {0} is the Git object count, {1} is the repository, and {2} is the destination path.</comment>
   </data>
   <data name="StatusCenter_GitCheckoutCanceled_Header" xml:space="preserve">
-    <value>Canceled switching to "{0}" in "{1}"</value>
+    <value>Přepínání na „{0}“ v „{1}“ bylo zrušeno</value>
     <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitCheckoutComplete_Header" xml:space="preserve">
-    <value>Switched to "{0}" in "{1}"</value>
+    <value>Přepnuto na „{0}“ v „{1}“</value>
     <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitCheckoutFailed_Header" xml:space="preserve">
-    <value>Failed to switch to "{0}" in "{1}"</value>
+    <value>Nepodařilo se přepnout na „{0}“ v „{1}“</value>
     <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitCheckoutInProgress_Header" xml:space="preserve">
-    <value>Switching to "{0}" in "{1}"</value>
+    <value>Přepínání na „{0}“ v „{1}“</value>
     <comment>Shown in Status Center for Git checkout. {0} is the branch and {1} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitFetchCanceled_Header" xml:space="preserve">
-    <value>Canceled fetching remote changes for "{0}"</value>
+    <value>Stahování vzdálených změn pro „{0}“ bylo zrušeno</value>
     <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitFetchComplete_Header" xml:space="preserve">
-    <value>Fetched remote changes for "{0}"</value>
+    <value>Vzdálené změny pro „{0}“ byly staženy</value>
     <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitFetchFailed_Header" xml:space="preserve">
-    <value>Failed to fetch remote changes for "{0}"</value>
+    <value>Nepodařilo se stáhnout vzdálené změny pro „{0}“</value>
     <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitFetchInProgress_Header" xml:space="preserve">
-    <value>Fetching remote changes for "{0}"</value>
+    <value>Stahování vzdálených změn pro „{0}“</value>
     <comment>Shown in Status Center for Git fetch. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitOperationProgress" xml:space="preserve">
-    <value>{0}% complete</value>
+    <value>Dokončeno {0} %</value>
     <comment>Shown in Status Center during a Git operation. {0} is the percentage from 0 to 100.</comment>
   </data>
   <data name="StatusCenter_GitPullCanceled_Header" xml:space="preserve">
-    <value>Canceled pulling remote changes into "{0}"</value>
+    <value>Stahování a slučování vzdálených změn do „{0}“ bylo zrušeno</value>
     <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPullComplete_Header" xml:space="preserve">
-    <value>Pulled remote changes into "{0}"</value>
+    <value>Vzdálené změny byly staženy a sloučeny do „{0}“</value>
     <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPullFailed_Header" xml:space="preserve">
-    <value>Failed to pull remote changes into "{0}"</value>
+    <value>Nepodařilo se stáhnout a sloučit vzdálené změny do „{0}“</value>
     <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPullInProgress_Header" xml:space="preserve">
-    <value>Pulling remote changes into "{0}"</value>
+    <value>Stahování a slučování vzdálených změn do „{0}“</value>
     <comment>Shown in Status Center for Git pull. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPushCanceled_Header" xml:space="preserve">
-    <value>Canceled pushing local commits from "{0}"</value>
+    <value>Odesílání místních commitů z „{0}“ bylo zrušeno</value>
     <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPushComplete_Header" xml:space="preserve">
-    <value>Pushed local commits from "{0}"</value>
+    <value>Místní commity z „{0}“ byly odeslány</value>
     <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPushFailed_Header" xml:space="preserve">
-    <value>Failed to push local commits from "{0}"</value>
+    <value>Nepodařilo se odeslat místní commity z „{0}“</value>
     <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitPushInProgress_Header" xml:space="preserve">
-    <value>Pushing local commits from "{0}"</value>
+    <value>Odesílání místních commitů z „{0}“</value>
     <comment>Shown in Status Center for Git push. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitSyncCanceled_Header" xml:space="preserve">
-    <value>Canceled syncing local and remote commits for "{0}"</value>
+    <value>Synchronizace místních a vzdálených commitů pro „{0}“ byla zrušena</value>
     <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitSyncComplete_Header" xml:space="preserve">
-    <value>Synced local and remote commits for "{0}"</value>
+    <value>Místní a vzdálené commity pro „{0}“ byly synchronizovány</value>
     <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitSyncFailed_Header" xml:space="preserve">
-    <value>Failed to sync local and remote commits for "{0}"</value>
+    <value>Nepodařilo se synchronizovat místní a vzdálené commity pro „{0}“</value>
     <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_GitSyncInProgress_Header" xml:space="preserve">
-    <value>Syncing local and remote commits for "{0}"</value>
+    <value>Synchronizace místních a vzdálených commitů pro „{0}“</value>
     <comment>Shown in Status Center for Git sync. {0} is the repository.</comment>
   </data>
   <data name="StatusCenter_InstallFontCanceled_Header" xml:space="preserve">
@@ -3793,67 +3843,67 @@
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontCanceled_SubHeader" xml:space="preserve">
-    <value>Canceled installing {0, plural, one {# font} other {# fonts}} from "{1}"</value>
+    <value>Instalace {0, plural, one {# písma} other {# písem}} z „{1}“ byla zrušena</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontComplete_Header" xml:space="preserve">
-    <value>Installed {0, plural, one {# font} other {# fonts}}</value>
+    <value>Dokončena instalace {0, plural, one {# písma} other {# písem}}</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontComplete_SubHeader" xml:space="preserve">
-    <value>Installed {0, plural, one {# font} other {# fonts}} from "{1}"</value>
+    <value>Dokončena instalace {0, plural, one {# písma} other {# písem}} z „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontFailed_Header" xml:space="preserve">
-    <value>Error installing {0, plural, one {# font} other {# fonts}}</value>
+    <value>Chyba při instalaci {0, plural, one {# písma} other {# písem}}</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontFailed_SubHeader" xml:space="preserve">
-    <value>Failed to install {0, plural, one {# font} other {# fonts}} from "{1}"</value>
+    <value>Instalace {0, plural, one {# písma} other {# písem}} z „{1}“ se nezdařila</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontInProgress_Header" xml:space="preserve">
-    <value>Installing {0, plural, one {# font} other {# fonts}}</value>
+    <value>Instalace {0, plural, one {# písma} other {# písem}}</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_InstallFontInProgress_SubHeader" xml:space="preserve">
-    <value>Installing {0, plural, one {# font} other {# fonts}} from "{1}"</value>
+    <value>Instalace {0, plural, one {# písma} other {# písem}} z „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyCanceled_Header" xml:space="preserve">
-    <value>Canceled copying {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Kopírování {0, plural, one {# položky} other {# položek}} do „{1}“ bylo zrušeno</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyCanceled_SubHeader" xml:space="preserve">
-    <value>Canceled copying {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Kopírování {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“ bylo zrušeno</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyComplete_Header" xml:space="preserve">
-    <value>Copied {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Dokončeno kopírování {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyComplete_SubHeader" xml:space="preserve">
-    <value>Copied {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Dokončeno kopírování {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyFailed_Header" xml:space="preserve">
-    <value>Error copying {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Chyba při kopírování {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyFailed_SubHeader" xml:space="preserve">
-    <value>Failed to copy {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Kopírování {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“ se nezdařilo</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyInProgress_Header" xml:space="preserve">
-    <value>Copying {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Kopírování {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyInProgress_SubHeader" xml:space="preserve">
-    <value>Copying {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Kopírování {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_CopyDiscovery_Header" xml:space="preserve">
-    <value>Discovered {0, plural, one {# item} other {# items}}</value>
+    <value>Počet nalezených položek: {0, plural, one {# položka} few {# položky} other {# položek}}</value>
     <comment>Shown in a StatusCenter card during file discovery phase.</comment>
   </data>
   <data name="StatusCenter_DecompressCanceled_Header" xml:space="preserve">
@@ -3889,55 +3939,55 @@
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_DeleteCanceled_Header" xml:space="preserve">
-    <value>Canceled deleting {0, plural, one {# item} other {# items}} from "{1}"</value>
+    <value>Odstraňování {0, plural, one {# položky} other {# položek}} z „{1}“ bylo zrušeno</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_DeleteComplete_Header" xml:space="preserve">
-    <value>Deleted {0, plural, one {# item} other {# items}} from "{1}"</value>
+    <value>Dokončeno odstranění {0, plural, one {# položky} other {# položek}} z „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_DeleteFailed_Header" xml:space="preserve">
-    <value>Error deleting {0, plural, one {# item} other {# items}} from "{1}"</value>
+    <value>Chyba při odstraňování {0, plural, one {# položky} other {# položek}} z „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_DeleteFailed_SubHeader" xml:space="preserve">
-    <value>Failed to delete {0, plural, one {# item} other {# items}} from "{1}"</value>
+    <value>Odstranění {0, plural, one {# položky} other {# položek}} z „{1}“ se nezdařilo</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_DeleteInProgress_Header" xml:space="preserve">
-    <value>Deleting {0, plural, one {# item} other {# items}} from "{1}"</value>
+    <value>Odstraňování {0, plural, one {# položky} other {# položek}} z „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveCanceled_Header" xml:space="preserve">
-    <value>Canceled moving {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Přesouvání {0, plural, one {# položky} other {# položek}} do „{1}“ bylo zrušeno</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveCanceled_SubHeader" xml:space="preserve">
-    <value>Canceled moving {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Přesouvání {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“ bylo zrušeno</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveComplete_Header" xml:space="preserve">
-    <value>Moved {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Dokončeno přesunutí {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveComplete_SubHeader" xml:space="preserve">
-    <value>Moved {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Dokončeno přesunutí {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveInProgress_Header" xml:space="preserve">
-    <value>Moving {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Přesouvání {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveInProgress_SubHeader" xml:space="preserve">
-    <value>Moving {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Přesouvání {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveFailed_Header" xml:space="preserve">
-    <value>Error moving {0, plural, one {# item} other {# items}} to "{1}"</value>
+    <value>Chyba při přesouvání {0, plural, one {# položky} other {# položek}} do „{1}“</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_MoveFailed_SubHeader" xml:space="preserve">
-    <value>Failed to move {0, plural, one {# item} other {# items}} from "{1}" to "{2}"</value>
+    <value>Přesunutí {0, plural, one {# položky} other {# položek}} z „{1}“ do „{2}“ se nezdařilo</value>
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_EmptyRecycleBinCancel_Header" xml:space="preserve">
@@ -3965,7 +4015,7 @@
     <comment>Shown in a StatusCenter card.</comment>
   </data>
   <data name="StatusCenter_ProcessedItems_Header" xml:space="preserve">
-    <value>{0}/{1, plural, one {# item} other {# items}} processed</value>
+    <value>Zpracováno {0}/{1, plural, one {# položky} other {# položek}}</value>
     <comment>Shown in a StatusCenter card. Used as "8/20 items processed"</comment>
   </data>
   <data name="UnblockDownloadedFile" xml:space="preserve">
@@ -4059,7 +4109,7 @@
     <value>Změnit obal alba</value>
   </data>
   <data name="RemoveAlbumCover" xml:space="preserve">
-    <value>Remove album cover</value>
+    <value>Odstranit obal alba</value>
   </data>
   <data name="ItemRenameFailed" xml:space="preserve">
     <value>Přejmenování položky se nezdařilo</value>
@@ -4141,7 +4191,7 @@
     <value>Akce</value>
   </data>
   <data name="Action" xml:space="preserve">
-    <value>Action</value>
+    <value>Akce</value>
   </data>
   <data name="Commands" xml:space="preserve">
     <value>Příkazy</value>
@@ -4165,10 +4215,10 @@
     <value>Vámi zvolenou kombinaci kláves nelze použít, zkuste prosím použít jinou kombinaci kláves.</value>
   </data>
   <data name="KeyboardShortcuts" xml:space="preserve">
-    <value>Keyboard shortcuts</value>
+    <value>Klávesové zkratky</value>
   </data>
   <data name="DeleteKeyBindingConfirmation" xml:space="preserve">
-    <value>Are you sure you want to remove this key binding?</value>
+    <value>Opravdu chcete odebrat toto přiřazení kláves?</value>
   </data>
   <data name="Customized" xml:space="preserve">
     <value>Přizpůsobeno</value>
@@ -4262,17 +4312,17 @@
     <comment>This is the friendly name for bitmap files.</comment>
   </data>
   <data name="ImageFiles" xml:space="preserve">
-    <value>Image Files</value>
+    <value>Obrázkové soubory</value>
     <comment>This is the friendly name for image files.</comment>
   </data>
   <data name="AllSupportedFiles" xml:space="preserve">
-    <value>All supported files</value>
+    <value>Všechny podporované soubory</value>
   </data>
   <data name="ConvertToIconRequiredMessage" xml:space="preserve">
-    <value>This image needs to be converted into an icon file before it can be used. Choose a location to save the converted icon file.</value>
+    <value>Před použitím je nutné tento obrázek převést na soubor ikony. Vyberte umístění, kam se má převedený soubor ikony uložit.</value>
   </data>
   <data name="ConvertToIconError" xml:space="preserve">
-    <value>Couldn't convert the image to an icon file</value>
+    <value>Obrázek se nepodařilo převést na soubor ikony</value>
   </data>
   <data name="NumPadTypeName" xml:space="preserve">
     <value>Num</value>
@@ -4309,13 +4359,13 @@
     <value>Rozdělit vertikálně</value>
   </data>
   <data name="AddVerticalPaneDescription" xml:space="preserve">
-    <value>Split pane vertically</value>
+    <value>Rozdělit panel svisle</value>
   </data>
   <data name="SplitPaneHorizontally" xml:space="preserve">
     <value>Rozdělit horizontálně</value>
   </data>
   <data name="SplitPaneHorizontallyDescription" xml:space="preserve">
-    <value>Split pane horizontally</value>
+    <value>Rozdělit panel vodorovně</value>
   </data>
   <data name="ArrangePanesVertically" xml:space="preserve">
     <value>Uspořádat vertikálně</value>
@@ -4339,10 +4389,10 @@
     <value>Uspořádání panelů</value>
   </data>
   <data name="DualPaneSplitDirection" xml:space="preserve">
-    <value>Default dual pane split direction</value>
+    <value>Výchozí směr rozdělení v režimu dvou panelů</value>
   </data>
   <data name="DualPane" xml:space="preserve">
-    <value>Dual pane mode</value>
+    <value>Režim dvou panelů</value>
   </data>
   <data name="Horizontal" xml:space="preserve">
     <value>Horizontálně</value>
@@ -4360,7 +4410,7 @@
     <value>Přejít na domovskou stránku</value>
   </data>
   <data name="AddressBar" xml:space="preserve">
-    <value>Address bar</value>
+    <value>Adresní řádek</value>
   </data>
   <data name="UserID" xml:space="preserve">
     <value>Uživatelské ID</value>
@@ -4408,13 +4458,13 @@
     <value>Vždy přepnout na nově vytvořenou kartu</value>
   </data>
   <data name="ReverseTabScrollDirection" xml:space="preserve">
-    <value>Reverse tab scroll direction</value>
+    <value>Obrátit směr posouvání karet</value>
   </data>
   <data name="DownMotionScrollsLeft" xml:space="preserve">
-    <value>Down motion scrolls left</value>
+    <value>Pohyb dolů posouvá doleva</value>
   </data>
   <data name="DownMotionScrollsRight" xml:space="preserve">
-    <value>Down motion scrolls right</value>
+    <value>Pohyb dolů posouvá doprava</value>
   </data>
   <data name="ToggleShelfPane" xml:space="preserve">
     <value>Zobrazit/skrýt odkládací panel</value>
@@ -4433,7 +4483,7 @@
     <value>Odebrat položky</value>
   </data>
   <data name="BatchAction" xml:space="preserve">
-    <value>Batch action</value>
+    <value>Hromadná akce</value>
   </data>
   <data name="RemoveFromShelf" xml:space="preserve">
     <value>Odebrat z panelu</value>
@@ -4473,13 +4523,13 @@
     <value>Otevřít nastavení</value>
   </data>
   <data name="NetworkDiscoveryTurnedOffInfoBarMessage" xml:space="preserve">
-    <value>Network discovery is turned off. Network computers and devices are not visible.</value>
+    <value>Zjišťování sítě je vypnuté. Počítače a zařízení v síti nejsou viditelné.</value>
   </data>
   <data name="FileSharingTurnedOffInfoBarMessage" xml:space="preserve">
-    <value>File sharing is turned off. Some network computers and devices might not be visible.</value>
+    <value>Sdílení souborů je vypnuté. Některé počítače a zařízení v síti nemusí být viditelné.</value>
   </data>
   <data name="NetworkDiscoveryAndFileSharingTurnedOffInfoBarMessage" xml:space="preserve">
-    <value>Network discovery and file sharing are turned off. Network computers and devices are not visible.</value>
+    <value>Zjišťování sítě a sdílení souborů jsou vypnuté. Počítače a zařízení v síti nejsou viditelné.</value>
   </data>
   <data name="VisualStudioCode" xml:space="preserve">
     <value>Visual Studio Code</value>
@@ -4552,10 +4602,10 @@
     <value>Zobrazit zjednodušenou cestu</value>
   </data>
   <data name="BreadcrumbBarChevronButtonToolTip" xml:space="preserve">
-    <value>Show folders in {0}</value>
+    <value>Zobrazit složky v umístění {0}</value>
   </data>
   <data name="BreadcrumbBarRootChevronButtonToolTip" xml:space="preserve">
-    <value>Show folders in Home</value>
+    <value>Zobrazit složky na domovské stránce</value>
   </data>
   <data name="NoCommandsFound" xml:space="preserve">
     <value>Nebyly nalezeny žádné příkazy obsahující {0}</value>
@@ -4573,7 +4623,7 @@
     <value>Podpisy</value>
   </data>
   <data name="SignatureList" xml:space="preserve">
-    <value>Signature list</value>
+    <value>Seznam podpisů</value>
   </data>
   <data name="IssuedBy" xml:space="preserve">
     <value>Vydal:</value>
@@ -4588,156 +4638,348 @@
     <value>Platné do:</value>
   </data>
   <data name="NoSignatureFound" xml:space="preserve">
-    <value>No signature was found.</value>
+    <value>Nebyl nalezen žádný podpis.</value>
   </data>
   <data name="ShowOpenTerminal" xml:space="preserve">
-    <value>Show option to open folders in Windows Terminal</value>
+    <value>Zobrazit možnost otevírat složky v aplikaci Windows Terminal</value>
   </data>
   <data name="OpenLogFile" xml:space="preserve">
-    <value>Open log file</value>
+    <value>Otevřít soubor protokolu</value>
   </data>
   <data name="OpenLogFileDescription" xml:space="preserve">
-    <value>Open log file in your default editor</value>
+    <value>Otevřít soubor protokolu ve výchozím editoru</value>
   </data>
   <data name="OpenLogFileLocationDescription" xml:space="preserve">
-    <value>Open log file location in your default file manager</value>
+    <value>Otevřít umístění souboru protokolu ve výchozím správci souborů</value>
   </data>
   <data name="FailedToOpenLogFile" xml:space="preserve">
-    <value>Unable to open the log file</value>
+    <value>Soubor protokolu nelze otevřít</value>
   </data>
   <data name="ShowStatusBar" xml:space="preserve">
-    <value>Show status bar</value>
+    <value>Zobrazit stavový řádek</value>
   </data>
   <data name="OnlyForTouch" xml:space="preserve">
-    <value>When using touch</value>
+    <value>Při dotykovém ovládání</value>
   </data>
   <data name="OnlyForMouse" xml:space="preserve">
-    <value>When using mouse</value>
+    <value>Při ovládání myší</value>
   </data>
   <data name="CreateNewFile" xml:space="preserve">
     <value>Nový {0}</value>
   </data>
   <data name="EnableSmoothScrolling" xml:space="preserve">
-    <value>Enable smooth scrolling</value>
+    <value>Povolit plynulé posouvání</value>
   </data>
   <data name="Scrolling" xml:space="preserve">
-    <value>Scrolling</value>
+    <value>Posouvání</value>
   </data>
   <data name="ShowPinToSideBar" xml:space="preserve">
-    <value>Show option to Pin to Sidebar</value>
+    <value>Zobrazit možnost připnout do postranního panelu</value>
   </data>
   <data name="ShowPinToStart" xml:space="preserve">
-    <value>Show option to Pin to the Start Menu</value>
+    <value>Zobrazit možnost připnout do nabídky Start</value>
   </data>
   <data name="Toolbar" xml:space="preserve">
-    <value>Toolbar</value>
+    <value>Panel nástrojů</value>
   </data>
   <data name="CustomizeToolbar" xml:space="preserve">
-    <value>Customize toolbar</value>
+    <value>Přizpůsobit panel nástrojů</value>
   </data>
   <data name="CustomizeToolbarDescription" xml:space="preserve">
-    <value>Customize toolbar buttons</value>
+    <value>Přizpůsobit tlačítka panelu nástrojů</value>
   </data>
   <data name="ChooseToolbarModeToCustomize" xml:space="preserve">
-    <value>Choose toolbar mode to customize</value>
+    <value>Vyberte režim panelu nástrojů, který chcete přizpůsobit</value>
   </data>
   <data name="AlwaysVisible" xml:space="preserve">
-    <value>Always visible</value>
+    <value>Vždy viditelné</value>
   </data>
   <data name="ArchiveFiles" xml:space="preserve">
-    <value>Archive files</value>
+    <value>Archivy</value>
   </data>
   <data name="BatchFiles" xml:space="preserve">
-    <value>Batch files</value>
+    <value>Dávkové soubory</value>
   </data>
   <data name="PowerShellFiles" xml:space="preserve">
-    <value>PowerShell files</value>
+    <value>Soubory PowerShellu</value>
   </data>
   <data name="MediaFiles" xml:space="preserve">
-    <value>Media files</value>
+    <value>Multimediální soubory</value>
   </data>
   <data name="FontFiles" xml:space="preserve">
-    <value>Font files</value>
+    <value>Soubory písem</value>
   </data>
   <data name="DriverFiles" xml:space="preserve">
-    <value>Driver files</value>
+    <value>Soubory ovladačů</value>
   </data>
   <data name="CertificateFiles" xml:space="preserve">
-    <value>Certificate files</value>
+    <value>Soubory certifikátů</value>
   </data>
   <data name="OtherContexts" xml:space="preserve">
-    <value>Other contexts</value>
+    <value>Další kontexty</value>
   </data>
   <data name="Archive" xml:space="preserve">
-    <value>Archive</value>
+    <value>Archiv</value>
   </data>
   <data name="Run" xml:space="preserve">
-    <value>Run</value>
+    <value>Spustit</value>
   </data>
   <data name="Start" xml:space="preserve">
     <value>Start</value>
   </data>
   <data name="Selection" xml:space="preserve">
-    <value>Selection</value>
+    <value>Výběr</value>
   </data>
   <data name="Show" xml:space="preserve">
-    <value>Show</value>
+    <value>Zobrazit</value>
   </data>
   <data name="Navigation" xml:space="preserve">
-    <value>Navigation</value>
+    <value>Navigace</value>
   </data>
   <data name="FileSystem" xml:space="preserve">
-    <value>File system</value>
+    <value>Systém souborů</value>
   </data>
   <data name="Window" xml:space="preserve">
-    <value>Window</value>
+    <value>Okno</value>
   </data>
   <data name="DualPaneCategory" xml:space="preserve">
-    <value>Dual Pane</value>
+    <value>Dva panely</value>
   </data>
   <data name="ResetDefaults" xml:space="preserve">
-    <value>Reset defaults</value>
+    <value>Obnovit výchozí nastavení</value>
   </data>
   <data name="Separator" xml:space="preserve">
-    <value>Separator</value>
+    <value>Oddělovač</value>
   </data>
   <data name="Icon" xml:space="preserve">
-    <value>Icon</value>
+    <value>Ikona</value>
   </data>
   <data name="Label" xml:space="preserve">
-    <value>Label</value>
+    <value>Popisek</value>
   </data>
   <data name="ShowToolbarLabels" xml:space="preserve">
-    <value>Show label</value>
+    <value>Zobrazit popisek</value>
   </data>
   <data name="ShowToolbarIconOnly" xml:space="preserve">
-    <value>Show icon</value>
+    <value>Zobrazit ikonu</value>
   </data>
   <data name="AvailableToolbarItems" xml:space="preserve">
-    <value>Available items</value>
+    <value>Dostupné položky</value>
   </data>
   <data name="AddedToolbarItems" xml:space="preserve">
-    <value>Added items</value>
+    <value>Přidané položky</value>
   </data>
   <data name="ExtractGroupDescription" xml:space="preserve">
-    <value>Extract compressed archives</value>
+    <value>Extrahovat komprimované archivy</value>
   </data>
   <data name="SetAsGroupDescription" xml:space="preserve">
-    <value>Set image as wallpaper or background</value>
+    <value>Nastavit obrázek jako tapetu nebo pozadí</value>
   </data>
   <data name="NewItemGroupDescription" xml:space="preserve">
-    <value>Create new files and folders</value>
+    <value>Vytvořit nové soubory a složky</value>
   </data>
   <data name="EditTagsGroupDescription" xml:space="preserve">
-    <value>Add or remove file tags</value>
+    <value>Přidat nebo odebrat štítky souborů</value>
   </data>
   <data name="RemoveTags" xml:space="preserve">
-    <value>Remove tags</value>
+    <value>Odebrat štítky</value>
   </data>
   <data name="RemoveTagsDescription" xml:space="preserve">
-    <value>Remove tags from the selected items</value>
+    <value>Odebrat štítky z vybraných položek</value>
   </data>
   <data name="ConfirmRemoveTagsDialogContent" xml:space="preserve">
-    <value>Are you sure you want to remove tags from the selected items?</value>
+    <value>Opravdu chcete odebrat štítky z vybraných položek?</value>
   </data>
+  <data name="SearchForQuery" xml:space="preserve">
+    <value>Vyhledat „{0}“</value>
+  </data>
+  <data name="OmnibarSwitchToTabDescription" xml:space="preserve">
+    <value>Přepnout na kartu {0} · {1}</value>
+    <comment>{0} is the 1-based tab position, {1} the tab's location (may be empty)</comment>
+  </data>
+  <data name="NaiAssistantTitle" xml:space="preserve"><value>Asistent NAI Files</value></data>
+  <data name="NaiOpened" xml:space="preserve"><value>Otevřeno v aplikaci Files</value></data>
+  <data name="NaiUnopened" xml:space="preserve"><value>Dosud neotevřeno v aplikaci Files</value></data>
+  <data name="NaiOpenedAt" xml:space="preserve"><value>Naposledy otevřeno: {0} · Počet spuštění: {1}</value></data>
+  <data name="NaiMarkUnopened" xml:space="preserve"><value>Označit jako neotevřené</value></data>
+  <data name="NaiActionSummary" xml:space="preserve"><value>Shrnout dokumenty</value></data>
+  <data name="NaiActionQuestion" xml:space="preserve"><value>Zeptat se na vybrané dokumenty</value></data>
+  <data name="NaiActionKeyPoints" xml:space="preserve"><value>Vypsat hlavní body</value></data>
+  <data name="NaiActionTasks" xml:space="preserve"><value>Vypsat úkoly a termíny</value></data>
+  <data name="NaiActionExplain" xml:space="preserve"><value>Vysvětlit srozumitelně</value></data>
+  <data name="NaiActionTranslate" xml:space="preserve"><value>Přeložit vybraný text</value></data>
+  <data name="NaiActionCompare" xml:space="preserve"><value>Porovnat dokumenty</value></data>
+  <data name="NaiActionName" xml:space="preserve"><value>Navrhnout výstižné názvy souborů</value></data>
+  <data name="NaiActionTags" xml:space="preserve"><value>Navrhnout štítky a kategorie</value></data>
+  <data name="NaiActionOrganize" xml:space="preserve"><value>Navrhnout uspořádání složek</value></data>
+  <data name="NaiActionSearch" xml:space="preserve"><value>Převést otázku na vyhledávání v indexu</value></data>
+  <data name="NaiAiConsent" xml:space="preserve"><value>Souhlasím s odesláním zobrazeného výběru a otázky nastavenému poskytovateli AI prostřednictvím Kelvin AI Workstation. Obsah dokumentů se nikdy neodesílá automaticky.</value></data>
+  <data name="NaiAiReview" xml:space="preserve"><value>Jde pouze o návrhy. Žádné soubory se automaticky nepřejmenovávají, nepřesouvají, nemažou ani nespouštějí. Před použitím výstup AI zkontrolujte.</value></data>
+  <data name="NaiAiGenerate" xml:space="preserve"><value>Vygenerovat</value></data>
+  <data name="NaiAiPrompt" xml:space="preserve"><value>Vaše otázka, pokyny nebo cílový jazyk…</value></data>
+  <data name="NaiAiConnect" xml:space="preserve"><value>Připojit ke Kelvin AI Workstation</value></data>
+  <data name="NaiAiUnavailable" xml:space="preserve"><value>Brána AI není dostupná nebo tato aplikace Files není spárovaná. Vyhledávání a místní historie dokumentů nadále fungují.</value></data>
+  <data name="NaiAiNoSelection" xml:space="preserve"><value>Nejprve vyberte dokumenty. Text, Markdown, DOCX, ODT a PPTX se čtou místně jako omezené úryvky. U nepodporovaných, nedostupných nebo příliš velkých dokumentů se používají pouze názvy a metadata.</value></data>
+  <data name="NaiAiPreview" xml:space="preserve"><value>Obsah, který bude odeslán</value></data>
+  <data name="NaiAiModel" xml:space="preserve"><value>Model</value></data>
+  <data name="NaiAiResult" xml:space="preserve"><value>Výsledek AI</value></data>
+  <data name="NaiAiFailure" xml:space="preserve"><value>Požadavek se nezdařil. Žádné soubory nebyly změněny. {0}</value></data>
+  <data name="NaiAiApplySearch" xml:space="preserve"><value>Zkontrolovat a spustit vyhledávání</value></data>
+  <data name="NaiAiPairCode" xml:space="preserve"><value>Párovací kód</value></data>
+  <data name="NaiAiPair" xml:space="preserve"><value>Spárovat aplikaci Files</value></data>
+  <data name="NaiAiDisconnect" xml:space="preserve"><value>Odpojit aplikaci Files od AI</value></data>
+  <data name="NaiAiConnected" xml:space="preserve"><value>Připojeno ke Kelvin AI Workstation. Zvolený model určuje, kde probíhá zpracování požadavků AI.</value></data>
+  <data name="NaiSearchHint" xml:space="preserve"><value>Fuzzy search · files: název · unread: název · read: název · content: slova · $AQS</value></data>
+  <data name="NaiLanguageRestart" xml:space="preserve"><value>Jazyk se nyní řídí nastavením NAI OS. Znovu spusťte aplikaci Files, aby se aktualizovaly již zobrazené stránky; vaše karty budou obnoveny.</value></data>
+  <data name="NaiLanguageManaged" xml:space="preserve"><value>Jazyk se řídí nastavením NAI OS. Již otevřené stránky mohou vyžadovat restart; vaše karty se zachovají.</value></data>
+  <data name="NaiAiInvalidResponse" xml:space="preserve"><value>Model nevrátil ověřitelný návrh. Žádné soubory se nezměnily. Upravte zadání nebo vyberte jiný model.</value></data>
+  <data name="NaiFuzzySearch" xml:space="preserve"><value>Fuzzy search</value></data>
+  <data name="NaiAssistantShortTitle" xml:space="preserve"><value>AI asistent</value></data>
+  <data name="NaiProductName" xml:space="preserve"><value>NAI Průzkumník</value></data>
+  <data name="NaiConnectionSettings" xml:space="preserve"><value>Model a připojení ke Kelvin AI Workstation</value></data>
+  <data name="NaiChooseAction" xml:space="preserve"><value>Co chcete se soubory udělat?</value></data>
+  <data name="NaiNoCompatibleModel" xml:space="preserve"><value>Kelvin AI Workstation nenabízí kompatibilní chatový model. Řečové a embeddingové modely se zde nezobrazují.</value></data>
+  <data name="NaiPinnedModelUnavailable" xml:space="preserve"><value>Vybraný model není dostupný nebo kompatibilní: {0}. Vyberte jiný model výslovně.</value></data>
+  <data name="NaiSortDirection" xml:space="preserve"><value>Přepnout vzestupné / sestupné řazení</value></data>
+  <data name="NaiAttributeFilterHint" xml:space="preserve"><value>Omezí aktuální seznam podle vlastností souborů. Fuzzy search hledá podobné názvy, AI vision hledá obsah obrázků.</value></data>
+  <data name="NaiThumbnailProgress" xml:space="preserve"><value>Náhledy: {0} připraveno · {1} ve frontě · {2} se načítají · {3} nedostupných bez stažení · {4} chyb</value></data>
+  <data name="NaiVisionTitle" xml:space="preserve"><value>Obrázky s AI</value></data>
+  <data name="NaiVisionDescription" xml:space="preserve"><value>Hledejte analyzované obrázky podle viditelného obsahu, popisů, OCR a štítků. Psaní prohledává pouze místní cache; analýza obrázků vyžaduje váš souhlas.</value></data>
+  <data name="NaiVisionFolder" xml:space="preserve"><value>Aktuální složka</value></data>
+  <data name="NaiChooseFolder" xml:space="preserve"><value>Vybrat složku</value></data>
+  <data name="NaiVisionSearchHint" xml:space="preserve"><value>Fuzzy search — popište obrázek nebo screenshot…</value></data>
+  <data name="NaiVisionAllCache" xml:space="preserve"><value>Všechny analyzované obrázky</value></data>
+  <data name="NaiVisionTags" xml:space="preserve"><value>Vygenerované štítky</value></data>
+  <data name="NaiVisionAnalyze" xml:space="preserve"><value>Analyzovat tuto složku</value></data>
+  <data name="NaiVisionConsent" xml:space="preserve"><value>Souhlasím s analýzou obrázků v této složce výslovně vybraným modelem přes Kelvin AI Workstation. Čtou se pouze místně dostupné obrázky; online soubory a podsložky se přeskakují. Bez automatického přepnutí do cloudu nebo na CPU.</value></data>
+  <data name="NaiVisionResults" xml:space="preserve"><value>{0} odpovídajících obrázků · {1} analýz v cache</value></data>
+  <data name="NaiVisionProgress" xml:space="preserve"><value>{0} analyzováno · {1} v cache · {2} přeskočeno · {3} chyb / {4} obrázků · {5}</value></data>
+  <data name="NaiAllTags" xml:space="preserve"><value>Všechny štítky</value></data>
+  <data name="NaiVisionTranslate" xml:space="preserve"><value>Hledat napříč jazyky</value></data>
+  <data name="NaiVisionChooseModel" xml:space="preserve"><value>Výslovně vyberte kompatibilní model</value></data>
+  <data name="NaiVisionQueryConsent" xml:space="preserve"><value>Odeslat pouze tento hledaný výraz modelu {0} přes Kelvin AI Workstation? Obrázky, názvy souborů ani popisy z cache se neodesílají. Bez náhradního modelu.&#10;&#10;{1}</value></data>
+  <data name="NaiVisionInterpreted" xml:space="preserve"><value>Interpretace hledání: {0} · {1}</value></data>
+  <data name="NaiVisionLiteralSearch" xml:space="preserve"><value>Překlad není dostupný; zobrazené výsledky nadále používají původní výraz. {0}</value></data>
+  <data name="NaiVisionStale" xml:space="preserve"><value>Analýza z cache: zdroj se změnil nebo už není dostupný. Nejde o důkaz jeho aktuálního obsahu.</value></data>
+  <data name="NaiOpenSource" xml:space="preserve"><value>Otevřít zdroj</value></data>
+  <data name="NaiRevealSource" xml:space="preserve"><value>Zobrazit ve složce</value></data>
+  <data name="NaiWorkspaceTitle" xml:space="preserve"><value>Pracovní prostor souborů</value></data>
+  <data name="NaiWorkspaceDescription" xml:space="preserve"><value>Pojmenované sady karet, skutečné souborové operace, přehled úložiště, historie otevření a porovnání složek. Kontroly nikdy nepřesouvají ani nemažou soubory.</value></data>
+  <data name="NaiWorkspaceSaved" xml:space="preserve"><value>Uložené pracovní prostory</value></data>
+  <data name="NaiWorkspaceSave" xml:space="preserve"><value>Uložit aktuální karty</value></data>
+  <data name="NaiWorkspaceRestore" xml:space="preserve"><value>Obnovit do nových karet</value></data>
+  <data name="NaiWorkspaceForget" xml:space="preserve"><value>Zapomenout uloženou položku</value></data>
+  <data name="NaiWorkspaceName" xml:space="preserve"><value>Název (existující se nahradí)</value></data>
+  <data name="NaiWorkspaceStorage" xml:space="preserve"><value>Největší soubory</value></data>
+  <data name="NaiWorkspaceDuplicates" xml:space="preserve"><value>Ověřit přesné duplicity</value></data>
+  <data name="NaiWorkspaceHistory" xml:space="preserve"><value>Historie otevření dokumentů</value></data>
+  <data name="NaiWorkspaceCompare" xml:space="preserve"><value>Porovnat se složkou…</value></data>
+  <data name="NaiWorkspaceChanges" xml:space="preserve"><value>Změny a zastaralé analýzy</value></data>
+  <data name="NaiWorkspaceGroups" xml:space="preserve"><value>Návrhy seskupení z AI</value></data>
+  <data name="NaiWorkspaceOperations" xml:space="preserve"><value>Probíhající operace a průběh</value></data>
+  <data name="NaiWorkspaceCancelled" xml:space="preserve"><value>Kontrola zrušena. Žádné soubory se nezměnily.</value></data>
+  <data name="NaiWorkspaceResults" xml:space="preserve"><value>Zobrazeno {0} z {1} výsledků. Vyberte soubor pro zobrazení v jeho složce.</value></data>
+  <data name="NaiWorkspaceScope" xml:space="preserve"><value>Pouze přímý obsah složky: {0} položek · {1} nepřístupných · {2}</value></data>
+  <data name="NaiWorkspaceTruncated" xml:space="preserve"><value>Dosažen limit 10 000 položek; výsledky nejsou úplné</value></data>
+  <data name="NaiWorkspaceOnlineOnly" xml:space="preserve"><value>Není vhodný pro místní čtení obsahu</value></data>
+  <data name="NaiWorkspaceComparisonNote" xml:space="preserve"><value>Porovnání metadat bez rekurze a synchronizace. Shodná metadata nedokazují shodný obsah. Druhá složka:</value></data>
+  <data name="NaiCompareOnlyLeft" xml:space="preserve"><value>Pouze v aktuální složce</value></data>
+  <data name="NaiCompareOnlyRight" xml:space="preserve"><value>Pouze v porovnávané složce</value></data>
+  <data name="NaiCompareTypeChanged" xml:space="preserve"><value>Liší se typ soubor/složka</value></data>
+  <data name="NaiCompareMetadataChanged" xml:space="preserve"><value>Liší se velikost nebo čas změny</value></data>
+  <data name="NaiCompareMetadataEqual" xml:space="preserve"><value>Metadata se shodují; obsah nebyl porovnán</value></data>
+  <data name="NaiWorkspaceHashConsent" xml:space="preserve"><value>Přečíst místní soubory v této složce a ověřit kandidáty se stejnou velikostí pomocí SHA-256? Online soubory, odkazy, podsložky a soubory nad 512 MiB se přeskakují. Kontrolu lze zrušit. Nic se nemaže.</value></data>
+  <data name="NaiWorkspaceHashProgress" xml:space="preserve"><value>Ověřeno {0}/{1} kandidátů · {2} přeskočeno</value></data>
+  <data name="NaiWorkspaceDuplicateGroup" xml:space="preserve"><value>{0} shodných souborů · každý {1:N0} bajtů</value></data>
+  <data name="NaiWorkspaceOpened" xml:space="preserve"><value>Naposledy otevřeno v Průzkumníku: {0} · {1} zaznamenaných otevření</value></data>
+  <data name="NaiWorkspaceNotOpened" xml:space="preserve"><value>Průzkumník nezaznamenal otevření</value></data>
+  <data name="NaiWorkspaceChangedSinceOpen" xml:space="preserve"><value>Změněno po posledním zaznamenaném otevření</value></data>
+  <data name="NaiWorkspaceChangesNote" xml:space="preserve"><value>Pouze aktuální metadata, historie otevření v Průzkumníku a původ analýz v cache. Nejde o porovnání historického obsahu.</value></data>
+  <data name="NaiWorkspaceGroupsNote" xml:space="preserve"><value>Návrhy skupin podle hlavního anglického AI štítku nejnovějších analýz v cache; každý zdroj uvádí model. Cache může být zastaralá. Složky se nevytvářejí a soubory se nepřesouvají.</value></data>
+  <data name="NaiVisionLenses" xml:space="preserve"><value>Uložená sémantická hledání</value></data>
+  <data name="NaiVisionSaveLens" xml:space="preserve"><value>Uložit hledání a rozsah</value></data>
+  <data name="NaiVisionLoadLens" xml:space="preserve"><value>Načíst uložené hledání</value></data>
+  <data name="NaiVisionDuplicates" xml:space="preserve"><value>Duplicitní obrázky v cache</value></data>
+  <data name="NaiVisionRelated" xml:space="preserve"><value>Související analyzované obrázky</value></data>
+  <data name="NaiVisionSharedTags" xml:space="preserve"><value>Společné AI štítky: {0}. Podobnost štítků, nikoli shoda pixelů či bajtů.</value></data>
+  <data name="NaiVisionRelatedResults" xml:space="preserve"><value>{0} souvisejících obrázků k {1} v aktuálním rozsahu cache</value></data>
+  <data name="NaiVisionCachedDuplicatesNote" xml:space="preserve"><value>{0} obrázků má shodné uložené hashe zdroje. Zdroje nebyly znovu přečteny; aktuální soubory ověřte kontrolou přesných duplicit.</value></data>
+  <data name="NaiResourcesTitle" xml:space="preserve"><value>Systémové prostředky</value></data>
+  <data name="NaiTelemetryUnknown" xml:space="preserve"><value>Nedostupné</value></data>
+  <data name="NaiTelemetryDisk" xml:space="preserve"><value>Systémový disk volno/celkem</value></data>
+  <data name="NaiTelemetryObserved" xml:space="preserve"><value>Změřeno v {0}</value></data>
+  <data name="NaiTelemetrySource" xml:space="preserve"><value>Časové čítače skupiny procesorů Windows, fyzická RAM, kapacita systémového disku a signál Wi-Fi. Kapacita disku není vytížení I/O. Neznámé hodnoty GPU/NPU se neodhadují z rezervací plánovače.</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Topologie a fronta Kelvin</value></data>
+  <data name="NaiRuntimeDescription" xml:space="preserve"><value>Snímek Kelvin AI Workstation pouze pro čtení s vlastním párováním Průzkumníku. Nespouští modely. Zobrazuje příslušnost poskytovatelů a skutečné přiřazení zařízení, nikoli měřený provoz nebo odhad výkonu.</value></data>
+  <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Obnovit snímek</value></data>
+  <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Živý snímek není dostupný. Zobrazený snímek je zastaralý; připojte Kelvin AI Workstation přes NAI Assistant. {0}</value></data>
+  <data name="NaiRuntimeSnapshotAt" xml:space="preserve"><value>Snímek zachycen: {0}</value></data>
+  <data name="NaiRuntimeQueue" xml:space="preserve"><value>Orchestrátor Kelvin: {0} aktivních rezervací · {1} ve frontě. Přímé chatové požadavky nejsou zahrnuty.</value></data>
+  <data name="NaiRuntimeQueueUnknown" xml:space="preserve"><value>Fronta orchestrátoru není dostupná, nikoli prázdná.</value></data>
+  <data name="NaiRuntimeAssignments" xml:space="preserve"><value>Přiřazení úloh (schopnost · stav · poskytovatel → zařízení)</value></data>
+  <data name="NaiRuntimeRelationships" xml:space="preserve"><value>Pozorované vztahy topologie</value></data>
+  <data name="NaiRuntimeTruncated" xml:space="preserve"><value>Dosažen limit snímku; přehled není úplný.</value></data>
+  <data name="NaiRuntimeReadOnly" xml:space="preserve"><value>Pouze pro čtení. Obnovuje se každých pět sekund, když je stránka viditelná.</value></data>
+  <data name="NaiEmailTitle" xml:space="preserve"><value>Přehled NAI E-MAIL</value></data>
+  <data name="NaiEmailDescription" xml:space="preserve"><value>Živá metadata pouze pro čtení z běžícího okna NAI E-Mail a výslovně schválených účtů vlastníka. Nechte obě aplikace otevřené; tato stránka to zkouší každých pět sekund. Přílohy a schůzky se otevírají v NAI E-Mail. Průzkumník nikdy nečte databázi schránek, těla zpráv, přepisy ani diskové cesty příloh.</value></data>
+  <data name="NaiEmailInbox" xml:space="preserve"><value>Otevřít doručenou poštu</value></data>
+  <data name="NaiEmailAttachments" xml:space="preserve"><value>Nedávné přílohy</value></data>
+  <data name="NaiEmailCalendar" xml:space="preserve"><value>Dnešní schůzky</value></data>
+  <data name="NaiEmailTasks" xml:space="preserve"><value>Otevřít úkoly</value></data>
+  <data name="NaiEmailGrantMissing" xml:space="preserve"><value>Nechte NAI E-Mail otevřený. Přehled v Průzkumníku ve výchozím stavu používá každou schránku vlastníka; vlastní oprávnění uživatele Windows se najde automaticky. Nastavení → AI otevírejte jen pro zúžení nebo odvolání přístupu.</value></data>
+  <data name="NaiEmailUnavailable" xml:space="preserve"><value>Přehled pošty není dostupný. Staré řádky se mažou, nikoli vydávají za aktuální. {0}</value></data>
+  <data name="NaiEmailSummary" xml:space="preserve"><value>Dnes: {0} přijatých nepřečtených vláken · {1} splatných hlavních úkolů · {2} schůzek · {3} schválených účtů</value></data>
+  <data name="NaiEmailProvenance" xml:space="preserve"><value>Živá cache NAI E-Mail · snímek {0} · den {1} ({2}). Obnovuje se každých pět sekund, dokud je tato stránka a NAI E-Mail otevřené.</value></data>
+  <data name="NaiEmailAllDay" xml:space="preserve"><value>Celý den</value></data>
+  <data name="NaiEmailHasRecord" xml:space="preserve"><value>V E-Mailu existuje záznam schůzky</value></data>
+  <data name="NaiEmailOpenFailed" xml:space="preserve"><value>NAI E-Mail se nepodařilo otevřít. Nainstalujte nebo opravte registraci protokolu aplikace.</value></data>
+  <data name="NaiTelemetryGpuSource" xml:space="preserve"><value>GPU/NPU používá nejvytíženější změřený engine adaptéru z Windows PDH. Identifikátory jsou Windows LUID/fyzické uzly, nikoli vymyšlené indexy OpenVINO. Chybějící poskytovatelé čítačů zůstávají nedostupní.</value></data>
+  <data name="NaiEmailTimeout" xml:space="preserve"><value>NAI E-Mail nedokončil odpověď před vypršením limitu požadavku.</value></data>
+  <data name="NaiEmailWaiting" xml:space="preserve"><value>Čeká se na běžící okno NAI E-Mail se schváleným přístupem pro Průzkumník. Tato stránka to zkouší každých pět sekund, dokud jsou obě aplikace otevřené.</value></data>
+  <data name="NaiRequestTimeout" xml:space="preserve"><value>Požadovaná služba překročila časový limit. Nebyl použit jiný poskytovatel.</value></data>
+  <data name="NaiWorkspaceSection" xml:space="preserve"><value>NAI OS</value></data>
+  <data name="NaiAiPairingCapabilities" xml:space="preserve"><value>Kelvin vrátil starší registraci Files bez embeddings, rerank a chat. V integracích Kelvin odvolejte pouze nai-files a znovu připojte Files. Pověření jiné aplikace se nepoužije.</value></data>
+  <data name="NaiSearchMode" xml:space="preserve"><value>Režim hledání</value></data>
+  <data name="NaiSearchLocal" xml:space="preserve"><value>Místní fuzzy / AQS</value></data>
+  <data name="NaiSearchSemantic" xml:space="preserve"><value>Sémantické · NPU</value></data>
+  <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Index</value></data>
+  <data name="NaiSemanticTitle" xml:space="preserve"><value>Sémantické hledání souborů</value></data>
+  <data name="NaiSemanticDescription" xml:space="preserve"><value>Hledání ve schváleném obsahu dokumentů přes místní NPU index Kelvina. Je oddělené od místního fuzzy/AQS hledání názvů. Indexování je výslovné, omezené a zrušitelné; zastaralé verze zdrojů se vylučují.</value></data>
+  <data name="NaiSemanticRecursive" xml:space="preserve"><value>Zahrnout podsložky (nikdy nenásledovat odkazy)</value></data>
+  <data name="NaiSemanticConsent" xml:space="preserve"><value>Souhlasím se čtením zkontrolovaných místních dokumentů a uložením omezených úryvků a vektorů v Kelvinu. Bez online souborů, odkazů a cloudového fallbacku. Před indexováním zkontroluji seznam souborů.</value></data>
+  <data name="NaiSemanticIndex" xml:space="preserve"><value>Zkontrolovat a indexovat</value></data>
+  <data name="NaiSemanticApprove" xml:space="preserve"><value>Indexovat schválené soubory</value></data>
+  <data name="NaiSemanticForget" xml:space="preserve"><value>Odstranit tento index</value></data>
+  <data name="NaiSemanticForgetConfirm" xml:space="preserve"><value>Odstranit pouze index této složky patřící Průzkumníku a přesná evidovaná ID úryvků? Zdrojové soubory ani indexy jiných aplikací se nezmění.</value></data>
+  <data name="NaiSemanticQueryHint" xml:space="preserve"><value>Popište hledaný význam; odesláním se dotážete NPU</value></data>
+  <data name="NaiSemanticChooseFolder" xml:space="preserve"><value>Vyberte místní složku. Indexování celého disku ani na pozadí se nespouští automaticky.</value></data>
+  <data name="NaiSemanticIndexRequired" xml:space="preserve"><value>Pro tuto složku není schválený sémantický index. Otevřete Index, zkontrolujte rozsah a indexujte vybrané dokumenty.</value></data>
+  <data name="NaiSemanticIndexState" xml:space="preserve"><value>{0} evidovaných dokumentů · aktualizace {1} · {2} · {3} přesných ID čeká na úklid</value></data>
+  <data name="NaiSemanticPartial" xml:space="preserve"><value>Částečné / omezené pokrytí</value></data>
+  <data name="NaiSemanticReady" xml:space="preserve"><value>Schválený průchod dokončen</value></data>
+  <data name="NaiSemanticRetrievalUnavailable" xml:space="preserve"><value>Kelvin je spárován, ale lokální služba NPU vyhledávání není k dispozici. Spusťte službu OpenVINO NPU v Kelvinu a zkuste to znovu.</value></data>
+  <data name="NaiSemanticReviewPlan" xml:space="preserve"><value>Schválit těchto {0} dokumentů? Přeskočeno {1} nepodporovaných či nedostupných položek. {2} Limity: 256 souborů, 32 MiB na soubor, 512 MiB na průchod, prvních 24 000 znaků a nejvýše 16 úryvků na dokument. Zdrojové soubory se nemění. Úryvky a embeddingy zůstávají u výslovně spárovaného místního NPU.</value></data>
+  <data name="NaiSemanticProgress" xml:space="preserve"><value>{0}/{1} zkontrolováno · {2} indexováno · {3} beze změny · {4} přeskočeno · {5} chyb</value></data>
+  <data name="NaiSemanticCancelled" xml:space="preserve"><value>Indexování či dotaz zrušen. Checkpointy dokončených dokumentů zůstávají; úklid přesných ID je evidován.</value></data>
+  <data name="NaiSemanticSearchFailure" xml:space="preserve"><value>Sémantické hledání/index není dostupný — bez místní či poskytovatelové náhrady: {0}</value></data>
+  <data name="NaiSemanticResults" xml:space="preserve"><value>Pořadí relevance NPU: {0} výsledků · {1} aktuálních dokumentů · {2} zastaralých/nedostupných dokumentů vyloučeno</value></data>
+  <data name="NaiSemanticEvidence" xml:space="preserve"><value>Skóre rerank {0:F4} · indexováno {1} · uložený úryvek, nikoli nové čtení dokumentu</value></data>
+  <data name="NaiSemanticFullResults" xml:space="preserve"><value>Otevřít výsledky Průzkumníku</value></data>
+  <data name="PulseMediaStartFailed" xml:space="preserve"><value>{0} nelze spustit: {1}</value></data>
+  <data name="PulseMediaProcessFailed" xml:space="preserve"><value>{0} skončil chybou (kód {1}).
+{2}</value></data>
+  <data name="PulseMediaTimedOut" xml:space="preserve"><value>{0} neodpovídá. Operace byla zastavena.</value></data>
+  <data name="PulseMediaOutputMissing" xml:space="preserve"><value>Výstup nebyl vytvořen: {0}</value></data>
+  <data name="PulseMediaRuntimeUnavailable" xml:space="preserve"><value>Přibalené nástroje médií nejsou dostupné.
+{0}</value></data>
+  <data name="PulseMediaPreparing" xml:space="preserve"><value>Připravuji nástroje médií…</value></data>
+  <data name="PulseMediaReady" xml:space="preserve"><value>Připraveno.</value></data>
+  <data name="PulseMediaPreviewPreparing" xml:space="preserve"><value>Připravuji kompatibilní náhled…</value></data>
+  <data name="PulseMediaActionFailed" xml:space="preserve"><value>Akce s médiem selhala</value></data>
+  <data name="DialogChooseFile" xml:space="preserve"><value>Vyberte soubor nebo zadejte jeho cestu.</value></data>
+  <data name="DialogEnterFileName" xml:space="preserve"><value>Zadejte název souboru.</value></data>
+  <data name="DialogFileMissing" xml:space="preserve"><value>Soubor nebyl nalezen: {0}</value></data>
+  <data name="DialogFolderMissing" xml:space="preserve"><value>Složka není dostupná: {0}</value></data>
+  <data name="DialogAccessDenied" xml:space="preserve"><value>Přístup odepřen: {0}</value></data>
+  <data name="DialogTypeMismatch" xml:space="preserve"><value>Soubor neodpovídá vybranému typu: {0}</value></data>
 </root>

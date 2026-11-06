@@ -33,6 +33,11 @@ namespace Files.App.Data.Enums
 		/// <summary>
 		/// Adaptive view 
 		/// </summary>
-		Adaptive = 5
+		Adaptive = 5,
+
+		/// <summary>
+		/// Pulse view: chronological media feed (newest first) with content-aware cards
+		/// </summary>
+		PulseView = 6
 	}
 }

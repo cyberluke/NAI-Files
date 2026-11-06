@@ -6,9 +6,14 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="using:Files.App.UserControls.FilePreviews"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:wctconverters="using:CommunityToolkit.WinUI.Converters"
 	d:DesignHeight="300"
 	d:DesignWidth="400"
 	mc:Ignorable="d">
+
+	<UserControl.Resources>
+		<wctconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	</UserControl.Resources>
 
 	<UserControl.KeyboardAccelerators>
 		<KeyboardAccelerator
@@ -19,19 +24,32 @@
 
 	<Border CornerRadius="{StaticResource ControlCornerRadius}">
 
-		<MediaPlayerElement
-			x:Name="PlayerContext"
-			AreTransportControlsEnabled="True"
-			Background="Transparent"
-			Foreground="Transparent"
-			Source="{x:Bind ViewModel.Source, Mode=OneWay}">
-			<MediaPlayerElement.TransportControls>
-				<MediaTransportControls
-					IsCompact="True"
-					IsPlaybackRateButtonVisible="False"
-					IsZoomButtonVisible="False" />
-			</MediaPlayerElement.TransportControls>
-		</MediaPlayerElement>
+		<Grid>
+			<Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+			<MediaPlayerElement
+				x:Name="PlayerContext"
+				AreTransportControlsEnabled="True"
+				Background="Transparent"
+				Foreground="Transparent">
+				<MediaPlayerElement.TransportControls>
+					<MediaTransportControls
+						IsCompact="True"
+						IsPlaybackRateButtonVisible="False"
+						IsZoomButtonVisible="False" />
+				</MediaPlayerElement.TransportControls>
+			</MediaPlayerElement>
+
+			<ProgressRing
+				x:Name="PreparingRing"
+				Width="36"
+				Height="36"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				IsActive="{x:Bind ViewModel.IsPreparing, Mode=OneWay}"
+				Visibility="{x:Bind ViewModel.IsPreparing, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" />
+			<InfoBar Grid.Row="1" IsClosable="False" Severity="Error"
+				IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}" Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+		</Grid>
 
 	</Border>
 </UserControl>

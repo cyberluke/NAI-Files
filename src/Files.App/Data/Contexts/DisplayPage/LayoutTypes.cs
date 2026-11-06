@@ -12,5 +12,6 @@ namespace Files.App.Data.Contexts
 		Grid,
 		Columns,
 		Adaptive,
+		Pulse,
 	}
 }

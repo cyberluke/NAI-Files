@@ -1,0 +1,270 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<ContentDialog
+	x:Class="Files.App.Dialogs.PulseImageToolDialog"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	x:Name="ImageToolDialog"
+	Title="{helpers:ResourceString Name=PulseImageDialogTitle}"
+	CloseButtonText="{helpers:ResourceString Name=PulseTrimCancel}"
+	CornerRadius="{StaticResource OverlayCornerRadius}"
+	DefaultButton="Primary"
+	HighContrastAdjustment="None"
+	MaxWidth="680"
+	PrimaryButtonClick="PrimaryButton_Click"
+	PrimaryButtonStyle="{StaticResource AccentButtonStyle}"
+	PrimaryButtonText="{helpers:ResourceString Name=PulseImageApply}"
+	RequestedTheme="{x:Bind RootAppElement.RequestedTheme, Mode=OneWay}"
+	Style="{StaticResource DefaultContentDialogStyle}"
+	mc:Ignorable="d">
+
+	<Grid MinWidth="540" RowSpacing="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<!--  Source file + dimensions  -->
+		<StackPanel Grid.Row="0" Orientation="Vertical" Spacing="2">
+			<TextBlock
+				x:Name="FileNameText"
+				FontSize="13"
+				FontWeight="SemiBold"
+				TextTrimming="CharacterEllipsis"
+				TextWrapping="NoWrap" />
+			<TextBlock
+				x:Name="SizeText"
+				FontSize="11"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+		</StackPanel>
+
+		<!--  Preview with interactive crop overlay  -->
+		<Border
+			Grid.Row="1"
+			HorizontalAlignment="Center"
+			Background="#120F2E"
+			CornerRadius="8">
+			<Grid
+				x:Name="ImageHost"
+				PointerMoved="ImageHost_PointerMoved"
+				PointerPressed="ImageHost_PointerPressed"
+				PointerReleased="ImageHost_PointerReleased">
+				<Image
+					x:Name="PreviewImage"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Stretch"
+					Stretch="Uniform"
+					Visibility="Collapsed" />
+				<Canvas
+					x:Name="CropCanvas"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Stretch"
+					IsHitTestVisible="False">
+					<Rectangle
+						x:Name="OutsideDim"
+						Canvas.ZIndex="1"
+						Fill="#66000000" />
+					<Border
+						x:Name="CropRectVisual"
+						Canvas.ZIndex="2"
+						BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+						BorderThickness="1.5" />
+					<Rectangle
+						x:Name="HandleTL"
+						Canvas.ZIndex="3"
+						Width="12"
+						Height="12"
+						Fill="{ThemeResource AccentFillColorDefaultBrush}"
+						Stroke="White"
+						StrokeThickness="1" />
+					<Rectangle
+						x:Name="HandleTR"
+						Canvas.ZIndex="3"
+						Width="12"
+						Height="12"
+						Fill="{ThemeResource AccentFillColorDefaultBrush}"
+						Stroke="White"
+						StrokeThickness="1" />
+					<Rectangle
+						x:Name="HandleBL"
+						Canvas.ZIndex="3"
+						Width="12"
+						Height="12"
+						Fill="{ThemeResource AccentFillColorDefaultBrush}"
+						Stroke="White"
+						StrokeThickness="1" />
+					<Rectangle
+						x:Name="HandleBR"
+						Canvas.ZIndex="3"
+						Width="12"
+						Height="12"
+						Fill="{ThemeResource AccentFillColorDefaultBrush}"
+						Stroke="White"
+						StrokeThickness="1" />
+				</Canvas>
+				<TextBlock
+					x:Name="LoadingText"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Foreground="White"
+					FontSize="12"
+					Text="{helpers:ResourceString Name=PulseImageLoading}" />
+			</Grid>
+		</Border>
+
+		<!--  Crop info + aspect  -->
+		<Grid Grid.Row="2" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<TextBlock
+				x:Name="CropSizeText"
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				FontFamily="Consolas"
+				FontSize="12"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+			<ComboBox
+				x:Name="AspectComboBox"
+				Grid.Column="1"
+				MinWidth="110"
+				SelectionChanged="AspectComboBox_SelectionChanged">
+				<ComboBoxItem Content="{helpers:ResourceString Name=PulseImageAspectFree}" />
+				<ComboBoxItem Content="1:1" />
+				<ComboBoxItem Content="4:3" />
+				<ComboBoxItem Content="16:9" />
+			</ComboBox>
+		</Grid>
+
+		<!--  Rotate + reset  -->
+		<StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8">
+			<Button Click="RotateLeft_Click">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<FontIcon FontSize="12" Glyph="&#xE7A7;" />
+					<TextBlock Text="{helpers:ResourceString Name=PulseImageRotateLeft}" />
+				</StackPanel>
+			</Button>
+			<Button Click="RotateRight_Click">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<FontIcon FontSize="12" Glyph="&#xE7A3;" />
+					<TextBlock Text="{helpers:ResourceString Name=PulseImageRotateRight}" />
+				</StackPanel>
+			</Button>
+			<Button Click="Rotate180_Click">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<FontIcon FontSize="12" Glyph="&#xE7A8;" />
+					<TextBlock Text="180°" />
+				</StackPanel>
+			</Button>
+			<Button Click="ResetCrop_Click">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<FontIcon FontSize="12" Glyph="&#xE777;" />
+					<TextBlock Text="{helpers:ResourceString Name=PulseImageResetCrop}" />
+				</StackPanel>
+			</Button>
+		</StackPanel>
+
+		<!--  Resize + format + quality  -->
+		<Grid Grid.Row="4" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<TextBlock
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				FontSize="12"
+				Text="{helpers:ResourceString Name=PulseImageResize}" />
+			<ComboBox
+				x:Name="ResizeComboBox"
+				Grid.Column="1"
+				MinWidth="120"
+				SelectedIndex="0">
+				<ComboBoxItem Content="100%" />
+				<ComboBoxItem Content="75%" />
+				<ComboBoxItem Content="50%" />
+				<ComboBoxItem Content="25%" />
+			</ComboBox>
+			<TextBlock
+				Grid.Column="2"
+				VerticalAlignment="Center"
+				FontSize="12"
+				Text="{helpers:ResourceString Name=PulseConvertFormat}" />
+			<ComboBox
+				x:Name="FormatComboBox"
+				Grid.Column="3"
+				MinWidth="110"
+				SelectionChanged="FormatComboBox_SelectionChanged">
+				<ComboBoxItem Content="PNG" />
+				<ComboBoxItem Content="JPG" />
+				<ComboBoxItem Content="WebP" />
+				<ComboBoxItem Content="BMP" />
+				<ComboBoxItem Content="TIFF" />
+			</ComboBox>
+			<Grid
+				x:Name="QualityRow"
+				Grid.Column="4"
+				ColumnSpacing="6"
+				Visibility="Collapsed">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="110" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<TextBlock
+					Grid.Column="0"
+					VerticalAlignment="Center"
+					FontSize="12"
+					Text="{helpers:ResourceString Name=PulseConvertQuality}" />
+				<Slider
+					x:Name="QualitySlider"
+					Grid.Column="1"
+					VerticalAlignment="Center"
+					Minimum="1"
+					Maximum="100"
+					StepFrequency="1"
+					Value="80" />
+				<TextBlock
+					x:Name="QualityText"
+					Grid.Column="2"
+					VerticalAlignment="Center"
+					MinWidth="30"
+					FontFamily="Consolas"
+					FontSize="12" />
+			</Grid>
+		</Grid>
+
+		<!--  Progress + status  -->
+		<Grid Grid.Row="5" ColumnSpacing="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<TextBlock
+				x:Name="StatusText"
+				Grid.Column="0"
+				VerticalAlignment="Center"
+				FontSize="12"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+				TextTrimming="CharacterEllipsis" />
+			<ProgressRing
+				x:Name="ProgressRing"
+				Grid.Column="1"
+				Width="22"
+				Height="22"
+				IsActive="False" />
+		</Grid>
+	</Grid>
+</ContentDialog>

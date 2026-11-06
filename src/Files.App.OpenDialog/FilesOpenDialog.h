@@ -6,8 +6,6 @@
 
 #pragma once
 
-#define DEBUGLOG
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -16,6 +14,8 @@
 #include "resource.h"
 #include "CustomOpenDialog_i.h"
 #include "UndefInterfaces.h"
+#include "DialogControlSelections.h"
+#include "DialogOptions.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not supported properly on the Windows CE platform, for example Windows Mobile platforms do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to make ATL support the creation of single-threaded COM objects and allow implementations with single-threaded COM objects. The threading model in the RGS file has been set to 'Free' as it is the only threading model supported on non-DCOM Windows CE platforms."
@@ -28,7 +28,6 @@ using namespace ATL;
 class ATL_NO_VTABLE CFilesOpenDialog :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CFilesOpenDialog, &CLSID_FilesOpenDialog>,
-	public IFileDialog,
 	public IFileDialog2,
 	public IFileOpenDialog,
 	public IFileDialogCustomize,
@@ -41,12 +40,12 @@ public:
 DECLARE_REGISTRY_RESOURCEID(106)
 
 CUSTOM_BEGIN_COM_MAP(CFilesOpenDialog)
-	COM_INTERFACE_ENTRY(IFileDialog)
+	COM_INTERFACE_ENTRY2(IFileDialog, IFileOpenDialog)
 	COM_INTERFACE_ENTRY(IFileDialog2)
 	COM_INTERFACE_ENTRY(IFileOpenDialog)
+	COM_INTERFACE_ENTRY2(IModalWindow, IFileOpenDialog)
 	COM_INTERFACE_ENTRY(IFileDialogCustomize)
 	COM_INTERFACE_ENTRY(IObjectWithSite)
-	COM_INTERFACE_ENTRY(IFileDialogPrivate)
 END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -60,12 +59,17 @@ END_COM_MAP()
 
 	CComPtr<IFileOpenDialog> _systemDialog;
 
-	FILEOPENDIALOGOPTIONS _fos;
+	FILEOPENDIALOGOPTIONS _fos = FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST;
 
 	std::vector<std::wstring> _selectedItems;
-	std::wstring _outputPath;
+	std::wstring _initName;
 	CComPtr<IShellItem> _initFolder;
-	CComPtr<IFileDialogEvents> _dialogEvents;
+	CComPtr<IShellItem> _defaultFolder;
+	DialogOptions _request;
+	DialogEventSubscriptions _events;
+	CComPtr<IUnknown> _site;
+	DialogControlSelections _controlSelections;
+	UINT _fileTypeIndex = 1;
 
 	FILE* _debugStream;
 

@@ -3,6 +3,7 @@
 
 using CommunityToolkit.WinUI;
 using Files.App.Controls;
+using Files.App.Helpers.Application;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
@@ -46,13 +47,17 @@ namespace Files.App.Views
 		[DynamicWindowsRuntimeCast(typeof(MenuFlyout))]
 		public MainPage()
 		{
+			NaiLanguageBridge.StartupStage("mainpage-ctor-start");
 			InitializeComponent();
+			NaiLanguageBridge.StartupStage("mainpage-xaml-loaded");
 
 			// Dependency Injection
 			UserSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
 			SidebarAdaptiveViewModel = Ioc.Default.GetRequiredService<SidebarViewModel>();
+			NaiLanguageBridge.StartupStage("mainpage-sidebar-vm");
 			SidebarAdaptiveViewModel.PaneFlyout = (MenuFlyout)Resources["SidebarContextMenu"];
 			ViewModel = Ioc.Default.GetRequiredService<MainPageViewModel>();
+			NaiLanguageBridge.StartupStage("mainpage-main-vm");
 
 			if (AppLanguageHelper.IsPreferredLanguageRtl)
 			{
@@ -73,8 +78,57 @@ namespace Files.App.Views
 
 			// Realize the navigation controls before the first measure pass.
 			FindName(nameof(InnerNavigationToolbar));
+			// TabBar also activates the shell context used by commands and the sidebar.
+			// Hide its chrome in pickers, not the controller itself.
 			FindName(nameof(TabControl));
 			FindName(nameof(NavToolbar));
+
+			if (App.IsDialogMode)
+				ApplyDialogLayout();
+			NaiLanguageBridge.StartupStage("mainpage-ctor-done");
+		}
+
+		/// <summary>
+		/// Native open/save dialog layout: no tab bar, compact window, sidebar
+		/// starts collapsed, and a dedicated bottom bar owns the path/filename
+		/// field plus Cancel | Open/Save. The address bar stays at the top so
+		/// breadcrumbs remain usable while the footer matches the system dialog.
+		/// </summary>
+		private void ApplyDialogLayout()
+		{
+			App.Logger.LogInformation("DIALOGSTATE MainPage.ApplyDialogLayout mode={Mode}", App.DialogMode);
+			TabControl.Height = 0;
+			TabControl.MinHeight = 0;
+			TabControl.IsHitTestVisible = false;
+			ViewModel.IsSidebarPaneOpen = false;
+			DialogFooter.Visibility = Visibility.Visible;
+
+			// Give the path/filename field clear focus so the keyboard path entry
+			// the user asks for works immediately, and preselect a sensible value.
+			if (App.DialogMode == "save" && App.DialogFileName != null)
+				ViewModel.DialogFileName = App.DialogFileName;
+			DialogFileNameBox.Focus(FocusState.Programmatic);
+			ViewModel.RefreshDialogValidation();
+		}
+
+		private void DialogCancel_Click(object sender, RoutedEventArgs e)
+			=> ViewModel.CancelDialog();
+
+		private void DialogConfirm_Click(object sender, RoutedEventArgs e)
+			=> ViewModel.ConfirmDialog();
+
+		private void DialogFileNameBox_KeyDown(object sender, KeyRoutedEventArgs e)
+		{
+			if (e.Key == VirtualKey.Enter)
+			{
+				e.Handled = true;
+				ViewModel.ConfirmDialog();
+			}
+			else if (e.Key == VirtualKey.Escape)
+			{
+				e.Handled = true;
+				ViewModel.CancelDialog();
+			}
 		}
 
 		private void NumberedTabKeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs e)
@@ -132,11 +186,13 @@ namespace Files.App.Views
 				ViewModel.MultitaskingControls.Add(TabControl);
 				ViewModel.MultitaskingControl.CurrentInstanceChanged += MultitaskingControl_CurrentInstanceChanged;
 			}
+			// A first tab may have been selected before the control's Loaded event.
+			TabControl.SelectionChanged();
 		}
 
 		private int SetTitleBarDragRegion(InputNonClientPointerSource source, SizeInt32 size, double scaleFactor, Func<UIElement, RectInt32?, RectInt32> getScaledRect)
 		{
-			if (TabControl is null)
+			if (App.IsDialogMode || TabControl is null)
 				return -1;
 
 			var height = (int)TabControl.ActualHeight;
@@ -244,13 +300,20 @@ namespace Files.App.Views
 
 		private void UpdateNavToolbarProperties()
 		{
-			var toolbarViewModel = SidebarAdaptiveViewModel.PaneHolder?.ActivePaneOrColumn!.ToolbarViewModel;
+			var activePane = SidebarAdaptiveViewModel.PaneHolder?.ActivePaneOrColumn;
+			var toolbarViewModel = activePane?.ToolbarViewModel;
 
 			if (NavToolbar is not null)
 				NavToolbar.ViewModel = toolbarViewModel;
 
 			if (InnerNavigationToolbar is not null)
 				InnerNavigationToolbar.ViewModel = toolbarViewModel;
+
+			if (App.IsDialogMode)
+				App.Logger.LogInformation("DIALOGSTATE context bound={Bound} current={Current} folder={Folder} back={Back} forward={Forward} up={Up}",
+					toolbarViewModel is not null, ReferenceEquals(ContentPageContext.ShellPage, activePane),
+					activePane?.ShellViewModel?.WorkingDirectory, ContentPageContext.CanGoBack,
+					ContentPageContext.CanGoForward, ContentPageContext.CanNavigateToParent);
 		}
 
 		protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -263,12 +326,22 @@ namespace Files.App.Views
 		[DynamicWindowsRuntimeCast(typeof(DependencyObject))]
 		[DynamicWindowsRuntimeCast(typeof(TextBlock))]
 		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		[DynamicWindowsRuntimeCast(typeof(TextBox))]
+		[DynamicWindowsRuntimeCast(typeof(RichEditBox))]
+		[DynamicWindowsRuntimeCast(typeof(PasswordBox))]
+		[DynamicWindowsRuntimeCast(typeof(Omnibar))]
+		[DynamicWindowsRuntimeCast(typeof(AppBarButton))]
 		private async Task OnPreviewKeyDownAsync(KeyRoutedEventArgs e)
 		{
 			base.OnPreviewKeyDown(e);
+			if (e.Handled) return;
 
 			switch (e.Key)
 			{
+				case VirtualKey.Escape when App.IsDialogMode:
+					e.Handled = true;
+					ViewModel.CancelDialog();
+					return;
 				case VirtualKey.Menu:
 				case VirtualKey.Control:
 				case VirtualKey.Shift:
@@ -280,9 +353,15 @@ namespace Files.App.Views
 					HotKey hotKey = new((Keys)e.Key, currentModifiers);
 					var source = e.OriginalSource as DependencyObject;
 
-					// A textbox takes precedence over certain hotkeys.
-					if (source?.FindAscendantOrSelf<TextBox>() is not null)
+					// Enter in an address/search editor must never open the selected
+					// file behind it, including when a template reports an inner peer.
+					var focused = FocusManager.GetFocusedElement(XamlRoot) as DependencyObject;
+					if (source?.FindAscendantOrSelf<RichEditBox>() is not null || focused?.FindAscendantOrSelf<RichEditBox>() is not null ||
+						source?.FindAscendantOrSelf<PasswordBox>() is not null || focused?.FindAscendantOrSelf<PasswordBox>() is not null)
 						break;
+					var textInput = source?.FindAscendantOrSelf<TextBox>() is not null || focused?.FindAscendantOrSelf<TextBox>() is not null;
+					var navigationShortcut = currentModifiers == KeyModifiers.Ctrl && e.Key is VirtualKey.T or VirtualKey.F;
+					if (textInput && !navigationShortcut) break;
 
 					// Execute command for hotkey
 					var command = Commands[hotKey];
@@ -333,6 +412,8 @@ namespace Files.App.Views
 		private void Page_Loaded(object sender, RoutedEventArgs e)
 		{
 			ViewModel.OnPageLoaded();
+			if (App.IsDialogMode && App.DialogTraceRequested)
+				_ = DialogBackendTrace.RunAsync(this);
 
 			MainWindow.Instance.AppWindow.Changed += (_, _) => MainWindow.Instance.RaiseSetTitleBarDragRegion(SetTitleBarDragRegion);
 
@@ -351,6 +432,11 @@ namespace Files.App.Views
 				DispatcherQueue.TryEnqueue(async () => await AppRunningAsAdminPromptAsync());
 			}
 		}
+
+		internal bool IsDialogContextBound => ViewModel.MultitaskingControl is not null
+			&& SidebarAdaptiveViewModel.PaneHolder?.ActivePaneOrColumn is { } pane
+			&& ReferenceEquals(ContentPageContext.ShellPage, pane)
+			&& ReferenceEquals(NavToolbar.ViewModel, pane.ToolbarViewModel);
 
 		private void PreviewPane_Loaded(object sender, RoutedEventArgs e)
 		{
@@ -478,7 +564,7 @@ namespace Files.App.Views
 				var isBigEnough = !App.AppModel.IsMainWindowClosed &&
 					(MainWindow.Instance.Bounds.Width > 450 && MainWindow.Instance.Bounds.Height > 450 || RootGrid.ActualWidth > 700 && MainWindow.Instance.Bounds.Height > 360);
 
-				ViewModel.ShouldPreviewPaneBeDisplayed = ((!isHomePage && !isReleaseNotesPage && !isSettingsPage) || isMultiPane) && isBigEnough;
+				ViewModel.ShouldPreviewPaneBeDisplayed = !App.IsDialogMode && ((!isHomePage && !isReleaseNotesPage && !isSettingsPage) || isMultiPane) && isBigEnough;
 				ViewModel.ShouldPreviewPaneBeActive = UserSettingsService.InfoPaneSettingsService.IsInfoPaneEnabled && ViewModel.ShouldPreviewPaneBeDisplayed;
 
 				UpdatePositioning();
@@ -608,7 +694,7 @@ namespace Files.App.Views
 				SafetyExtensions.IgnoreExceptions(() => deferral.Complete(), App.Logger);
 		}
 
-		private void SidebarControl_ItemInvoked(object sender, ItemInvokedEventArgs e)
+		private async void SidebarControl_ItemInvoked(object sender, ItemInvokedEventArgs e)
 		{
 			if (sender is not SidebarItem { Item: ISidebarItemModel item })
 				return;
@@ -617,7 +703,15 @@ namespace Files.App.Views
 				string.Equals(navItem.Path, "Settings", StringComparison.OrdinalIgnoreCase))
 				_ = AnimateSettingsIconAsync();
 
-			SidebarAdaptiveViewModel.HandleItemInvokedAsync(item, e.PointerUpdateKind);
+			try
+			{
+				await SidebarAdaptiveViewModel.HandleItemInvokedAsync(item, e.PointerUpdateKind);
+			}
+			catch (Exception ex)
+			{
+				App.Logger.LogError(ex, "Sidebar navigation failed");
+				ViewModel.ReportDialogError(ex.Message);
+			}
 		}
 
 		private async Task AnimateSettingsIconAsync()

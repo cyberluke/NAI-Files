@@ -29,6 +29,22 @@ namespace Files.App.ViewModels.UserControls
 		public const string OmnibarPaletteModeName = "OmnibarCommandPaletteMode";
 		public const string OmnibarSearchModeName = "OmnibarSearchMode";
 
+		/// <summary>True when this instance runs as a native open/save dialog.</summary>
+		public bool IsDialogMode => App.IsDialogMode;
+
+		/// <summary>Save dialogs show the file-name input next to the actions.</summary>
+		public bool IsDialogSaveMode => App.DialogMode == "save";
+
+		/// <summary>Open-style dialogs (open/multi/folder) show the Open action.</summary>
+		public bool IsDialogOpenMode => App.DialogMode != "save";
+
+		/// <summary>File name for save dialogs (two-way bound to the bottom bar input).</summary>
+		public string DialogFileName
+		{
+			get => App.DialogFileName ?? string.Empty;
+			set => App.DialogFileName = value;
+		}
+
 		// Dependency injections
 
 		private readonly IUserSettingsService UserSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
@@ -111,6 +127,7 @@ namespace Files.App.ViewModels.UserControls
 		public bool IsCardsLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.CardsView;
 		public bool IsColumnLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.ColumnView;
 		public bool IsGridLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.GridView;
+		public bool IsPulseLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.PulseView;
 		public bool IsDetailsLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.DetailsView;
 		public bool IsListLayout => _InstanceViewModel?.FolderSettings.LayoutMode is FolderLayoutModes.ListView;
 
@@ -220,10 +237,12 @@ namespace Files.App.ViewModels.UserControls
 
 		private string? _OmnibarSearchModeText;
 		public string? OmnibarSearchModeText { get => _OmnibarSearchModeText; set => SetProperty(ref _OmnibarSearchModeText, value); }
+		private int naiSearchCount;
+		public bool NaiSearchBusy => naiSearchCount > 0;
 
 		public string OmnibarSearchModePlaceholder => _InstanceViewModel?.IsPageTypeSettings == true
 			? Strings.SearchSettings.GetLocalizedResource()
-			: Strings.OmnibarSearchModeTextPlaceholder.GetLocalizedResource();
+			: "NaiSearchHint".GetLocalizedResource();
 
 		private List<SettingsSearchResult>? _settingsSearchIndex;
 
@@ -395,37 +414,31 @@ namespace Files.App.ViewModels.UserControls
 			if (_lockFlag)
 				return;
 
-			_lockFlag = true;
-
 			// Reset dragged over pathbox item
 			_dragOverPath = null;
 
 			if (((FrameworkElement)sender).DataContext is not PathBoxItem pathBoxItem ||
 				pathBoxItem.Path == "Home" ||
 				pathBoxItem.Path == "ReleaseNotes" ||
-				pathBoxItem.Path == "Settings")
+				pathBoxItem.Path == "Settings" || NaiWorkspaceRoutes.IsRoute(pathBoxItem.Path))
 			{
+				e.AcceptedOperation = DataPackageOperation.None;
+				e.Handled = true;
 				return;
 			}
 
+			_lockFlag = true;
 			var deferral = e.GetDeferral();
-
-			var signal = new AsyncManualResetEvent();
-
-			PathBoxItemDropped?.Invoke(this, new PathBoxItemDroppedEventArgs()
+			try
 			{
-				AcceptedOperation = e.AcceptedOperation,
-				Package = e.DataView,
-				Path = pathBoxItem.Path,
-				SignalEvent = signal
-			});
-
-			await signal.WaitAsync();
-
-			deferral.Complete();
-			await Task.Yield();
-
-			_lockFlag = false;
+				var signal = new AsyncManualResetEvent();
+				if (PathBoxItemDropped is { } handler)
+				{
+					handler.Invoke(this, new PathBoxItemDroppedEventArgs { AcceptedOperation = e.AcceptedOperation, Package = e.DataView, Path = pathBoxItem.Path, SignalEvent = signal });
+					await signal.WaitAsync();
+				}
+			}
+			finally { deferral.Complete(); _lockFlag = false; }
 		}
 
 		[Obsolete("Superseded by Omnibar.")]
@@ -436,8 +449,11 @@ namespace Files.App.ViewModels.UserControls
 				((FrameworkElement)sender).DataContext is not PathBoxItem pathBoxItem ||
 				pathBoxItem.Path == "Home" ||
 				pathBoxItem.Path == "ReleaseNotes" ||
-				pathBoxItem.Path == "Settings")
+				pathBoxItem.Path == "Settings" || NaiWorkspaceRoutes.IsRoute(pathBoxItem.Path))
 			{
+				e.AcceptedOperation = DataPackageOperation.None;
+				e.Handled = true;
+				_dragOverPath = null; _dragOverTimer?.Stop();
 				return;
 			}
 
@@ -544,19 +560,19 @@ namespace Files.App.ViewModels.UserControls
 		{
 			var shellPage = ContentPageContext.ShellPage;
 			if (shellPage is null)
-				return true;
+				return false;
 
 			var shellViewModel = shellPage.ShellViewModel
 				?? throw new InvalidOperationException("The current shell page does not have a view model.");
 
-			var currentPath = PathComponents.LastOrDefault()?.Path;
 			var isFtp = FtpHelpers.IsFtpPath(path);
 			var normalizedInput = NormalizePathInput(path, isFtp);
-			if (currentPath is not null && currentPath.Equals(normalizedInput, StringComparison.OrdinalIgnoreCase) ||
-				string.IsNullOrWhiteSpace(normalizedInput))
-				return true;
+			if (string.IsNullOrWhiteSpace(normalizedInput))
+				return false;
 
-			if (normalizedInput.Equals(shellViewModel.WorkingDirectory) &&
+			// Breadcrumbs can still describe the previous folder after Back/Up. Only
+			// the active shell's working directory can make navigation a no-op.
+			if (normalizedInput.Equals(shellViewModel.WorkingDirectory, StringComparison.OrdinalIgnoreCase) &&
 				shellPage.CurrentPageType != typeof(HomePage) &&
 				!shellViewModel.IsSearchResults)
 				return true;
@@ -582,7 +598,8 @@ namespace Files.App.ViewModels.UserControls
 			else
 			{
 				normalizedInput = StorageFileExtensions.GetResolvedPath(normalizedInput, isFtp);
-				if (currentPath is not null && currentPath.Equals(normalizedInput, StringComparison.OrdinalIgnoreCase))
+				if (normalizedInput.Equals(shellViewModel.WorkingDirectory, StringComparison.OrdinalIgnoreCase)
+					&& shellPage.CurrentPageType != typeof(HomePage) && !shellViewModel.IsSearchResults)
 					return true;
 
 				var item = await FilesystemTasks.Wrap(() => DriveHelpers.GetRootFromPathAsync(normalizedInput));
@@ -1182,6 +1199,19 @@ namespace Files.App.ViewModels.UserControls
 				OmnibarCommandPaletteModeSuggestionItems.RemoveAt(OmnibarCommandPaletteModeSuggestionItems.Count - 1);
 		}
 
+		private bool naiSemanticMode;
+		public bool NaiSemanticMode
+		{
+			get => naiSemanticMode;
+			set
+			{
+				if (naiSemanticMode == value) return;
+				naiSemanticMode = value; _suggestSearchCTS.Cancel();
+				OmnibarSearchModeSuggestionItems.Clear(); UpdateSearchQuerySuggestion();
+				OnPropertyChanged(nameof(NaiSemanticMode));
+			}
+		}
+
 		public async Task PopulateOmnibarSuggestionsForSearchMode()
 		{
 			if (_isDisposed || ContentPageContext.ShellPage is null)
@@ -1207,8 +1237,17 @@ namespace Files.App.ViewModels.UserControls
 				if (previousSearchQueries is not null)
 					newSuggestions.AddRange(previousSearchQueries.Select(query => new SuggestionModel(query, true)));
 			}
+			else if (NaiSemanticMode || NaiSemanticProtocol.TryParse(OmnibarSearchModeText, out _))
+			{
+				// Explicit submission only: typing must not enqueue uncancellable
+				// NPU inference for every key or lexical-prefilter semantic candidates.
+			}
 			else
 			{
+				// Open tabs first: the same fuzzy scorer as files, matched on the tab header and its path/tooltip,
+				// so a folder that is already open is one keystroke away instead of a disk search away
+				newSuggestions.AddRange(GetMatchingTabSuggestions(OmnibarSearchModeText));
+
 				try
 				{
 					await Task.Delay(200, token);
@@ -1219,12 +1258,19 @@ namespace Files.App.ViewModels.UserControls
 					{
 						Query = OmnibarSearchModeText,
 						Folder = shellViewModel.WorkingDirectory,
-						MaxItemCount = 10,
+						MaxItemCount = 50,
 					};
 
 					var results = new List<ListedItem>();
-					await search.SearchAsync(results, token);
-					newSuggestions.AddRange(results.Select(result => new SuggestionModel(result)));
+					naiSearchCount++;
+					OnPropertyChanged(nameof(NaiSearchBusy));
+					try { await search.SearchAsync(results, token); }
+					finally { naiSearchCount--; OnPropertyChanged(nameof(NaiSearchBusy)); }
+					newSuggestions.AddRange(results
+						.OrderByDescending(result => NaiFileSearch.Score(search.Query ?? string.Empty, result.ItemNameRaw ?? result.Name ?? string.Empty))
+						.ThenBy(result => result.ItemPath, StringComparer.OrdinalIgnoreCase)
+						.Take(10)
+						.Select(result => new SuggestionModel(result)));
 				}
 				catch (OperationCanceledException)
 				{
@@ -1237,18 +1283,59 @@ namespace Files.App.ViewModels.UserControls
 
 			// Remove outdated suggestions
 			var toRemove = OmnibarSearchModeSuggestionItems
-				.Where(existing => !existing.IsSearchQuery && !newSuggestions.Any(newItem => newItem.ItemPath == existing.ItemPath))
+				.Where(existing => !existing.IsSearchQuery)
 				.ToList();
 
 			foreach (var item in toRemove)
 				OmnibarSearchModeSuggestionItems.Remove(item);
 
-			// Add new suggestions
+			// Add new suggestions (a tab and a file can share a path: they are different suggestions)
 			var toAdd = newSuggestions
-				.Where(newItem => !OmnibarSearchModeSuggestionItems.Any(existing => existing.ItemPath == newItem.ItemPath));
+				.Where(newItem => !OmnibarSearchModeSuggestionItems.Any(existing => existing.IsTab == newItem.IsTab && existing.ItemPath == newItem.ItemPath));
 
 			foreach (var item in toAdd)
 				OmnibarSearchModeSuggestionItems.Add(item);
+		}
+
+		/// <summary>
+		/// Open tabs whose header or location fuzzily matches <paramref name="query"/>, best match first.
+		/// The current tab is skipped: switching to it is a no-op.
+		/// </summary>
+		private IEnumerable<SuggestionModel> GetMatchingTabSuggestions(string query)
+		{
+			var tabs = MainPageViewModel.AppInstances;
+			var selectedIndex = App.AppModel.TabStripSelectedIndex;
+
+			var matches = new List<(int Score, int Index, SuggestionModel Suggestion)>();
+			for (int i = 0; i < tabs.Count; i++)
+			{
+				if (i == selectedIndex)
+					continue;
+
+				var tab = tabs[i];
+				var header = tab.Header ?? string.Empty;
+				var location = tab.ToolTipText ?? string.Empty;
+
+				var score = Math.Max(
+					string.IsNullOrEmpty(header) ? -1 : NaiFileSearch.Score(query, header),
+					string.IsNullOrEmpty(location) ? -1 : NaiFileSearch.Score(query, SystemIO.Path.GetFileName(location.TrimEnd('\\'))));
+				if (score < 0)
+					continue;
+
+				matches.Add((score, i, new SuggestionModel(header, false)
+				{
+					TabItem = tab,
+					ItemPath = location,
+					Description = string.Format(Strings.OmnibarSwitchToTabDescription.GetLocalizedResource(), i + 1,
+						string.IsNullOrEmpty(location) || location == header ? string.Empty : location).TrimEnd(' ', '·'),
+				}));
+			}
+
+			return matches
+				.OrderByDescending(match => match.Score)
+				.ThenBy(match => match.Index)
+				.Take(5)
+				.Select(match => match.Suggestion);
 		}
 
 		private void UpdateSearchQuerySuggestion()
@@ -1302,12 +1389,14 @@ namespace Files.App.ViewModels.UserControls
 						FolderLayoutModes.CardsView => Commands.LayoutCards.ThemedIconStyle!,
 						FolderLayoutModes.ColumnView => Commands.LayoutColumns.ThemedIconStyle!,
 						FolderLayoutModes.GridView => Commands.LayoutGrid.ThemedIconStyle!,
+						FolderLayoutModes.PulseView => Commands.LayoutPulse.ThemedIconStyle!,
 						_ => Commands.LayoutDetails.ThemedIconStyle!
 					};
 					OnPropertyChanged(nameof(IsCardsLayout));
 					OnPropertyChanged(nameof(IsListLayout));
 					OnPropertyChanged(nameof(IsColumnLayout));
 					OnPropertyChanged(nameof(IsGridLayout));
+					OnPropertyChanged(nameof(IsPulseLayout));
 					OnPropertyChanged(nameof(IsDetailsLayout));
 					OnPropertyChanged(nameof(IsLayoutSizeCompact));
 					OnPropertyChanged(nameof(IsLayoutSizeSmall));

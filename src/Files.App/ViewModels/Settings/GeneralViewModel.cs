@@ -81,6 +81,8 @@ namespace Files.App.ViewModels.Settings
 		public List<DateTimeFormatItem> DateFormats { get; set; } = null!;
 
 		public ObservableCollection<AppLanguageItem> AppLanguages => AppLanguageHelper.SupportedLanguages;
+		public bool IsAppLanguageEditable => !NaiLanguageBridge.IsFollowingNaiOS;
+		public string NaiLanguageDescription => NaiLanguageBridge.IsFollowingNaiOS ? "NaiLanguageManaged".GetLocalizedResource() : string.Empty;
 
 		public Dictionary<ShellPaneArrangement, string> ShellPaneArrangementTypes { get; private set; } = [];
 
@@ -98,6 +100,8 @@ namespace Files.App.ViewModels.Settings
 			SelectedDateTimeFormatIndex = (int)Enum.Parse(typeof(DateTimeFormats), DateTimeFormat.ToString());
 
 			dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+			ShowRestartControl = NaiLanguageBridge.IsRestartRequired;
+			NaiLanguageBridge.LanguageChanged += OnNaiLanguageChanged;
 
 			if (UserSettingsService.GeneralSettingsService.TabsOnStartupList is not null)
 				PagesOnStartupList = new ObservableCollection<PageOnStartupViewModel>(UserSettingsService.GeneralSettingsService.TabsOnStartupList.Select((p) => new PageOnStartupViewModel(p)));
@@ -603,11 +607,25 @@ namespace Files.App.ViewModels.Settings
 			}
 		}
 
+		private void OnNaiLanguageChanged()
+		{
+			dispatcherQueue.TryEnqueue(() =>
+			{
+				if (disposed) return;
+				selectedAppLanguageIndex = AppLanguageHelper.SupportedLanguages.IndexOf(AppLanguageHelper.PreferredLanguage);
+				OnPropertyChanged(nameof(SelectedAppLanguageIndex));
+				OnPropertyChanged(nameof(IsAppLanguageEditable));
+				OnPropertyChanged(nameof(NaiLanguageDescription));
+				ShowRestartControl = NaiLanguageBridge.IsRestartRequired;
+			});
+		}
+
 		public void Dispose()
 		{
 			if (!disposed)
 			{
 				disposed = true;
+				NaiLanguageBridge.LanguageChanged -= OnNaiLanguageChanged;
 
 				GC.SuppressFinalize(this);
 			}

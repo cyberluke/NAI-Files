@@ -3,6 +3,7 @@
 
 using CommunityToolkit.WinUI;
 using Files.App.Controls;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -18,6 +19,16 @@ namespace Files.App.UserControls
 {
 	public sealed partial class NavigationToolbar : UserControl
 	{
+		private bool naiAssistantOpen;
+		private async void NaiAssistant_Click(object sender, RoutedEventArgs e)
+		{
+			if (naiAssistantOpen || XamlRoot is null) return;
+			naiAssistantOpen = true;
+			try { await Files.App.Dialogs.NaiAssistantDialog.ShowAsync(XamlRoot, ContentPageContext); }
+			catch (Exception ex) { App.Logger.LogWarning(ex, "Unable to open NAI Files assistant"); }
+			finally { naiAssistantOpen = false; }
+		}
+
 		// Dependency injections
 
 		private readonly IUserSettingsService userSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
@@ -27,6 +38,11 @@ namespace Files.App.UserControls
 		private readonly IContentPageContext ContentPageContext = Ioc.Default.GetRequiredService<IContentPageContext>();
 
 		private (OmnibarMode Mode, string Text)? _pendingOmnibarText;
+
+		// Debounced search-as-you-type: typing in the Omnibar search lane submits
+		// automatically after a pause, so no search button is required. Cancelled
+		// on every keystroke and on explicit submission (Enter or suggestion).
+		private CancellationTokenSource? _autoSearchCTS;
 
 		// Properties
 
@@ -183,6 +199,26 @@ namespace Files.App.UserControls
 
 			var mode = Omnibar.CurrentSelectedMode;
 
+			// A directory entered into the search editor is navigation, regardless of search mode.
+			if (mode != OmnibarCommandPaletteMode)
+			{
+				string? directory = null;
+				try
+				{
+					directory = DialogSelectionResolver.ResolvePath(args.Text, ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory);
+				}
+				catch (Exception ex) when (ex is ArgumentException or System.IO.IOException or NotSupportedException)
+				{
+					App.Logger.LogDebug(ex, "Invalid directory submitted in Omnibar");
+				}
+				if (directory is not null && System.IO.Directory.Exists(directory))
+				{
+					_autoSearchCTS?.Cancel();
+					await viewModel.HandleItemNavigationAsync(directory);
+					return;
+				}
+			}
+
 			// Path mode
 			if (mode == OmnibarPathMode)
 			{
@@ -229,9 +265,28 @@ namespace Files.App.UserControls
 			// Search mode
 			else if (mode == OmnibarSearchMode)
 			{
+				_autoSearchCTS?.Cancel();
 				var shellPage = ContentPageContext.ShellPage;
 
 				// Settings search: jump to the matching card, or apply the query in-page.
+				if (NaiImageSearchIntent.Parse(args.Text) is { } imageSearch)
+				{
+					var folder = ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory;
+					NaiWorkspaceRoutes.OpenVision(folder, imageSearch.AllCached ? "vision: cache:" + imageSearch.Query : imageSearch.Query);
+					return;
+				}
+				if (ContentPageContext.ShellPage?.ShellViewModel?.WorkingDirectory == NaiWorkspaceRoutes.Vision)
+				{
+					var workspace = (Ioc.Default.GetRequiredService<IMultiPanesContext>().ActivePane as FrameworkElement)?.FindDescendant<Files.App.Views.NaiVisionPage>();
+					workspace?.ApplySearchQuery(args.Text);
+					return;
+				}
+				if (NaiWorkspaceRoutes.IsRoute(shellPage?.ShellViewModel?.WorkingDirectory))
+				{
+					viewModel.OmnibarSearchModeText = string.Empty;
+					Omnibar.IsFocused = false;
+					return;
+				}
 				if (viewModel.InstanceViewModel.IsPageTypeSettings)
 				{
 					var settingsPage = (MainWindow.Instance.Content as FrameworkElement)?.FindDescendant<Files.App.Views.SettingsPage>();
@@ -255,6 +310,19 @@ namespace Files.App.UserControls
 					return;
 				}
 
+				// An open tab matched by name: switch to it instead of searching or navigating
+				if (args.Item is SuggestionModel { TabItem: { } tabItem })
+				{
+					var index = MainPageViewModel.AppInstances.IndexOf(tabItem);
+					if (index >= 0)
+						App.AppModel.TabStripSelectedIndex = index;
+
+					viewModel.OmnibarSearchModeText = string.Empty;
+					Omnibar.IsFocused = false;
+					ContentPageContext.ShellPage?.PaneHolder?.FocusActivePane();
+					return;
+				}
+
 				if (args.Item is SuggestionModel item && !string.IsNullOrWhiteSpace(item.ItemPath) && shellPage is not null)
 					await NavigationHelpers.OpenPath(item.ItemPath, shellPage);
 				else
@@ -263,6 +331,7 @@ namespace Files.App.UserControls
 						? x.Name
 						: args.Text;
 
+					if (viewModel.NaiSemanticMode && !NaiSemanticProtocol.TryParse(searchQuery, out _)) searchQuery = NaiSemanticProtocol.Prefix + " " + searchQuery;
 					shellPage?.SubmitSearch(searchQuery); // use the resolved shellPage for consistency
 					viewModel.SaveSearchQueryToList(searchQuery);
 				}
@@ -271,6 +340,18 @@ namespace Files.App.UserControls
 				ContentPageContext.ShellPage?.PaneHolder?.FocusActivePane();
 				return;
 			}
+		}
+
+		private void NaiSearchMode_Changed(object sender, SelectionChangedEventArgs e)
+		{
+			if (ViewModel is not { } model || NaiFuzzySearchLabel is null || NaiSearchModeBox is null) return;
+			model.NaiSemanticMode = NaiSearchModeBox.SelectedIndex == 1;
+			NaiFuzzySearchLabel.Text = (model.NaiSemanticMode ? "NaiSearchSemantic" : "NaiFuzzySearch").GetLocalizedResource();
+			Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(NaiSearchButton, NaiFuzzySearchLabel.Text);
+		}
+		private void NaiSemanticIndex_Click(object sender, RoutedEventArgs e)
+		{
+			if (ContentPageContext.ShellPage is { } host) NaiWorkspaceRoutes.OpenInPane(host, NaiWorkspaceRoutes.Semantic);
 		}
 
 		private async void Omnibar_TextChanged(Omnibar sender, OmnibarTextChangedEventArgs args)
@@ -292,7 +373,36 @@ namespace Files.App.UserControls
 			else if (Omnibar.CurrentSelectedMode == OmnibarSearchMode)
 			{
 				await DispatcherQueue.EnqueueOrInvokeAsync(viewModel.PopulateOmnibarSuggestionsForSearchMode);
+				ScheduleAutoSearch(viewModel);
 			}
+		}
+
+		private void ScheduleAutoSearch(NavigationToolbarViewModel viewModel)
+		{
+			// Auto-submit after typing pauses, for both fuzzy and semantic modes.
+			// Kelvin routes the semantic query to whatever execution device it
+			// scores; the client only submits, never pre-diagnoses placement.
+			_autoSearchCTS?.Cancel();
+			_autoSearchCTS = new CancellationTokenSource();
+			var token = _autoSearchCTS.Token;
+			var text = viewModel.OmnibarSearchModeText;
+			var instance = viewModel.InstanceViewModel;
+			_ = Task.Run(async () =>
+			{
+				try { await Task.Delay(TimeSpan.FromMilliseconds(450), token); }
+				catch (OperationCanceledException) { return; }
+				if (token.IsCancellationRequested) return;
+				var query = text?.Trim();
+				if (string.IsNullOrWhiteSpace(query)) return;
+				if (viewModel.NaiSemanticMode && !NaiSemanticProtocol.TryParse(query, out _)) query = NaiSemanticProtocol.Prefix + " " + query;
+				if (string.Equals(query, instance?.CurrentSearchQuery, StringComparison.Ordinal)) return;
+				await DispatcherQueue.EnqueueOrInvokeAsync(async () =>
+				{
+					if (token.IsCancellationRequested) return;
+					if (string.Equals(query, instance?.CurrentSearchQuery, StringComparison.Ordinal)) return;
+					ContentPageContext.ShellPage?.SubmitSearch(query);
+				});
+			}, token);
 		}
 
 		private async void BreadcrumbBar_ItemClicked(Controls.BreadcrumbBar sender, Controls.BreadcrumbBarItemClickedEventArgs args)
@@ -521,6 +631,7 @@ namespace Files.App.UserControls
 		{
 			if (e.Key is VirtualKey.Escape)
 			{
+				_autoSearchCTS?.Cancel();
 				Omnibar.IsFocused = false;
 				var paneHolder = ContentPageContext.ShellPage?.PaneHolder;
 				paneHolder?.FocusActivePane();

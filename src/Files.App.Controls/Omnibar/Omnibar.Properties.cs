@@ -53,6 +53,8 @@ namespace Files.App.Controls
 
 		partial void OnIsFocusedChanged(bool newValue)
 		{
+			UpdateShellState();
+
 			if (CurrentSelectedMode is null || _textBox is null)
 				return;
 

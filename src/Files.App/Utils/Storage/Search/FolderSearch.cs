@@ -29,7 +29,35 @@ namespace Files.App.Utils.Storage
 
 		private const uint defaultStepSize = 500;
 
-		public string? Query { get; set; }
+		private string? query;
+		private bool? openedFilter;
+		public bool IsSemanticSearch { get; private set; }
+		public string? SemanticFailure { get; private set; }
+		public NaiSemanticSearchResult? SemanticResult { get; private set; }
+		private string semanticQuery = string.Empty;
+		public string? Query
+		{
+			get => query;
+			set
+			{
+				openedFilter = null;
+				query = NaiFileSearch.StripFilesPrefix(value ?? string.Empty);
+				if (query.StartsWith("unread:", StringComparison.OrdinalIgnoreCase))
+				{
+					openedFilter = false;
+					query = query[7..].Trim();
+				}
+				else if (query.StartsWith("read:", StringComparison.OrdinalIgnoreCase))
+				{
+					openedFilter = true;
+					query = query[5..].Trim();
+				}
+				IsSemanticSearch = NaiSemanticProtocol.TryParse(query, out semanticQuery);
+				if (IsSemanticSearch) return;
+				if (query.StartsWith("content:", StringComparison.OrdinalIgnoreCase))
+					query = "$System.Search.Contents:\"" + query[8..].Trim().Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
+			}
+		}
 
 		public string? Folder { get; set; }
 
@@ -90,6 +118,19 @@ namespace Files.App.Utils.Storage
 
 		public async Task SearchAsync(IList<ListedItem> results, CancellationToken token)
 		{
+			if (openedFilter is not null) await NaiDocumentHistory.EnsureLoadedAsync().WaitAsync(token);
+			SemanticFailure = null; SemanticResult = null;
+			if (IsSemanticSearch)
+			{
+				try { await AddSemanticResultsAsync(results, token); }
+				catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+				catch (Exception ex)
+				{
+					SemanticFailure = ex.Message;
+					App.Logger.LogWarning("Semantic search failed ({Type})", ex.GetType().Name);
+				}
+				return; // Never reinterpret an unavailable semantic request as local/AQS.
+			}
 			try
 			{
 				if (App.LibraryManager.TryGetLibrary(Folder, out var library))
@@ -148,6 +189,7 @@ namespace Files.App.Utils.Storage
 		public async Task<ObservableCollection<ListedItem>> SearchAsync()
 		{
 			ObservableCollection<ListedItem> results = [];
+			if (IsSemanticSearch) { await SearchAsync(results, CancellationToken.None); return results; }
 			try
 			{
 				var token = CancellationToken.None;
@@ -172,11 +214,41 @@ namespace Files.App.Utils.Storage
 			return results;
 		}
 
+		private async Task AddSemanticResultsAsync(IList<ListedItem> results, CancellationToken token)
+		{
+			SemanticResult = await NaiSemanticIndexService.SearchAsync(Folder ?? string.Empty, semanticQuery, token);
+			foreach (var match in SemanticResult.Matches)
+			{
+				token.ThrowIfCancellationRequested();
+				if (results.Count >= UsedMaxItemCount) break;
+				var found = await Task.Run(() =>
+				{
+					WIN32_FIND_DATAW data = default;
+					unsafe
+					{
+						using var handle = PInvoke.FindFirstFileEx(match.Path, FINDEX_INFO_LEVELS.FindExInfoBasic,
+							&data, FINDEX_SEARCH_OPS.FindExSearchNameMatch, FIND_FIRST_EX_FLAGS.FIND_FIRST_EX_LARGE_FETCH);
+						if (handle.IsInvalid) return (Found: false, Data: data);
+					}
+					return (Found: true, Data: data);
+				}, token);
+				if (!found.Found || !NaiThumbnailAvailability.CanReadAttributes((uint)found.Data.dwFileAttributes)) continue;
+				var attributes = (FileAttributes)found.Data.dwFileAttributes;
+				if (attributes.HasFlag(FileAttributes.Hidden) && !UserSettingsService.FoldersSettingsService.ShowHiddenItems
+					|| attributes.HasFlag(FileAttributes.System) && !UserSettingsService.FoldersSettingsService.ShowProtectedSystemFiles
+					|| Path.GetFileName(match.Path).StartsWith('.') && !UserSettingsService.FoldersSettingsService.ShowDotFiles) continue;
+				if (GetListedItemAsync(match.Path, found.Data) is { } item) AddResult(results, item, token);
+			}
+		}
+
 		private void AddResult(IList<ListedItem> results, ListedItem item, CancellationToken token)
 		{
 			if (token.IsCancellationRequested)
 				return;
 
+			if (openedFilter is bool opened && (!NaiDocumentHistory.IsDocument(item.ItemPath)
+				|| (NaiDocumentHistory.Get(item.ItemPath) is not null) != opened))
+				return;
 			results.Add(item);
 			pendingResults.Add(item);
 			if (item is ShortcutItem shortcutItem)
@@ -513,15 +585,15 @@ namespace Files.App.Utils.Storage
 					return;
 				}
 
-				var hiddenOnlyFromWin32 = false;
 				if (storageFolder is not null)
 				{
-					var countBefore = results.Count;
 					await SearchAsync(storageFolder, results, token);
-					hiddenOnlyFromWin32 = results.Count != countBefore;
 				}
 
-				await SearchWithWin32Async(folder, hiddenOnlyFromWin32, results, token);
+				// Windows Search supplies ranked indexed matches first. The existing
+				// cancellable filename walk also considers non-hidden fuzzy matches;
+				// indexedResultPaths suppresses duplicates. No content is sent to AI.
+				await SearchWithWin32Async(folder, false, results, token);
 			}
 		}
 
@@ -581,7 +653,8 @@ namespace Files.App.Utils.Storage
 						if (isDirectory && !IsNameSurrogateReparseTag(reparseTag))
 							pendingFolders.Enqueue((Path.Combine(folder, fileName), useFindTimeout || IsCloudFilesReparseTag(reparseTag)));
 
-						if (!FileSystemName.MatchesWin32Expression(expression, fileName))
+						if (!FileSystemName.MatchesWin32Expression(expression, fileName)
+							&& !NaiFileSearch.Matches(Query ?? string.Empty, fileName))
 							continue;
 
 						var isSystem = attributes.HasFlag(FileAttributes.System);
@@ -595,7 +668,7 @@ namespace Files.App.Utils.Storage
 							(!startWithDot || showDotFiles);
 
 						var itemPath = Path.Combine(folder, fileName);
-						if (!shouldBeListed || (hiddenOnly && indexedResultPaths.Contains(itemPath)))
+						if (!shouldBeListed || indexedResultPaths.Contains(itemPath))
 							continue;
 
 						try

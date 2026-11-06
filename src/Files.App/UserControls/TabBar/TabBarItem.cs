@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 
 namespace Files.App.UserControls.TabBar
@@ -26,7 +27,15 @@ namespace Files.App.UserControls.TabBar
 		public string? Header
 		{
 			get => _Header;
-			set => SetProperty(ref _Header, value);
+			set
+			{
+				if (SetProperty(ref _Header, value))
+				{
+					OnPropertyChanged(nameof(FullToolTipText));
+					if (string.IsNullOrEmpty(ToolTipText))
+						RefreshAccentBrush();
+				}
+			}
 		}
 
 		private string? _Description = null;
@@ -40,7 +49,28 @@ namespace Files.App.UserControls.TabBar
 		public string? ToolTipText
 		{
 			get => _ToolTipText;
-			set => SetProperty(ref _ToolTipText, value);
+			set
+			{
+				if (SetProperty(ref _ToolTipText, value))
+				{
+					OnPropertyChanged(nameof(FullToolTipText));
+					RefreshAccentBrush();
+				}
+			}
+		}
+
+		public string? FullToolTipText => string.IsNullOrEmpty(ToolTipText) || ToolTipText == Header
+			? Header
+			: string.IsNullOrEmpty(Header) ? ToolTipText : $"{Header}{Environment.NewLine}{ToolTipText}";
+
+		private SolidColorBrush? _AccentBrush;
+		public SolidColorBrush AccentBrush => _AccentBrush ??= NaiTabAppearance.CreateAccentBrush(
+			string.IsNullOrEmpty(ToolTipText) ? Header : ToolTipText);
+
+		private void RefreshAccentBrush()
+		{
+			_AccentBrush = null;
+			OnPropertyChanged(nameof(AccentBrush));
 		}
 
 		private bool _AllowStorageItemDrop;

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0-windows10.0.26100.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <ProjectReference Include="..\..\src\Files.App.CsWin32\Files.App.CsWin32.csproj" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiSystemTelemetry.cs" Link="NaiSystemTelemetry.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiWindowsEngineSampler.cs" Link="NaiWindowsEngineSampler.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiEngineCounters.cs" Link="NaiEngineCounters.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiRuntimeSnapshot.cs" Link="NaiRuntimeSnapshot.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiFileWorkspace.cs" Link="NaiFileWorkspace.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiThumbnailAvailability.cs" Link="NaiThumbnailAvailability.cs" />
+  </ItemGroup>
+</Project>

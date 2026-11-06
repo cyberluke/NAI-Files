@@ -1,0 +1,50 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<UserControl
+	x:Class="Files.App.UserControls.Pulse.PulseTimeRail"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	Width="88"
+	AutomationProperties.Name="{helpers:ResourceString Name=PulseTimeRail}"
+	Background="Transparent"
+	PointerCanceled="Rail_PointerReleased"
+	PointerCaptureLost="Rail_PointerReleased"
+	PointerMoved="Rail_PointerMoved"
+	PointerPressed="Rail_PointerPressed"
+	PointerReleased="Rail_PointerReleased"
+	ToolTipService.ToolTip="{helpers:ResourceString Name=PulseTimeRail}"
+	mc:Ignorable="d">
+
+	<Grid Margin="0,12">
+		<!--  Spine  -->
+		<Rectangle
+			Width="2"
+			HorizontalAlignment="Right"
+			Margin="0,0,11,0"
+			Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
+			RadiusX="1"
+			RadiusY="1" />
+
+		<!--  Day ticks (positioned in code)  -->
+		<Canvas x:Name="TicksCanvas" />
+
+		<!--  Scrub indicator: the day under the pointer while dragging  -->
+		<Border
+			x:Name="ScrubBubble"
+			HorizontalAlignment="Right"
+			Margin="0,0,20,0"
+			Padding="8,4"
+			Background="{ThemeResource AccentFillColorDefaultBrush}"
+			CornerRadius="6"
+			IsHitTestVisible="False"
+			Visibility="Collapsed">
+			<TextBlock
+				x:Name="ScrubText"
+				FontFamily="Consolas"
+				FontSize="12"
+				Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+		</Border>
+	</Grid>
+</UserControl>

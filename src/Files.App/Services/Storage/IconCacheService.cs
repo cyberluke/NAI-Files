@@ -18,6 +18,10 @@ namespace Files.App.Services
 
 		public async Task<byte[]?> GetIconAsync(string? itemPath, string? extension, bool isFolder, uint size)
 		{
+			var themed = NaiIconThemeHelper.GetIcon(itemPath, (int)(size * App.AppModel.AppWindowDPI), isFolder);
+			if (themed is not null)
+				return themed;
+
 			var key = $"{(isFolder ? ":folder:" : (extension?.ToLowerInvariant() ?? ":noext:"))}:{size}";
 
 			if (_cache.TryGetValue(key, out var cached))
@@ -45,7 +49,10 @@ namespace Files.App.Services
 			if (DispatcherQueue.GetForCurrentThread() is null)
 				return null;
 
-			var key = $"{(isFolder ? ":folder:" : (extension?.ToLowerInvariant() ?? ":noext:"))}:{size}";
+			var identity = NaiIconThemeHelper.IsEnabled && (isFolder || string.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
+				? itemPath?.ToLowerInvariant()
+				: isFolder ? ":folder:" : extension?.ToLowerInvariant() ?? ":noext:";
+			var key = $"{identity}:{size}";
 			if (_imageCache.TryGetValue(key, out var cached))
 				return cached;
 

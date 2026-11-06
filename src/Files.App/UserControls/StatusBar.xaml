@@ -38,6 +38,12 @@
 			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<ProgressBar x:Name="ThumbnailProgressBar" Grid.Row="1" Grid.ColumnSpan="4"
+			Height="3" MinHeight="3" Visibility="Collapsed" IsHitTestVisible="True" />
 
 		<!--  Folder and selection info  -->
 		<Grid
@@ -60,6 +66,9 @@
 					x:Load="{x:Bind ShowInfoText, Mode=OneWay}"
 					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
 					Text="{x:Bind StatusBarViewModel.DirectoryItemCount, Mode=OneWay}" />
+				<TextBlock x:Name="ThumbnailProgressText" VerticalAlignment="Center"
+					Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"
+					AutomationProperties.AutomationId="NaiThumbnailProgress" />
 
 				<!--  Divider  -->
 				<Border

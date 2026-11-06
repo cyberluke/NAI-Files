@@ -687,12 +687,14 @@ namespace Files.App.Views.Layouts
 
 			shellViewModel.CancelExtendedPropertiesLoading();
 			var filesAndFolders = shellViewModel.FilesAndFolders.ToList();
+			var visualLoads = new List<Task>();
 			foreach (ListedItem listedItem in filesAndFolders)
 			{
 				listedItem.ItemPropertiesInitialized = false;
 				if (FileList.ContainerFromItem(listedItem) is not null)
-					await shellViewModel.LoadExtendedItemPropertiesAsync(listedItem);
+					visualLoads.Add(shellViewModel.LoadExtendedItemPropertiesAsync(listedItem));
 			}
+			await Task.WhenAll(visualLoads);
 
 			if (shellViewModel.EnabledGitProperties is not GitProperties.None)
 			{

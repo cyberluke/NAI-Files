@@ -85,7 +85,7 @@ namespace Files.App.Services.Settings
 		/// <inheritdoc/>
 		public String AppThemeFontFamily
 		{
-			get => Get(Constants.Appearance.StandardFont);
+			get => Get(Constants.Appearance.NAIDefaultFont);
 			set => Set(value);
 		}
 

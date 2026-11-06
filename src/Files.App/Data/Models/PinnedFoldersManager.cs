@@ -142,6 +142,26 @@ namespace Files.App.Data.Models
 		{
 			try
 			{
+				// NAI theme first: pinned folders get the same colorized icons as the
+				// file list (semantic glyphs + deterministic color variants). Only
+				// thumbnail-worthy files and unknown items fall back to the shell.
+				var themeBytes = (isFolder || !NaiIconThemeHelper.PrefersThumbnail(path))
+					? NaiIconThemeHelper.GetIcon(path, (int)(Constants.ShellIconSizes.Small * App.AppModel.AppWindowDPI), isFolder)
+					: null;
+				if (themeBytes is not null)
+				{
+					locationItem.IconData = themeBytes;
+
+					// Assign Icon on the UI thread: it raises PropertyChanged, which builds a XAML IconElement in a realized SidebarItem.
+					await MainWindow.Instance.DispatcherQueue.EnqueueOrInvokeAsync(async () =>
+					{
+						var bitmapImage = await locationItem.IconData.ToBitmapAsync();
+						if (bitmapImage is not null)
+							locationItem.Icon = bitmapImage;
+					});
+					return;
+				}
+
 				var result = await FileThumbnailHelper.GetIconAsync(
 					path,
 					Constants.ShellIconSizes.Small,
@@ -162,6 +182,25 @@ namespace Files.App.Data.Models
 			{
 				App.Logger.LogWarning(ex, $"Error loading icon for {path}");
 			}
+		}
+
+		/// <summary>
+		/// Re-resolves every pinned item's icon from the NAI theme (called when the
+		/// desktop-wide theme changes, e.g. the user switches icon packs in NAI OS).
+		/// </summary>
+		public async Task RefreshIconsAsync()
+		{
+			lock (_PinnedFolderItems)
+			{
+				foreach (var item in _PinnedFolderItems.OfType<LocationItem>())
+				{
+					if (string.IsNullOrEmpty(item.Path) || item.IsInvalid)
+						continue;
+					_ = LoadIconForLocationItemAsync(item, item.Path, isFolder: true);
+				}
+			}
+
+			await Task.CompletedTask;
 		}
 
 		private async Task LoadDefaultIconForLocationItemAsync(LocationItem locationItem)

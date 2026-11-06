@@ -1,0 +1,39 @@
+<Page
+	x:Class="Files.App.Views.NaiSemanticPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:local="using:Files.App.Views">
+	<Grid Padding="24" RowSpacing="12">
+		<Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+		<StackPanel Spacing="6"><TextBlock Text="{helpers:ResourceString Name=NaiSemanticTitle}" Style="{StaticResource TitleTextBlockStyle}"/><TextBlock Text="{helpers:ResourceString Name=NaiSemanticDescription}" TextWrapping="Wrap"/></StackPanel>
+		<Grid Grid.Row="1" ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+			<TextBox x:Name="FolderBox" Header="{helpers:ResourceString Name=NaiVisionFolder}" IsReadOnly="True" AutomationProperties.AutomationId="NaiSemanticFolder"/>
+			<Button x:Name="ChooseButton" Grid.Column="1" VerticalAlignment="Bottom" Content="{helpers:ResourceString Name=NaiChooseFolder}" Click="Choose_Click"/>
+		</Grid>
+		<StackPanel Grid.Row="2" Spacing="8">
+			<CheckBox x:Name="RecursiveBox" Content="{helpers:ResourceString Name=NaiSemanticRecursive}" Checked="Scope_Changed" Unchecked="Scope_Changed"/>
+			<CheckBox x:Name="ConsentBox" AutomationProperties.AutomationId="NaiSemanticConsent" Checked="Consent_Changed" Unchecked="Consent_Changed">
+				<TextBlock Text="{helpers:ResourceString Name=NaiSemanticConsent}" TextWrapping="Wrap"/>
+			</CheckBox>
+			<VariableSizedWrapGrid Orientation="Horizontal" ItemWidth="210" ItemHeight="44" MaximumRowsOrColumns="4">
+				<Button x:Name="IndexButton" Content="{helpers:ResourceString Name=NaiSemanticIndex}" Click="Index_Click" AutomationProperties.AutomationId="NaiSemanticIndex" IsEnabled="False"/>
+				<Button x:Name="ForgetButton" Content="{helpers:ResourceString Name=NaiSemanticForget}" Click="Forget_Click" AutomationProperties.AutomationId="NaiSemanticForget"/>
+				<Button x:Name="ConnectButton" Content="{helpers:ResourceString Name=NaiAiPair}" Click="Connect_Click"/>
+				<Button x:Name="FullResultsButton" Content="{helpers:ResourceString Name=NaiSemanticFullResults}" Click="FullResults_Click" AutomationProperties.AutomationId="NaiSemanticFullResults"/>
+				<Button x:Name="CancelButton" Content="{helpers:ResourceString Name=Cancel}" Click="Cancel_Click" IsEnabled="False"/>
+			</VariableSizedWrapGrid>
+		</StackPanel>
+		<StackPanel Grid.Row="3" Spacing="6">
+			<TextBlock x:Name="IndexStateText" TextWrapping="Wrap"/>
+			<ProgressBar x:Name="Progress" Visibility="Collapsed"/>
+			<TextBlock x:Name="StatusText" AutomationProperties.AutomationId="NaiSemanticStatus" AutomationProperties.LiveSetting="Polite" TextWrapping="Wrap"/>
+		</StackPanel>
+		<Grid Grid.Row="4" ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+			<TextBox x:Name="QueryBox" Header="{helpers:ResourceString Name=NaiSearchSemantic}" PlaceholderText="{helpers:ResourceString Name=NaiSemanticQueryHint}" MaxLength="512" TextChanged="QueryBox_TextChanged" KeyDown="QueryBox_KeyDown" AutomationProperties.AutomationId="NaiSemanticQuery"/>
+		</Grid>
+		<ListView x:Name="Results" Grid.Row="5" IsItemClickEnabled="True" ItemClick="Result_Click" AutomationProperties.AutomationId="NaiSemanticResults">
+			<ListView.ItemTemplate><DataTemplate x:DataType="local:NaiWorkspaceRow"><StackPanel Padding="8" Spacing="4"><TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{x:Bind Detail}" TextWrapping="Wrap"/></StackPanel></DataTemplate></ListView.ItemTemplate>
+		</ListView>
+	</Grid>
+</Page>

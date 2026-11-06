@@ -134,6 +134,49 @@
 							<Color x:Key="App.Theme.FillColorAttention">#0070CB</Color>
 							<SolidColorBrush x:Key="App.Theme.FillColorAttentionBrush" Color="{StaticResource App.Theme.FillColorAttention}" />
 							<SolidColorBrush x:Key="App.Theme.CardBackgroundFillColorTertiaryBrush" Color="#FFFFFFFF" />
+
+							<!--  NAI search shell (mirrors NAI OS Apps launcher search lane)  -->
+							<Color x:Key="App.Theme.Nai.Lavender">#8D7CFF</Color>
+							<Color x:Key="App.Theme.Nai.Magenta">#FF5D8F</Color>
+							<Color x:Key="App.Theme.Nai.Orange">#FF9A4D</Color>
+							<Color x:Key="App.Theme.Nai.Cyan">#4DEBFF</Color>
+							<SolidColorBrush x:Key="App.Theme.Nai.LavenderBrush" Color="{StaticResource App.Theme.Nai.Lavender}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.MagentaBrush" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.OrangeBrush" Color="{StaticResource App.Theme.Nai.Orange}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.CyanBrush" Color="{StaticResource App.Theme.Nai.Cyan}" />
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineActiveBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Magenta}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Orange}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineQueryBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Cyan}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.SweepBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="#00FFFFFF" />
+								<GradientStop Offset="0.45" Color="#E6FFFFFF" />
+								<GradientStop Offset="0.55" Color="#E6FFFFFF" />
+								<GradientStop Offset="1" Color="#00FFFFFF" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.SearchShellBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+								<GradientStop Offset="0" Color="#0D000000" />
+								<GradientStop Offset="1" Color="#03000000" />
+							</LinearGradientBrush>
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellBorderBrush" Color="#1F000000" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusBorderBrush" Color="#998D7CFF" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusRingBrush" Color="#598D7CFF" />
+							<SolidColorBrush x:Key="App.Theme.Nai.UnderlineBaseBrush" Color="#1F000000" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextBrush" Color="#1A000000" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextMutedBrush" Color="#99000000" />
+							<RadialGradientBrush x:Key="App.Theme.Nai.ModeActiveChipBrush">
+								<RadialGradientBrush.GradientStops>
+									<GradientStop Offset="0" Color="#66FF5D8F" />
+									<GradientStop Offset="0.55" Color="#24FF5D8F" />
+									<GradientStop Offset="1" Color="#00FF5D8F" />
+								</RadialGradientBrush.GradientStops>
+							</RadialGradientBrush>
 						</ResourceDictionary>
 						<ResourceDictionary x:Key="Dark">
 							<SolidColorBrush x:Key="App.Theme.BackgroundBrush" Color="Transparent" />
@@ -152,6 +195,49 @@
 							<Color x:Key="App.Theme.FillColorAttention">#50C0FF</Color>
 							<SolidColorBrush x:Key="App.Theme.FillColorAttentionBrush" Color="{StaticResource App.Theme.FillColorAttention}" />
 							<SolidColorBrush x:Key="App.Theme.CardBackgroundFillColorTertiaryBrush" Color="#12FFFFFF" />
+
+							<!--  NAI search shell (mirrors NAI OS Apps launcher search lane)  -->
+							<Color x:Key="App.Theme.Nai.Lavender">#8D7CFF</Color>
+							<Color x:Key="App.Theme.Nai.Magenta">#FF5D8F</Color>
+							<Color x:Key="App.Theme.Nai.Orange">#FF9A4D</Color>
+							<Color x:Key="App.Theme.Nai.Cyan">#4DEBFF</Color>
+							<SolidColorBrush x:Key="App.Theme.Nai.LavenderBrush" Color="{StaticResource App.Theme.Nai.Lavender}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.MagentaBrush" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.OrangeBrush" Color="{StaticResource App.Theme.Nai.Orange}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.CyanBrush" Color="{StaticResource App.Theme.Nai.Cyan}" />
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineActiveBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Magenta}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Orange}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineQueryBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Cyan}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.SweepBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="#00FFFFFF" />
+								<GradientStop Offset="0.45" Color="#E6FFFFFF" />
+								<GradientStop Offset="0.55" Color="#E6FFFFFF" />
+								<GradientStop Offset="1" Color="#00FFFFFF" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.SearchShellBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+								<GradientStop Offset="0" Color="#0DFFFFFF" />
+								<GradientStop Offset="1" Color="#03FFFFFF" />
+							</LinearGradientBrush>
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellBorderBrush" Color="#1AECEBF4" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusBorderBrush" Color="#998D7CFF" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusRingBrush" Color="#598D7CFF" />
+							<SolidColorBrush x:Key="App.Theme.Nai.UnderlineBaseBrush" Color="#12FFFFFF" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextBrush" Color="#F3ECEBF4" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextMutedBrush" Color="#A6A09DB4" />
+							<RadialGradientBrush x:Key="App.Theme.Nai.ModeActiveChipBrush">
+								<RadialGradientBrush.GradientStops>
+									<GradientStop Offset="0" Color="#66FF5D8F" />
+									<GradientStop Offset="0.55" Color="#24FF5D8F" />
+									<GradientStop Offset="1" Color="#00FF5D8F" />
+								</RadialGradientBrush.GradientStops>
+							</RadialGradientBrush>
 						</ResourceDictionary>
 						<ResourceDictionary x:Key="HighContrast">
 							<SolidColorBrush x:Key="App.Theme.BackgroundBrush" Color="Transparent" />
@@ -170,6 +256,40 @@
 							<Color x:Key="App.Theme.FillColorAttention">#50C0FF</Color>
 							<SolidColorBrush x:Key="App.Theme.FillColorAttentionBrush" Color="{StaticResource App.Theme.FillColorAttention}" />
 							<SolidColorBrush x:Key="App.Theme.CardBackgroundFillColorTertiaryBrush" Color="{StaticResource SystemColorWindowColor}" />
+
+							<!--  NAI search shell (mirrors NAI OS Apps launcher search lane)  -->
+							<Color x:Key="App.Theme.Nai.Lavender">#8D7CFF</Color>
+							<Color x:Key="App.Theme.Nai.Magenta">#FF5D8F</Color>
+							<Color x:Key="App.Theme.Nai.Orange">#FF9A4D</Color>
+							<Color x:Key="App.Theme.Nai.Cyan">#4DEBFF</Color>
+							<SolidColorBrush x:Key="App.Theme.Nai.LavenderBrush" Color="{StaticResource App.Theme.Nai.Lavender}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.MagentaBrush" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.OrangeBrush" Color="{StaticResource App.Theme.Nai.Orange}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.CyanBrush" Color="{StaticResource App.Theme.Nai.Cyan}" />
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineActiveBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Magenta}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Orange}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.UnderlineQueryBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="{StaticResource App.Theme.Nai.Cyan}" />
+								<GradientStop Offset="0.5" Color="{StaticResource App.Theme.Nai.Lavender}" />
+								<GradientStop Offset="1" Color="{StaticResource App.Theme.Nai.Magenta}" />
+							</LinearGradientBrush>
+							<LinearGradientBrush x:Key="App.Theme.Nai.SweepBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+								<GradientStop Offset="0" Color="#00FFFFFF" />
+								<GradientStop Offset="0.45" Color="#E6FFFFFF" />
+								<GradientStop Offset="0.55" Color="#E6FFFFFF" />
+								<GradientStop Offset="1" Color="#00FFFFFF" />
+							</LinearGradientBrush>
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellBackgroundBrush" Color="Transparent" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellBorderBrush" Color="{StaticResource SystemColorWindowTextColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusBorderBrush" Color="{StaticResource SystemColorHighlightColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.SearchShellFocusRingBrush" Color="{StaticResource SystemColorHighlightColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.UnderlineBaseBrush" Color="{StaticResource SystemColorWindowTextColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextBrush" Color="{StaticResource SystemColorWindowTextColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.TextMutedBrush" Color="{StaticResource SystemColorGrayTextColor}" />
+							<SolidColorBrush x:Key="App.Theme.Nai.ModeActiveChipBrush" Color="{StaticResource SystemColorHighlightColor}" />
 						</ResourceDictionary>
 					</ResourceDictionary.ThemeDictionaries>
 				</ResourceDictionary>

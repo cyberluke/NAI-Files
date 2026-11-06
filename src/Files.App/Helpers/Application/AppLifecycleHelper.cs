@@ -101,6 +101,7 @@ namespace Files.App.Helpers
 		/// </summary>
 		public static async Task InitializeAppComponentsAsync()
 		{
+			NaiLanguageBridge.StartupStage("init-components-start");
 			var userSettingsService = Ioc.Default.GetRequiredService<IUserSettingsService>();
 			var addItemService = Ioc.Default.GetRequiredService<IAddItemService>();
 			var generalSettingsService = userSettingsService.GeneralSettingsService;

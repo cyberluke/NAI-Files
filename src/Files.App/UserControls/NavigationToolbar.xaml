@@ -59,13 +59,16 @@
 	</UserControl.Resources>
 
 	<Grid
+		x:Name="RootBar"
 		Height="48"
 		Padding="4,0,4,0"
 		Background="{ThemeResource App.Theme.AddressBar.BackgroundBrush}"
 		ColumnSpacing="4">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 
@@ -111,6 +114,22 @@
 					</AnimatedIcon.FallbackIconSource>
 				</AnimatedIcon>
 			</ToggleButton>
+
+			<Button
+				x:Name="DialogToolbarNewFolderButton"
+				MinHeight="32"
+				Padding="10,0"
+				x:Load="{x:Bind MainPageViewModel.IsDialogMode}"
+				AutomationProperties.AutomationId="DialogToolbarNewFolderButton"
+				AutomationProperties.Name="{helpers:ResourceString Name=NewFolder}"
+				AutomationProperties.FullDescription="{x:Bind Commands.CreateFolder.Description, Mode=OneWay}"
+				Command="{x:Bind Commands.CreateFolder, Mode=OneWay}"
+				ToolTipService.ToolTip="{x:Bind Commands.CreateFolder.LabelWithHotKey, Mode=OneWay}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<FontIcon FontSize="14" Glyph="{x:Bind Commands.CreateFolder.Glyph.BaseGlyph}" />
+					<TextBlock Text="{helpers:ResourceString Name=NewFolder}" />
+				</StackPanel>
+			</Button>
 
 			<Button
 				x:Name="Back"
@@ -222,10 +241,45 @@
 			</Button>
 		</StackPanel>
 
+		<StackPanel
+			Grid.Column="1"
+			Margin="8,0"
+			VerticalAlignment="Center"
+			Orientation="Horizontal"
+			Spacing="8">
+			<Button x:Name="NaiAssistantButton" Height="38" Padding="12,6"
+				AutomationProperties.AutomationId="NaiAssistantButton"
+				AutomationProperties.Name="{helpers:ResourceString Name=NaiAssistantTitle}"
+				ToolTipService.ToolTip="{helpers:ResourceString Name=NaiAssistantTitle}" Click="NaiAssistant_Click">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<Path Width="20" Height="20" Stretch="Uniform" Fill="{ThemeResource AccentTextFillColorPrimaryBrush}"
+						Data="M10,0 C11,6 14,9 20,10 C14,11 11,14 10,20 C9,14 6,11 0,10 C6,9 9,6 10,0 Z" />
+					<TextBlock x:Name="NaiAssistantLabel" Text="{helpers:ResourceString Name=NaiAssistantShortTitle}" FontWeight="SemiBold"
+						Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+				</StackPanel>
+			</Button>
+			<ComboBox x:Name="NaiSearchModeBox" Height="38" SelectedIndex="0" MinWidth="105" MaxWidth="170" SelectionChanged="NaiSearchMode_Changed"
+				AutomationProperties.AutomationId="NaiSearchMode" AutomationProperties.Name="{helpers:ResourceString Name=NaiSearchMode}">
+				<ComboBoxItem Content="{helpers:ResourceString Name=NaiSearchLocal}" />
+				<ComboBoxItem Content="{helpers:ResourceString Name=NaiSearchSemantic}" />
+			</ComboBox>
+			<Button Height="38" Padding="8,6" Content="{helpers:ResourceString Name=NaiSemanticIndexShort}" Click="NaiSemanticIndex_Click"
+				AutomationProperties.AutomationId="NaiSemanticIndexButton" />
+			<Button x:Name="NaiSearchButton" Height="38" Padding="12,6" Command="{x:Bind Commands.Search, Mode=OneWay}"
+				AutomationProperties.AutomationId="NaiFuzzySearchButton"
+				AutomationProperties.Name="{helpers:ResourceString Name=NaiFuzzySearch}"
+				ToolTipService.ToolTip="{helpers:ResourceString Name=NaiFuzzySearch}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<helpers:NaiSearchIcon IsBusy="{x:Bind ViewModel.NaiSearchBusy, Mode=OneWay}" />
+					<TextBlock x:Name="NaiFuzzySearchLabel" Text="{helpers:ResourceString Name=NaiFuzzySearch}" FontWeight="SemiBold" VerticalAlignment="Center" />
+				</StackPanel>
+			</Button>
+		</StackPanel>
+
 		<!--  Omnibar  -->
 		<controls:Omnibar
 			x:Name="Omnibar"
-			Grid.Column="1"
+			Grid.Column="2"
 			x:Load="{x:Bind ViewModel.LoadOmnibar, Mode=OneWay}"
 			CurrentSelectedModeName="{x:Bind ViewModel.OmnibarCurrentSelectedModeName, Mode=TwoWay}"
 			FocusRedirectRequested="Omnibar_FocusRedirectRequested"
@@ -345,8 +399,6 @@
 
 			<controls:OmnibarMode
 				x:Name="OmnibarSearchMode"
-				IconOnActive="{controls:ThemedIconMarkup Style={StaticResource App.ThemedIcons.Omnibar.Search}, IsFilled=True}"
-				IconOnInactive="{controls:ThemedIconMarkup Style={StaticResource App.ThemedIcons.Omnibar.Search}, IconType=Outline}"
 				IsAutoFocusEnabled="True"
 				IsFirstSuggestionAutoSelected="True"
 				ItemsSource="{x:Bind ViewModel.OmnibarSearchModeSuggestionItems, Mode=OneWay}"
@@ -354,6 +406,8 @@
 				PlaceholderText="{x:Bind ViewModel.OmnibarSearchModePlaceholder, Mode=OneWay}"
 				Text="{x:Bind ViewModel.OmnibarSearchModeText, Mode=TwoWay}"
 				UpdateTextOnSelect="False">
+				<controls:OmnibarMode.IconOnActive><helpers:NaiSearchIcon IsBusy="{x:Bind ViewModel.NaiSearchBusy, Mode=OneWay}" /></controls:OmnibarMode.IconOnActive>
+				<controls:OmnibarMode.IconOnInactive><helpers:NaiSearchIcon /></controls:OmnibarMode.IconOnInactive>
 				<controls:OmnibarMode.ItemTemplate>
 					<DataTemplate x:DataType="datamodels:SuggestionModel">
 						<Grid ColumnSpacing="8" Tag="{x:Bind ItemPath}">
@@ -406,7 +460,7 @@
 		<!--  Right Side Action Buttons  -->
 		<StackPanel
 			x:Name="RightSideActionsStackPanel"
-			Grid.Column="2"
+			Grid.Column="3"
 			Orientation="Horizontal"
 			Spacing="4">
 
@@ -524,6 +578,9 @@
 				</Grid>
 			</Button>
 		</StackPanel>
+
+		<!--  Native dialog CTAs live on MainPage.DialogFooter so they stay pinned
+		     to the bottom of the window instead of the address bar.  -->
 
 		<!--  Status Center TeachingTip  -->
 		<TeachingTip

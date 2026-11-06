@@ -94,6 +94,12 @@ namespace Files.App
 				OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)
 					? "Segoe UI Variable"
 					: "Segoe UI";
+
+			/// <summary>
+			/// The NAI OS default font family (SAP 72). Falls back to the system
+			/// default when the family is not installed.
+			/// </summary>
+			public static string NAIDefaultFont => "72";
 		}
 
 		// Default icon sizes that are available for files and folders

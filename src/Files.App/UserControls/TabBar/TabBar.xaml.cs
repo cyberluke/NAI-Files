@@ -325,6 +325,16 @@ namespace Files.App.UserControls.TabBar
 		private void TabView_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
 		{
 			var delta = e.GetCurrentPoint(null).Properties.MouseWheelDelta;
+			var ctrlPressed = e.KeyModifiers.HasFlag(Windows.System.VirtualKeyModifiers.Control);
+
+			// An overflowing strip scrolls under the wheel (Ctrl+wheel still switches tabs); a strip that fits switches tabs
+			if (!ctrlPressed && TryGetTabStripScrollViewer() is { ScrollableWidth: > 0 } scrollViewer)
+			{
+				ScrollTabStripBy(scrollViewer, -delta * TabStripWheelPixelsPerNotch / 120d);
+				e.Handled = true;
+				return;
+			}
+
 			var scrollUpSelectsNextTab = !GeneralSettingsService.ReverseTabScrollDirection;
 
 			if ((delta > 0) == scrollUpSelectsNextTab)
@@ -339,6 +349,73 @@ namespace Files.App.UserControls.TabBar
 			}
 
 			e.Handled = true;
+		}
+
+		// One wheel notch slides roughly one tab
+		private const double TabStripWheelPixelsPerNotch = 160;
+
+		private ScrollViewer? tabStripScrollViewer;
+		private double tabStripScrollTarget = double.NaN;
+
+		[DynamicWindowsRuntimeCast(typeof(ScrollViewer))]
+		private ScrollViewer? TryGetTabStripScrollViewer()
+		{
+			if (tabStripScrollViewer is { } cached && cached.IsLoaded)
+				return cached;
+
+			tabStripScrollViewer = HorizontalTabView.FindDescendant<ScrollViewer>(sv => sv.Name == "ScrollViewer")
+				?? HorizontalTabView.FindDescendant<ScrollViewer>();
+			if (tabStripScrollViewer is not null)
+			{
+				tabStripScrollViewer.ViewChanged -= TabStripScrollViewer_ViewChanged;
+				tabStripScrollViewer.ViewChanged += TabStripScrollViewer_ViewChanged;
+			}
+
+			return tabStripScrollViewer;
+		}
+
+		private void TabStripScrollViewer_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
+		{
+			// The chained animation finished (or the user dragged the strip): the next wheel notch starts from the real offset
+			if (!e.IsIntermediate)
+				tabStripScrollTarget = double.NaN;
+		}
+
+		/// <summary>
+		/// Slides the tab strip by <paramref name="pixels"/> with the ScrollViewer's own inertia animation.
+		/// Successive notches accumulate on the pending target so fast wheeling glides instead of stuttering.
+		/// </summary>
+		private void ScrollTabStripBy(ScrollViewer scrollViewer, double pixels)
+		{
+			var from = double.IsNaN(tabStripScrollTarget) ? scrollViewer.HorizontalOffset : tabStripScrollTarget;
+			tabStripScrollTarget = Math.Clamp(from + pixels, 0, scrollViewer.ScrollableWidth);
+			scrollViewer.ChangeView(tabStripScrollTarget, null, null, disableAnimation: false);
+		}
+
+		/// <summary>Scrolls the strip so the selected tab is fully visible (animated).</summary>
+		[DynamicWindowsRuntimeCast(typeof(TabViewItem))]
+		private void BringSelectedTabIntoView()
+		{
+			if (HorizontalTabView.SelectedItem is not TabBarItem selected ||
+				HorizontalTabView.ContainerFromItem(selected) is not TabViewItem container ||
+				TryGetTabStripScrollViewer() is not { ScrollableWidth: > 0 } scrollViewer)
+				return;
+
+			var transform = container.TransformToVisual(scrollViewer);
+			var left = transform.TransformPoint(new Windows.Foundation.Point(0, 0)).X;
+			var right = left + container.ActualWidth;
+
+			double? target = null;
+			if (left < 0)
+				target = scrollViewer.HorizontalOffset + left - 8;
+			else if (right > scrollViewer.ViewportWidth)
+				target = scrollViewer.HorizontalOffset + (right - scrollViewer.ViewportWidth) + 8;
+
+			if (target is { } offset)
+			{
+				tabStripScrollTarget = Math.Clamp(offset, 0, scrollViewer.ScrollableWidth);
+				scrollViewer.ChangeView(tabStripScrollTarget, null, null, disableAnimation: false);
+			}
 		}
 
 		[DynamicWindowsRuntimeCast(typeof(MenuFlyout))]
@@ -428,18 +505,58 @@ namespace Files.App.UserControls.TabBar
 		}
 
 		private void DragAreaRectangle_Loaded(object sender, RoutedEventArgs e)
-			=> this.RunAfterNextRender(UpdateTitleBarInsets);
+		{
+			this.RunAfterNextRender(UpdateTitleBarInsets);
 
+			// The caption-button inset changes with DPI, maximize/restore and RTL; the strip must follow every time
+			HorizontalTabView.SizeChanged -= HorizontalTabView_SizeChanged;
+			HorizontalTabView.SizeChanged += HorizontalTabView_SizeChanged;
+			MainWindow.Instance.AppWindow.Changed -= AppWindow_Changed;
+			MainWindow.Instance.AppWindow.Changed += AppWindow_Changed;
+		}
+
+		private void HorizontalTabView_SizeChanged(object sender, SizeChangedEventArgs e)
+			=> UpdateTitleBarInsets();
+
+		private void AppWindow_Changed(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowChangedEventArgs args)
+		{
+			if (args.DidSizeChange || args.DidPresenterChange)
+				DispatcherQueue.TryEnqueue(UpdateTitleBarInsets);
+		}
+
+		/// <summary>
+		/// Reserves the caption-button area and keeps the tab strip inside the remaining width. TabView lays the
+		/// strip out as an Auto column, so without a hard limit a long row of tabs grows under the window's
+		/// minimize/maximize/close buttons; clamping the strip presenter instead makes TabView show its scroll
+		/// buttons and lets the strip scroll.
+		/// </summary>
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
 		private void UpdateTitleBarInsets()
 		{
+			if (DragAreaRectangle.XamlRoot is null)
+				return;
+
 			var titleBarInset = ((AppLanguageHelper.IsPreferredLanguageRtl
 				? MainWindow.Instance.AppWindow.TitleBar.LeftInset
 				: MainWindow.Instance.AppWindow.TitleBar.RightInset) / DragAreaRectangle.XamlRoot.RasterizationScale) + 40;
 
-			RightPaddingColumn.Width = new(titleBarInset > 40 ? titleBarInset : 138);
-			HorizontalTabView.Measure(new(
-				Math.Max(0, HorizontalTabView.ActualWidth - TabBarAddNewTabButton.Width - titleBarInset),
-				Math.Max(0, HorizontalTabView.ActualHeight)));
+			var reserved = titleBarInset > 40 ? titleBarInset : 138;
+			RightPaddingColumn.Width = new(reserved);
+
+			// Everything to the left of the strip (tab actions header) plus everything that must stay to its right
+			var headerWidth = HorizontalTabView.FindDescendant<FrameworkElement>(x => x.Name == "LeftContentPresenter")?.ActualWidth ?? 0;
+			var available = HorizontalTabView.ActualWidth - headerWidth - TabBarAddNewTabButton.Width - reserved - 8;
+
+			if (HorizontalTabView.FindDescendant<FrameworkElement>(x => x.Name == "TabListView") is { } tabList)
+				tabList.MaxWidth = Math.Max(0, available);
+		}
+
+		private void HorizontalTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			TabView_SelectionChanged(sender, e);
+
+			// Keyboard/wheel/command switches may land on a tab that is scrolled out of the strip
+			DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, BringSelectedTabIntoView);
 		}
 	}
 }

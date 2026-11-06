@@ -119,6 +119,7 @@ namespace Files.App.Views.Shells
 		}
 
 		public bool IsStatusBarVisible =>
+			!App.IsDialogMode &&
 			userSettingsService.AppearanceSettingsService.ShowStatusBar &&
 			CurrentPageType != typeof(HomePage) &&
 			CurrentPageType != typeof(ReleaseNotesPage) &&
@@ -396,7 +397,8 @@ namespace Files.App.Views.Shells
 				CurrentPageType == typeof(DetailsLayoutPage) ||
 				CurrentPageType == typeof(GridLayoutPage) ||
 				CurrentPageType == typeof(ColumnsLayoutPage) ||
-				CurrentPageType == typeof(ColumnLayoutPage);
+				CurrentPageType == typeof(ColumnLayoutPage) ||
+				CurrentPageType == typeof(PulseLayoutPage);
 
 			switch (c: ctrl, s: shift, a: alt, t: tabInstance, k: args.Key)
 			{
@@ -444,14 +446,14 @@ namespace Files.App.Views.Shells
 
 		protected async void ShellPage_PathBoxItemDropped(object sender, PathBoxItemDroppedEventArgs e)
 		{
-			if (e.Package is not { } package || e.Path is not { } destination)
+			if (e.Package is not { } package || e.Path is not { } destination || NaiWorkspaceRoutes.IsRoute(destination))
 			{
 				e.SignalEvent?.Set();
 				return;
 			}
 
-			await FilesystemHelpers.PerformOperationTypeAsync(e.AcceptedOperation, package, destination, false, true);
-			e.SignalEvent?.Set();
+			try { await FilesystemHelpers.PerformOperationTypeAsync(e.AcceptedOperation, package, destination, false, true); }
+			finally { e.SignalEvent?.Set(); }
 		}
 
 		protected async void NavigationToolbar_QuerySubmitted(object sender, ToolbarQuerySubmittedEventArgs e)
@@ -552,7 +554,7 @@ namespace Files.App.Views.Shells
 
 		public void NavigateToPath(string navigationPath, NavigationArguments? navArgs = null)
 		{
-			var layout = FolderSettings.GetLayoutType(navigationPath);
+			var layout = NaiWorkspaceRoutes.IsRoute(navigationPath) ? NaiWorkspaceRoutes.PageType(navigationPath) : FolderSettings.GetLayoutType(navigationPath);
 
 			// Don't use Columns Layout for displaying tags
 			if (navigationPath.StartsWith("tag:") && layout == typeof(ColumnsLayoutPage))
@@ -641,7 +643,7 @@ namespace Files.App.Views.Shells
 				if (entry.Parameter is NavigationArguments args &&
 					args.NavPathParam is not null and not "Home" &&
 					args.NavPathParam is not null and not "ReleaseNotes" &&
-					args.NavPathParam is not null and not "Settings")
+					args.NavPathParam is not null and not "Settings" && !NaiWorkspaceRoutes.IsRoute(args.NavPathParam))
 				{
 					var correctPageType = FolderSettings.GetLayoutType(args.NavPathParam, false);
 					if (!entry.SourcePageType.Equals(correctPageType))
@@ -659,7 +661,7 @@ namespace Files.App.Views.Shells
 				if (entry.Parameter is NavigationArguments args &&
 					args.NavPathParam is not null and not "Home" &&
 					args.NavPathParam is not null and not "ReleaseNotes" &&
-					args.NavPathParam is not null and not "Settings")
+					args.NavPathParam is not null and not "Settings" && !NaiWorkspaceRoutes.IsRoute(args.NavPathParam))
 				{
 					var correctPageType = FolderSettings.GetLayoutType(args.NavPathParam, false);
 					if (!entry.SourcePageType.Equals(correctPageType))
@@ -858,7 +860,7 @@ namespace Files.App.Views.Shells
 				incomingPageNavPath.IsLayoutSwitch = false;
 
 			// Update layout type
-			if (pageContent.SourcePageType != typeof(HomePage))
+			if (pageContent.SourcePageType != typeof(HomePage) && !NaiWorkspaceRoutes.IsRoute(incomingPageNavPath?.NavPathParam))
 			{
 				var navigationArguments = incomingPageNavPath
 					?? throw new InvalidOperationException("The navigation entry does not contain navigation arguments.");

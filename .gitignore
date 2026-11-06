@@ -409,3 +409,8 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 src/Files.App/Assets/FilesOpenDialog/Files.App.Launcher.exe.sha256
+
+# Bundled FFmpeg 9 toolset: staged from the NAI OS checkout by build-files-app.ps1, never committed
+src/Files.App/ffmpeg/
+# Bundled Demucs 4 runtime: staged from the NAI OS checkout by build-files-app.ps1, never committed
+src/Files.App/demucs/

@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <TargetPlatformMinVersion>$(MinimalWindowsVersion)</TargetPlatformMinVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableMSTestRunner>false</EnableMSTestRunner>
+    <PlatformTarget>x64</PlatformTarget>
+    <CsWin32PlatformTarget>x64</CsWin32PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Files.App.CsWin32\Files.App.CsWin32.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Files.App.Data.Enums" />
+    <Compile Include="..\..\src\Files.App\Utils\CommandLine\*.cs" Link="CommandLine\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\Files.App\Data\Enums\ParsedCommandType.cs" Link="ParsedCommandType.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\Navigation\DialogSelectionResolver.cs" Link="DialogSelectionResolver.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\Navigation\DialogResultWriter.cs" Link="DialogResultWriter.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiFileSearch.cs" Link="NaiFileSearch.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiSearchNative.cs" Link="NaiSearchNative.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiLanguagePolicy.cs" Link="NaiLanguagePolicy.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiDocumentReader.cs" Link="NaiDocumentReader.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiAiProtocol.cs" Link="NaiAiProtocol.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiAiResultValidator.cs" Link="NaiAiResultValidator.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiModelCatalog.cs" Link="NaiModelCatalog.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiThumbnailQueue.cs" Link="NaiThumbnailQueue.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiThumbnailAvailability.cs" Link="NaiThumbnailAvailability.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiThumbnailCache.cs" Link="NaiThumbnailCache.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiImageSearchIntent.cs" Link="NaiImageSearchIntent.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiVisionCache.cs" Link="NaiVisionCache.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiVisionAnalysisParser.cs" Link="NaiVisionAnalysisParser.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiFileWorkspace.cs" Link="NaiFileWorkspace.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiWorkspaceStore.cs" Link="NaiWorkspaceStore.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiRuntimeSnapshot.cs" Link="NaiRuntimeSnapshot.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiEngineCounters.cs" Link="NaiEngineCounters.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiHardwareCache.cs" Link="NaiHardwareCache.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiPnpDevices.cs" Link="NaiPnpDevices.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiEmailProtocol.cs" Link="NaiEmailProtocol.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiSemanticProtocol.cs" Link="NaiSemanticProtocol.cs" />
+    <Compile Include="..\..\src\Files.App\Helpers\NAI\NaiSemanticIndexStore.cs" Link="NaiSemanticIndexStore.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\Files.App\libs\nai-search-core\x64\nai_search_core.dll" Link="nai_search_core.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

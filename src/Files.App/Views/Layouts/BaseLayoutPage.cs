@@ -443,7 +443,7 @@ namespace Files.App.Views.Layouts
 		}
 
 		[DynamicWindowsRuntimeCast(typeof(ContentControl))]
-		protected ListedItem? GetItemFromElement(object element)
+		protected virtual ListedItem? GetItemFromElement(object element)
 		{
 			if (element is not ContentControl item || !CanGetItemFromElement(element))
 				return null;
@@ -824,6 +824,9 @@ namespace Files.App.Views.Layouts
 
 		public async void SetSelectedItemsOnNavigation()
 		{
+			if (isDisposed)
+				return;
+			var requestedNavigation = navigationArguments;
 			try
 			{
 				// Consume synchronously so a concurrent navigation can't capture the pending value
@@ -837,6 +840,8 @@ namespace Files.App.Views.Layouts
 				// Delay to ensure the new layout is loaded
 				if (navigationArguments is not null && navigationArguments.IsLayoutSwitch)
 					await Task.Delay(100);
+				if (isDisposed || navigationArguments != requestedNavigation)
+					return;
 
 				var itemsToSelect = layoutSwitchSelection ?? navigationArguments?.SelectItems;
 
@@ -1025,16 +1030,24 @@ namespace Files.App.Views.Layouts
 
 		protected virtual void FileList_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
 		{
+			if (!TryStartItemsDrag(e.Items.OfType<ListedItem>().ToList(), e.Data))
+				e.Cancel = true;
+		}
+
+		/// <summary>
+		/// Fills the drag data package for the given items and marks the drag as started.
+		/// Shared by the ListViewBase drag path and layouts that start drags from their own containers.
+		/// </summary>
+		protected bool TryStartItemsDrag(List<ListedItem> itemList, DataPackage data)
+		{
 			try
 			{
 				if (FolderSettings is not { } folderSettings ||
 					InstanceViewModel is not { } instanceViewModel)
 				{
-					e.Cancel = true;
-					return;
+					return false;
 				}
 
-				var itemList = e.Items.OfType<ListedItem>().ToList();
 				var firstItem = itemList.FirstOrDefault();
 				var sortedItems = SortingHelper.OrderFileList(itemList, folderSettings.DirectorySortOption, folderSettings.DirectorySortDirection, folderSettings.SortDirectoriesAlongsideFiles, folderSettings.SortFilesFirst).ToList();
 				var orderedItems = sortedItems.SkipWhile(x => x != firstItem).Concat(sortedItems.TakeWhile(x => x != firstItem)).ToList();
@@ -1045,17 +1058,17 @@ namespace Files.App.Views.Layouts
 					if (shellItemList?[0].FileSystemPath is not null && !instanceViewModel.IsPageTypeSearchResults)
 					{
 						var dataObject = ShellDataObject.Create(shellItemList);
-						if (ShellDataObject.GetShellIdListArray(dataObject) is byte[] data)
+						if (ShellDataObject.GetShellIdListArray(dataObject) is byte[] shellIdList)
 						{
-							var stream = new MemoryStream(data).AsRandomAccessStream();
-							e.Data.SetData(ShellDataObject.ShellIdListArrayFormat, stream);
+							var stream = new MemoryStream(shellIdList).AsRandomAccessStream();
+							data.SetData(ShellDataObject.ShellIdListArrayFormat, stream);
 						}
 					}
 					else
 					{
 						// Only support IStorageItem capable paths
 						var storageItemList = orderedItems.Where(x => !(x.IsHiddenItem && x.IsLinkItem && x.IsRecycleBinItem && x.IsShortcut)).Select(x => VirtualStorageItem.FromListedItem(x)).ToArray();
-						e.Data.SetStorageItems(storageItemList, false);
+						data.SetStorageItems(storageItemList, false);
 					}
 				}
 				finally
@@ -1070,14 +1083,21 @@ namespace Files.App.Views.Layouts
 				// Set can window to front (#13255)
 				MainWindow.Instance.SetCanWindowToFront(false);
 				itemDragging = true;
+				return true;
 			}
 			catch (Exception)
 			{
-				e.Cancel = true;
+				return false;
 			}
 		}
 
 		protected virtual void FileList_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args)
+		{
+			OnItemsDragCompleted();
+		}
+
+		/// <summary>Restores the window-to-front behavior once a drag started by <see cref="TryStartItemsDrag"/> ends.</summary>
+		protected void OnItemsDragCompleted()
 		{
 			// Set can window to front (#13255)
 			itemDragging = false;
@@ -1244,6 +1264,7 @@ namespace Files.App.Views.Layouts
 			HookScrollDeferTracking();
 			RefreshContainer(args.ItemContainer, args.InRecycleQueue);
 			RefreshItem(args.ItemContainer, args.Item, args.InRecycleQueue, args);
+			QueueViewportThumbnails();
 
 			// Set can window to front (#13255)
 			itemDragging = false;
@@ -1251,6 +1272,40 @@ namespace Files.App.Views.Layouts
 		}
 
 		private ScrollViewer? deferScrollViewer;
+		private DispatcherQueueTimer? thumbnailViewportTimer;
+
+		private void QueueViewportThumbnails()
+		{
+			if (thumbnailViewportTimer is null)
+			{
+				thumbnailViewportTimer = DispatcherQueue.CreateTimer();
+				thumbnailViewportTimer.Interval = TimeSpan.FromMilliseconds(50);
+				thumbnailViewportTimer.IsRepeating = false;
+				thumbnailViewportTimer.Tick += (_, _) => RefreshThumbnailViewport();
+			}
+			// Throttle rather than debounce: visible rows get priority even while
+			// the user continues dragging the scrollbar through a large folder.
+			if (!thumbnailViewportTimer.IsRunning) thumbnailViewportTimer.Start();
+		}
+
+		[DynamicWindowsRuntimeCast(typeof(SelectorItem))]
+		private void RefreshThumbnailViewport()
+		{
+			if (ParentShellPageInstance?.ShellViewModel is not { } model || ItemsControl.ItemsPanelRoot is null) return;
+			var items = new List<ListedItem>();
+			var (first, last) = GetVisibleIndexRange();
+			if (first >= 0 && last >= first)
+			{
+				for (var index = first; index <= last; index++)
+					if (ItemsControl.ContainerFromIndex(index) is SelectorItem { Content: ListedItem item }) items.Add(item);
+			}
+			else
+			{
+				foreach (var child in ItemsControl.ItemsPanelRoot.Children)
+					if (child is SelectorItem { Content: ListedItem item }) items.Add(item);
+			}
+			model.SetThumbnailViewport(items);
+		}
 
 		// Hooked lazily from the first container callback, when the list's template is guaranteed realized
 		[DynamicWindowsRuntimeCast(typeof(ScrollViewer))]
@@ -1267,6 +1322,8 @@ namespace Files.App.Views.Layouts
 		private void UnhookScrollDeferTracking()
 		{
 			scrollSettleTimer?.Stop();
+			thumbnailViewportTimer?.Stop();
+			ParentShellPageInstance?.ShellViewModel?.SetThumbnailViewport([]);
 
 			if (deferScrollViewer is not null)
 			{
@@ -1322,6 +1379,7 @@ namespace Files.App.Views.Layouts
 		// Rapid successive gestures raise a final ViewChanged between steps; debouncing keeps loads parked through the whole burst
 		private void DeferScrollViewer_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
 		{
+			QueueViewportThumbnails();
 			ParentShellPageInstance?.ShellViewModel?.NotifyScrollStateChanged(true);
 			AppMemoryHelper.NotifyActivity();
 
@@ -1541,6 +1599,19 @@ namespace Files.App.Views.Layouts
 
 		protected void FileListItem_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
 		{
+			// In native dialog mode, double-clicking a file picks it (like the
+			// system dialog): select it, then confirm and close.
+			if (App.IsDialogMode
+				&& App.DialogMode != "folder"
+				&& GetItemFromElement(sender) is ListedItem item
+				&& item.PrimaryItemAttribute == StorageItemTypes.File
+				&& !string.IsNullOrEmpty(item.ItemPath))
+			{
+				ItemManipulationModel.SetSelectedItem(item);
+				Ioc.Default.GetRequiredService<MainPageViewModel>().ConfirmSelection();
+				return;
+			}
+
 			// Set can window to front and bring the window to the front if necessary (#13255)
 			if ((!itemDragging) && MainWindow.Instance.SetCanWindowToFront(true))
 				Win32Helper.BringToForegroundEx(new(MainWindow.Instance.WindowHandle));

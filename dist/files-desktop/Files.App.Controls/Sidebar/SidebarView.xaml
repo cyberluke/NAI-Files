@@ -1,0 +1,387 @@
+﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<UserControl x:ConnectionId='1'
+	x:Class="Files.App.Controls.SidebarView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="using:Files.App.Controls"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	HorizontalAlignment="Stretch"
+	                           
+	TabFocusNavigation="Local"
+	mc:Ignorable="d">
+
+	<UserControl.Resources>
+		<DataTemplate
+			x:Key="DefaultSidebarItemTemplate"
+			                                  >
+			<local:SidebarItem x:ConnectionId='3'
+				                                    
+				                      
+				                    
+				                                               
+				                             
+				UseItemPresentation="True" />
+		</DataTemplate>
+	</UserControl.Resources>
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition x:ConnectionId='4'
+				x:Name="PaneColumnDefinition"
+				Width="240"
+				MaxWidth="480" />
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+
+		<!--  Background For Both Pane And Content  -->
+		<Border x:ConnectionId='5'
+			x:Name="PaneBackground"
+			Grid.Row="1"
+			Grid.ColumnSpan="3"
+			                                                       />
+
+		<!--  Pane Dismiss Layer  -->
+		<Grid x:ConnectionId='6'
+			x:Name="PaneLightDismissLayer"
+			Grid.Row="1"
+			Grid.Column="2"
+			Grid.ColumnSpan="3"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			Background="Transparent"
+			Canvas.ZIndex="10"
+			                                                     
+			                                     
+			Visibility="Collapsed" />
+
+		<!--  Pane  -->
+		<Grid x:ConnectionId='7'
+			x:Name="PaneColumnGrid"
+			Grid.Row="1"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			Canvas.ZIndex="10"
+			XYFocusKeyboardNavigation="Enabled">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.RenderTransform>
+				<CompositeTransform x:ConnectionId='11' x:Name="PaneColumnGridTransform" />
+			</Grid.RenderTransform>
+
+			<!--  Content  -->
+			<ContentPresenter x:ConnectionId='12'
+				Grid.RowSpan="3"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				HorizontalContentAlignment="Stretch"
+				VerticalContentAlignment="Stretch"
+				                                               />
+
+			<!--  Header  -->
+			<ContentPresenter x:ConnectionId='13'
+				Grid.Row="0"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				HorizontalContentAlignment="Stretch"
+				VerticalContentAlignment="Stretch"
+				                                       />
+
+			<!--  Menu Items  -->
+			<ItemsRepeaterScrollHost
+				Grid.Row="1"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch">
+				<ScrollViewer x:ConnectionId='15'
+					x:Name="MenuItemHostScrollViewer"
+					Padding="0,8,0,0"
+					                                                            
+					HorizontalScrollBarVisibility="Visible"
+					HorizontalScrollMode="Enabled"
+					VerticalScrollBarVisibility="Auto"
+					XYFocusKeyboardNavigation="Enabled">
+					<ItemsRepeater x:ConnectionId='16'
+						x:Name="MenuItemsHost"
+						Margin="4,0,4,16"
+						AutomationProperties.AccessibilityView="Content"
+						AutomationProperties.Name="Sidebar pane"
+						                                               
+						IsTabStop="True"
+						ItemTemplate="{StaticResource DefaultSidebarItemTemplate}"
+						                                                   
+						XYFocusKeyboardNavigation="Enabled" />
+				</ScrollViewer>
+			</ItemsRepeaterScrollHost>
+
+			<!--  Footer Items  -->
+			<ContentPresenter x:ConnectionId='14'
+				Grid.Row="2"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch"
+				HorizontalContentAlignment="Stretch"
+				VerticalContentAlignment="Stretch"
+				                                       />
+
+		</Grid>
+
+		<!--  Sizer  -->
+		<Border x:ConnectionId='8'
+			x:Name="SidebarResizer"
+			Grid.Row="1"
+			Grid.RowSpan="2"
+			Grid.Column="2"
+			MinWidth="4"
+			Margin="0,60,0,40"
+			HorizontalAlignment="Left"
+			AllowFocusOnInteraction="True"
+			Background="Transparent"
+			BorderBrush="Transparent"
+			Canvas.ZIndex="100"
+			CornerRadius="2"
+			                                          
+			                                                            
+			                                                    
+			ManipulationMode="TranslateX"
+			                                                        
+			                                              
+			                                              
+			                                            >
+			<UserControl x:ConnectionId='10'
+				x:Name="SidebarResizerControl"
+				IsTabStop="True"
+				                                       
+				UseSystemFocusVisuals="True" />
+		</Border>
+
+		<!--  Content  -->
+		<ContentPresenter x:ConnectionId='9'
+			x:Name="ContentPresenter"
+			Grid.Row="1"
+			Grid.Column="2"
+			Margin="2,0,8,0"
+			VerticalAlignment="Stretch"
+			                                            
+			TabFocusNavigation="Local" />
+
+		<VisualStateManager.VisualStateGroups>
+
+			<VisualStateGroup x:ConnectionId='17' x:Name="DisplayModes">
+				<VisualState x:ConnectionId='22' x:Name="Expanded" />
+				<VisualState x:ConnectionId='23' x:Name="Compact">
+					<VisualState.Setters>
+						<Setter Target="PaneColumnDefinition.Width" Value="{StaticResource SidebarCompactOpenPaneLength}" />
+						<Setter Target="MenuItemHostScrollViewer.HorizontalScrollMode" Value="Disabled" />
+						<Setter Target="MenuItemHostScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+					</VisualState.Setters>
+				</VisualState>
+				<VisualState x:ConnectionId='24' x:Name="MinimalCollapsed">
+					<VisualState.Setters>
+						<Setter Target="PaneColumnDefinition.Width" Value="{StaticResource SidebarOpenPaneLength}" />
+						<Setter Target="PaneColumnGrid.Background" Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" />
+						<Setter Target="PaneColumnGrid.BorderBrush" Value="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
+						<Setter Target="PaneColumnGrid.BorderThickness" Value="0,1,1,0" />
+						<Setter Target="PaneColumnGrid.CornerRadius" Value="0,8,0,8" />
+						<Setter Target="ContentPresenter.(Grid.Column)" Value="0" />
+						<Setter Target="ContentPresenter.(Grid.ColumnSpan)" Value="3" />
+						<Setter Target="SidebarResizer.Visibility" Value="Collapsed" />
+						<Setter Target="ContentPresenter.Margin" Value="8,0,8,0" />
+						<!--  Specific to Collapsed State  -->
+						<Setter Target="PaneColumnGridTransform.TranslateX" Value="{StaticResource SidebarNegativeOpenPaneLength}" />
+						<Setter Target="PaneColumnGrid.Visibility" Value="Collapsed" />
+					</VisualState.Setters>
+				</VisualState>
+				<VisualState x:ConnectionId='25' x:Name="MinimalExpanded">
+					<VisualState.Setters>
+						<Setter Target="PaneColumnDefinition.Width" Value="{StaticResource SidebarOpenPaneLength}" />
+						<Setter Target="PaneColumnGrid.Background" Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" />
+						<Setter Target="PaneColumnGrid.BorderBrush" Value="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
+						<Setter Target="PaneColumnGrid.BorderThickness" Value="0,1,1,0" />
+						<Setter Target="PaneColumnGrid.CornerRadius" Value="0,8,0,8" />
+						<Setter Target="ContentPresenter.(Grid.Column)" Value="0" />
+						<Setter Target="ContentPresenter.(Grid.ColumnSpan)" Value="3" />
+						<Setter Target="SidebarResizer.Visibility" Value="Collapsed" />
+						<Setter Target="ContentPresenter.Margin" Value="8,0,8,0" />
+						<!--  Specific to Expanded State  -->
+						<Setter Target="PaneLightDismissLayer.Visibility" Value="Visible" />
+						<Setter Target="PaneColumnGrid.Shadow">
+							<Setter.Value>
+								<ThemeShadow />
+							</Setter.Value>
+						</Setter>
+					</VisualState.Setters>
+				</VisualState>
+
+				<VisualStateGroup.Transitions>
+					<VisualTransition From="Compact" To="MinimalCollapsed">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+								<SplineDoubleKeyFrame
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									Value="{StaticResource SidebarNegativeCompactOpenPaneLength}" />
+							</DoubleAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Column)">
+								<DiscreteObjectKeyFrame Value="0" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+								<DiscreteObjectKeyFrame Value="3" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Margin)">
+								<DiscreteObjectKeyFrame Value="0,0,0,0" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGrid" Storyboard.TargetProperty="Background">
+								<DiscreteObjectKeyFrame Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnDefinition" Storyboard.TargetProperty="MaxWidth">
+								<DiscreteObjectKeyFrame Value="{StaticResource SidebarCompactOpenPaneLength}" />
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+
+					<VisualTransition From="Expanded" To="MinimalCollapsed">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+								<SplineDoubleKeyFrame x:ConnectionId='27'
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									                                                     />
+							</DoubleAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Column)">
+								<DiscreteObjectKeyFrame Value="0" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+								<DiscreteObjectKeyFrame Value="3" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Margin)">
+								<DiscreteObjectKeyFrame Value="0,0,0,0" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGrid" Storyboard.TargetProperty="Background">
+								<DiscreteObjectKeyFrame Value="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}" />
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+
+					<VisualTransition From="MinimalCollapsed" To="Compact">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="{StaticResource SidebarNegativeCompactOpenPaneLength}" />
+								<SplineDoubleKeyFrame
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									Value="0" />
+							</DoubleAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Column)">
+								<DiscreteObjectKeyFrame Value="2" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+								<DiscreteObjectKeyFrame Value="1" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Margin)">
+								<DiscreteObjectKeyFrame Value="2,0,0,0" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnDefinition" Storyboard.TargetProperty="Width">
+								<DiscreteObjectKeyFrame Value="{StaticResource SidebarCompactOpenPaneLength}" />
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+
+					<VisualTransition From="MinimalCollapsed" To="Expanded">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame x:ConnectionId='26' KeyTime="0:0:0"                                                      />
+								<SplineDoubleKeyFrame
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									Value="0" />
+							</DoubleAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Column)">
+								<DiscreteObjectKeyFrame Value="2" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.ColumnSpan)">
+								<DiscreteObjectKeyFrame Value="1" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="(Grid.Margin)">
+								<DiscreteObjectKeyFrame Value="2,0,0,0" />
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+
+					<VisualTransition From="MinimalCollapsed" To="MinimalExpanded">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="{StaticResource SidebarNegativeOpenPaneLength}" />
+								<SplineDoubleKeyFrame
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									Value="0" />
+							</DoubleAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneLightDismissLayer" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0:0:0" Value="Visible" />
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGrid" Storyboard.TargetProperty="Shadow">
+								<DiscreteObjectKeyFrame KeyTime="0:0:0">
+									<DiscreteObjectKeyFrame.Value>
+										<ThemeShadow />
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+
+					<VisualTransition From="MinimalExpanded" To="MinimalCollapsed">
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGridTransform" Storyboard.TargetProperty="TranslateX">
+								<DiscreteDoubleKeyFrame KeyTime="0:0:0" Value="0" />
+								<SplineDoubleKeyFrame
+									KeySpline="0.1,0.9 0.2,1.0"
+									KeyTime="0:0:0.35"
+									Value="{StaticResource SidebarNegativeOpenPaneLength}" />
+							</DoubleAnimationUsingKeyFrames>
+
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PaneColumnGrid" Storyboard.TargetProperty="Shadow">
+								<DiscreteObjectKeyFrame KeyTime="0:0:0">
+									<DiscreteObjectKeyFrame.Value>
+										<ThemeShadow />
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualTransition>
+				</VisualStateGroup.Transitions>
+			</VisualStateGroup>
+
+			<VisualStateGroup x:ConnectionId='18' x:Name="ResizerStates">
+				<VisualState x:ConnectionId='19' x:Name="ResizerNormal" />
+				<VisualState x:ConnectionId='20' x:Name="ResizerPointerOver">
+					<Storyboard>
+						<ObjectAnimationUsingKeyFrames Storyboard.TargetName="SidebarResizer" Storyboard.TargetProperty="Background">
+							<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardStrokeColorDefaultSolidBrush}" />
+						</ObjectAnimationUsingKeyFrames>
+						<ObjectAnimationUsingKeyFrames Storyboard.TargetName="SidebarResizer" Storyboard.TargetProperty="BorderBrush">
+							<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource CardStrokeColorDefaultSolidBrush}" />
+						</ObjectAnimationUsingKeyFrames>
+					</Storyboard>
+				</VisualState>
+
+				<VisualState x:ConnectionId='21' x:Name="ResizerPressed">
+					<Storyboard>
+						<ObjectAnimationUsingKeyFrames Storyboard.TargetName="SidebarResizer" Storyboard.TargetProperty="Background">
+							<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SolidBackgroundFillColorSecondaryBrush}" />
+						</ObjectAnimationUsingKeyFrames>
+						<ObjectAnimationUsingKeyFrames Storyboard.TargetName="SidebarResizer" Storyboard.TargetProperty="BorderBrush">
+							<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SolidBackgroundFillColorSecondaryBrush}" />
+						</ObjectAnimationUsingKeyFrames>
+					</Storyboard>
+				</VisualState>
+			</VisualStateGroup>
+
+		</VisualStateManager.VisualStateGroups>
+	</Grid>
+</UserControl>
+
