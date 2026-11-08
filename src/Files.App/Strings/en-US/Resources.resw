@@ -5069,7 +5069,7 @@
   <data name="NaiActionTags" xml:space="preserve"><value>Suggest tags and categories</value></data>
   <data name="NaiActionOrganize" xml:space="preserve"><value>Plan folder organization</value></data>
   <data name="NaiActionSearch" xml:space="preserve"><value>Turn a question into indexed search</value></data>
-  <data name="NaiAiConsent" xml:space="preserve"><value>I allow sending the displayed selection and question to the configured AI provider through Kelvin AI Workstation. Document content is never sent automatically.</value></data>
+  <data name="NaiAiConsent" xml:space="preserve"><value>I allow sending the displayed selection and question to the configured AI provider (LUSI Engine by default, Kelvin AI Workstation as fallback). Document content is never sent automatically.</value></data>
   <data name="NaiAiReview" xml:space="preserve"><value>Suggestions only. No files are renamed, moved, deleted, or executed automatically. Review AI output before using it.</value></data>
   <data name="NaiAiGenerate" xml:space="preserve"><value>Generate</value></data>
   <data name="NaiAiPrompt" xml:space="preserve"><value>Your question, instructions, or target language…</value></data>
@@ -5084,7 +5084,7 @@
   <data name="NaiAiPairCode" xml:space="preserve"><value>Pairing code</value></data>
   <data name="NaiAiPair" xml:space="preserve"><value>Pair Files</value></data>
   <data name="NaiAiDisconnect" xml:space="preserve"><value>Disconnect Files from AI</value></data>
-  <data name="NaiAiConnected" xml:space="preserve"><value>Connected to Kelvin AI Workstation. The selected model determines where inference runs.</value></data>
+  <data name="NaiAiConnected" xml:space="preserve"><value>Connected to the paired AI engine (LUSI Engine first, Kelvin AI Workstation as fallback). The selected model determines where inference runs.</value></data>
   <data name="NaiSearchHint" xml:space="preserve"><value>Fuzzy search · files: name · unread: name · read: name · content: words · $AQS</value></data>
   <data name="NaiLanguageRestart" xml:space="preserve"><value>The language now follows NAI OS. Reopen Files to update already displayed pages; your tabs will be restored.</value></data>
   <data name="NaiLanguageManaged" xml:space="preserve"><value>The language follows NAI OS Settings. Existing pages may require a restart; your tabs are preserved.</value></data>
@@ -5092,9 +5092,9 @@
   <data name="NaiFuzzySearch" xml:space="preserve"><value>Fuzzy search</value></data>
   <data name="NaiAssistantShortTitle" xml:space="preserve"><value>AI assistant</value></data>
   <data name="NaiProductName" xml:space="preserve"><value>NAI Files</value></data>
-  <data name="NaiConnectionSettings" xml:space="preserve"><value>Model and Kelvin AI Workstation connection</value></data>
+  <data name="NaiConnectionSettings" xml:space="preserve"><value>Model and AI engine connection (LUSI Engine / Kelvin AI Workstation)</value></data>
   <data name="NaiChooseAction" xml:space="preserve"><value>What would you like to do with your files?</value></data>
-  <data name="NaiNoCompatibleModel" xml:space="preserve"><value>No compatible chat model is advertised by Kelvin AI Workstation. Speech and embedding models are not shown here.</value></data>
+  <data name="NaiNoCompatibleModel" xml:space="preserve"><value>No compatible chat model is advertised by the paired AI engine (LUSI Engine or Kelvin AI Workstation). Speech and embedding models are not shown here.</value></data>
   <data name="NaiPinnedModelUnavailable" xml:space="preserve"><value>The selected model is unavailable or incompatible: {0}. Choose another model explicitly.</value></data>
   <data name="NaiSortDirection" xml:space="preserve"><value>Toggle ascending / descending</value></data>
   <data name="NaiAttributeFilterHint" xml:space="preserve"><value>Filter the current list by file properties. Fuzzy search finds approximate names; AI vision search finds image content.</value></data>
@@ -5107,13 +5107,15 @@
   <data name="NaiVisionAllCache" xml:space="preserve"><value>All analyzed images</value></data>
   <data name="NaiVisionTags" xml:space="preserve"><value>Generated tags</value></data>
   <data name="NaiVisionAnalyze" xml:space="preserve"><value>Analyze this folder</value></data>
-  <data name="NaiVisionConsent" xml:space="preserve"><value>I approve image analysis for this folder using the explicitly selected model through Kelvin AI Workstation. Only locally available images are read; online-only files and subfolders are skipped. No automatic cloud or CPU fallback.</value></data>
+  <data name="NaiVisionConsent" xml:space="preserve"><value>I approve image analysis for this folder using the explicitly selected model through the paired AI engine (LUSI Engine first, Kelvin AI Workstation as fallback). Only locally available images are read; online-only files and subfolders are skipped. No automatic cloud fallback.</value></data>
   <data name="NaiVisionResults" xml:space="preserve"><value>{0} matching images · {1} cached analyses</value></data>
   <data name="NaiVisionProgress" xml:space="preserve"><value>{0} analyzed · {1} cached · {2} skipped · {3} failed / {4} images · {5}</value></data>
   <data name="NaiAllTags" xml:space="preserve"><value>All tags</value></data>
   <data name="NaiVisionTranslate" xml:space="preserve"><value>Search across languages</value></data>
   <data name="NaiVisionChooseModel" xml:space="preserve"><value>Select a compatible model explicitly</value></data>
-  <data name="NaiVisionQueryConsent" xml:space="preserve"><value>Send only this search phrase to {0} through Kelvin AI Workstation? No images, filenames or cached descriptions are sent. No model fallback.&#10;&#10;{1}</value></data>
+  <data name="NaiVisionQueryConsent" xml:space="preserve"><value>Send only this search phrase to {0} through the paired AI engine (LUSI Engine first, Kelvin AI Workstation as fallback)? No images, filenames or cached descriptions are sent. No model fallback.
+
+{1}</value></data>
   <data name="NaiVisionInterpreted" xml:space="preserve"><value>Search interpretation: {0} · {1}</value></data>
   <data name="NaiVisionLiteralSearch" xml:space="preserve"><value>Translation unavailable; the displayed results still use your literal query. {0}</value></data>
   <data name="NaiVisionStale" xml:space="preserve"><value>Cached analysis: the source has changed or is no longer available. This is not evidence of its current contents.</value></data>
@@ -5165,12 +5167,12 @@
   <data name="NaiTelemetryDisk" xml:space="preserve"><value>System drive free/total</value></data>
   <data name="NaiTelemetryObserved" xml:space="preserve"><value>Measured at {0}</value></data>
   <data name="NaiTelemetrySource" xml:space="preserve"><value>Windows processor-group time counters, physical RAM, system-volume capacity and Wi-Fi signal. Disk capacity is not I/O utilization. Unknown GPU/NPU values are not estimated from scheduling reservations.</value></data>
-  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Kelvin topology and queue</value></data>
-  <data name="NaiRuntimeDescription" xml:space="preserve"><value>Read-only Kelvin AI Workstation snapshot using Files' own pairing. No model is started. Provider membership and actual device assignments are shown; these are not measured traffic or inferred performance.</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>AI engine topology and queue</value></data>
+  <data name="NaiRuntimeDescription" xml:space="preserve"><value>Read-only paired AI engine snapshot (LUSI Engine first, Kelvin AI Workstation as fallback) using Files' own pairing. No model is started. Provider membership and actual device assignments are shown; these are not measured traffic or inferred performance.</value></data>
   <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Refresh snapshot</value></data>
-  <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Live snapshot unavailable. Any displayed snapshot is stale; reconnect Kelvin AI Workstation through NAI Assistant. {0}</value></data>
+  <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Live snapshot unavailable. Any displayed snapshot is stale; the LUSI Engine / Kelvin AI Workstation may be offline. {0}</value></data>
   <data name="NaiRuntimeSnapshotAt" xml:space="preserve"><value>Snapshot captured: {0}</value></data>
-  <data name="NaiRuntimeQueue" xml:space="preserve"><value>Kelvin orchestrator: {0} active leases · {1} queued. Direct chat requests are not included.</value></data>
+  <data name="NaiRuntimeQueue" xml:space="preserve"><value>Paired AI engine: {0} active lanes · {1} queued. Direct chat requests are not included.</value></data>
   <data name="NaiRuntimeQueueUnknown" xml:space="preserve"><value>Orchestrator queue is unavailable, not empty.</value></data>
   <data name="NaiRuntimeAssignments" xml:space="preserve"><value>Workload assignments (capability · state · provider → device)</value></data>
   <data name="NaiRuntimeRelationships" xml:space="preserve"><value>Observed topology relationships</value></data>
@@ -5200,9 +5202,9 @@
   <data name="NaiSearchSemantic" xml:space="preserve"><value>Semantic · NPU</value></data>
   <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Index</value></data>
   <data name="NaiSemanticTitle" xml:space="preserve"><value>Semantic file search</value></data>
-  <data name="NaiSemanticDescription" xml:space="preserve"><value>Search approved document contents through Kelvin's local NPU index. This is separate from local filename fuzzy/AQS search. Indexing is explicit, bounded and cancellable; stale source versions are excluded.</value></data>
+  <data name="NaiSemanticDescription" xml:space="preserve"><value>Search approved document contents through the paired local AI engine (LUSI Engine embeddings and rerank first, Kelvin's local NPU index as fallback). This is separate from local filename fuzzy/AQS search. Indexing is explicit, bounded and cancellable; stale source versions are excluded.</value></data>
   <data name="NaiSemanticRecursive" xml:space="preserve"><value>Include subfolders (never follow links)</value></data>
-  <data name="NaiSemanticConsent" xml:space="preserve"><value>Allow reading reviewed local documents and storing bounded excerpts and vectors in Kelvin. No online-only files, links or cloud fallback. I will review the file list before indexing.</value></data>
+  <data name="NaiSemanticConsent" xml:space="preserve"><value>Allow reading reviewed local documents and storing bounded excerpts and vectors in the paired AI engine (Kelvin when it owns the index; LUSI vectors stay in this app). No online-only files, links or cloud fallback. I will review the file list before indexing.</value></data>
   <data name="NaiSemanticIndex" xml:space="preserve"><value>Review and index documents</value></data>
   <data name="NaiSemanticApprove" xml:space="preserve"><value>Index reviewed files</value></data>
   <data name="NaiSemanticForget" xml:space="preserve"><value>Remove this index</value></data>
@@ -5213,7 +5215,7 @@
   <data name="NaiSemanticIndexState" xml:space="preserve"><value>{0} tracked documents · updated {1} · {2} · {3} exact cleanup IDs pending</value></data>
   <data name="NaiSemanticPartial" xml:space="preserve"><value>Partial / bounded coverage</value></data>
   <data name="NaiSemanticReady" xml:space="preserve"><value>Reviewed run completed</value></data>
-  <data name="NaiSemanticRetrievalUnavailable" xml:space="preserve"><value>Kelvin is paired, but the local NPU retrieval service is unavailable. Start the OpenVINO NPU service in Kelvin and retry.</value></data>
+  <data name="NaiSemanticRetrievalUnavailable" xml:space="preserve"><value>The paired AI engine matched but the local retrieval service is unavailable. Start the OpenVINO NPU service (Kelvin) or the LUSI Engine box and retry.</value></data>
   <data name="NaiSemanticReviewPlan" xml:space="preserve"><value>Approve these {0} documents? {1} unsupported/unavailable entries were skipped. {2} Limits: 256 files, 32 MiB per file, 512 MiB per run, first 24,000 characters and at most 16 chunks per document. No source file is modified. Excerpts and embeddings stay with the explicitly paired local NPU owner.</value></data>
   <data name="NaiSemanticProgress" xml:space="preserve"><value>{0}/{1} reviewed · {2} indexed · {3} unchanged · {4} skipped · {5} failed</value></data>
   <data name="NaiSemanticCancelled" xml:space="preserve"><value>Index/query cancelled. Completed document checkpoints remain; pending exact-ID cleanup is retained.</value></data>

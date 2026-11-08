@@ -380,8 +380,9 @@ namespace Files.App.UserControls
 		private void ScheduleAutoSearch(NavigationToolbarViewModel viewModel)
 		{
 			// Auto-submit after typing pauses, for both fuzzy and semantic modes.
-			// Kelvin routes the semantic query to whatever execution device it
-			// scores; the client only submits, never pre-diagnoses placement.
+			// The paired engine (LUSI first, Kelvin fallback) routes the semantic
+			// query to whatever execution device it scores; the client only
+			// submits, never pre-diagnoses placement.
 			_autoSearchCTS?.Cancel();
 			_autoSearchCTS = new CancellationTokenSource();
 			var token = _autoSearchCTS.Token;

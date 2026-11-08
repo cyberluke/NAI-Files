@@ -11,6 +11,46 @@ namespace Files.App.Helpers
 	public sealed record NaiRuntimeSnapshot(DateTimeOffset ObservedAt, NaiRuntimeResource[] Resources, NaiRuntimeWorkload[] Workloads,
 		int? Active, int? Queued, NaiRuntimeRelationship[] Relationships, bool Truncated)
 	{
+		/// <summary>
+		/// Composes a Files-shaped runtime snapshot from the canonical LUSI engine's
+		/// <c>/v1/health</c> + capabilities map. LUSI exposes a lane inventory rather
+		/// than an orchestrator topology; these rows make the canonical engine the
+		/// FIRST-CLASS runtime view, keeping the Kelvin <c>files/overview</c> response
+		/// (parsed by <see cref="Parse"/>) as the fallback shape.
+		/// </summary>
+		public static NaiRuntimeSnapshot FromLusi(JsonElement health, string provider)
+		{
+			var observedAt = DateTimeOffset.UtcNow;
+			var lanes = health.TryGetProperty("capabilities", out var capabilities) && capabilities.ValueKind == JsonValueKind.Object
+				? capabilities : default;
+			var resources = new List<NaiRuntimeResource>();
+			var workloads = new List<NaiRuntimeWorkload>();
+			if (lanes.ValueKind == JsonValueKind.Object)
+			{
+				string LaneModel(string lane)
+				{
+					if (!lanes.TryGetProperty(lane, out var entry) || entry.ValueKind != JsonValueKind.Object) return string.Empty;
+					return entry.TryGetProperty("model", out var model) && model.ValueKind == JsonValueKind.String ? model.GetString() ?? string.Empty : string.Empty;
+				}
+				string LaneDevice(string lane)
+				{
+					if (!lanes.TryGetProperty(lane, out var entry) || entry.ValueKind != JsonValueKind.Object) return string.Empty;
+					return entry.TryGetProperty("device", out var device) && device.ValueKind == JsonValueKind.String ? device.GetString() ?? string.Empty : string.Empty;
+				}
+				foreach (var lane in new[] { "chat", "stt", "ocr", "embeddings", "rerank", "vision" })
+				{
+					if (!lanes.TryGetProperty(lane, out var entry) || entry.ValueKind != JsonValueKind.Object) continue;
+					var available = entry.TryGetProperty("available", out var avail) && avail.ValueKind == JsonValueKind.True;
+					var model = LaneModel(lane); var device = LaneDevice(lane);
+					resources.Add(new NaiRuntimeResource("lusi-" + lane, provider, lane, model,
+						available ? "running" : "down", available ? "healthy" : "unavailable", observedAt));
+					if (available) workloads.Add(new NaiRuntimeWorkload("lusi-" + lane, lane, "running", provider, string.IsNullOrEmpty(device) ? null : device));
+				}
+			}
+			if (resources.Count == 0) resources.Add(new NaiRuntimeResource("lusi", provider, "gateway", string.Empty, "unknown", "unknown", observedAt));
+			return new(observedAt, resources.ToArray(), workloads.ToArray(), workloads.Count, null, [], false);
+		}
+
 		public static NaiRuntimeSnapshot Parse(JsonElement root)
 		{
 			if (root.GetProperty("schemaVersion").GetInt32() != 1) throw new FormatException("Unsupported runtime snapshot");

@@ -103,7 +103,7 @@ namespace Files.App.Helpers
 			var current = await Task.Run(() => eligible.Where(item => NaiSemanticIndexStore.IsCurrentLocalFile(folder, item)).ToDictionary(item => item.Id, StringComparer.Ordinal), token);
 			if (current.Count == 0) return new(Array.Empty<NaiSemanticFileMatch>(), 0, eligible.Length, state.Partial);
 			var chunks = current.Values.SelectMany(item => item.ChunkIds).ToArray();
-			var hits = await NaiAiClient.SearchSemanticAsync(state.Dataset, query, chunks, token);
+			var hits = await NaiAiClient.SearchSemanticAsync(state.Dataset, folder, query, chunks, token);
 			var matches = new List<NaiSemanticFileMatch>();
 			foreach (var hit in hits)
 			{

@@ -19,7 +19,13 @@ namespace Files.App.Helpers
 			UseProxy = false, UseCookies = false, AllowAutoRedirect = false, ConnectTimeout = TimeSpan.FromSeconds(3),
 		}) { Timeout = TimeSpan.FromSeconds(120) };
 
+		// LUSI-first routing happens in the async feature methods; IsPaired reflects
+		// whether the app owns a Kelvin credential (the only explicit handshake).
+		// LUSI is auto-discovered by the async methods and needs no explicit pairing.
 		public static bool IsPaired => GetSecret() is not null;
+
+		/// <summary>True when a Kelvin pairing credential exists (the explicit handshake).</summary>
+		internal static bool HasKelvinSecret => GetSecret() is not null;
 		private static string? GetSecret()
 		{
 			try
@@ -36,10 +42,17 @@ namespace Files.App.Helpers
 			var vault = new PasswordVault();
 			try { vault.Remove(vault.Retrieve(VaultResource, AppId)); }
 			catch (System.Runtime.InteropServices.COMException) { }
+			// Forget the cached LUSI resolution so the next call re-probes.
+			NaiGatewayDiscovery.Invalidate();
 		}
 
 		public static async Task PairAsync(CancellationToken token)
 		{
+			// LUSI-first: discovery via the shared NAI models.json / gateway ports
+			// makes the canonical engine "paired" without an explicit handshake.
+			if ((await NaiGatewayDiscovery.ActiveAsync(token)).IsLusi)
+				return;
+			// Kelvin fallback: perform the explicit Kelvin pairing handshake.
 			var currentSecret = GetSecret();
 			using var response = await SendAsync("pairing", NaiAiProtocol.PairingPayload(), authenticated: currentSecret is not null, token, currentSecret);
 			var secret = NaiAiProtocol.PairingSecret(response.RootElement);
@@ -53,8 +66,18 @@ namespace Files.App.Helpers
 
 		public static async Task<IReadOnlyList<string>> ModelsAsync(CancellationToken token, string requiredCapability = "chat")
 		{
-			// The gateway's model catalog can be public; catalog success alone is
-			// not proof that this application's credential is still authorized.
+			// LUSI-first: the canonical engine's capability map names the models.
+			var active = await NaiGatewayDiscovery.ActiveAsync(token);
+			if (active.Lusi is { } lusi)
+			{
+				var ids = lusi.ModelIds(requiredCapability);
+				if (ids.Length > 0) return ids;
+				// Fall back to the chat lane when a specific capability has no
+				// named model on this box (e.g. some LUSI configs expose only chat).
+				if (requiredCapability != "chat") return lusi.ModelIds("chat");
+			}
+			// Kelvin fallback: the gateway's model catalog can be public; catalog
+			// success alone is not proof that this app's credential is authorized.
 			await VerifyAsync(null, token);
 			using var response = await SendAsync("models", null, authenticated: true, token);
 			return response.RootElement.GetProperty("data").EnumerateArray()
@@ -72,6 +95,13 @@ namespace Files.App.Helpers
 		public static async Task<string> GenerateAsync(string model, string instruction, string request,
 			string displayedContent, string language, CancellationToken token)
 		{
+			// LUSI-first (canonical engine) — the OpenAI wire, then Kelvin fallback.
+			var active = await NaiGatewayDiscovery.ActiveAsync(token);
+			if (active.Lusi is { } lusi)
+			{
+				try { return await lusi.ChatAsync(model, instruction, request, displayedContent, language, token); }
+				catch (HttpRequestException) when (active.Lusi is not null) { /* fall through to Kelvin */ }
+			}
 			using var response = await SendAsync("chat/completions", NaiAiProtocol.ChatPayload(model, instruction, request, displayedContent, language),
 				authenticated: true, token);
 			var content = response.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
@@ -84,6 +114,15 @@ namespace Files.App.Helpers
 			deadline.CancelAfter(TimeSpan.FromSeconds(15));
 			try
 			{
+				// LUSI-first: derive the runtime snapshot from the canonical engine's
+				// health/capabilities instead of Kelvin's files/overview.
+				var active = await NaiGatewayDiscovery.ActiveAsync(deadline.Token);
+				if (active.Lusi is { } lusi)
+				{
+					var health = await lusi.HealthAsync(deadline.Token);
+					if (health.TryGetProperty("ok", out var ok) && ok.ValueKind == System.Text.Json.JsonValueKind.True)
+						return NaiRuntimeSnapshot.FromLusi(health, lusi.Product);
+				}
 				await VerifyAsync(null, deadline.Token);
 				using var response = await SendAsync("files/overview", null, authenticated: true, deadline.Token);
 				return NaiRuntimeSnapshot.Parse(response.RootElement);
@@ -93,6 +132,10 @@ namespace Files.App.Helpers
 
 		public static async Task EnsureSemanticProfileAsync(CancellationToken token)
 		{
+			// LUSI owns no server-side document index; the client-side retriever
+			// needs no profile registration. Only Kelvin needs the explicit profile.
+			if ((await NaiGatewayDiscovery.ActiveAsync(token)).IsLusi)
+				return;
 			await VerifyAsync(null, token);
 			using var response = await SendAsync("apps", NaiSemanticProtocol.RegistrationPayload(), authenticated: true, token);
 			if (response.RootElement.GetProperty("profile").GetProperty("appId").GetString() != NaiSemanticProtocol.Profile)
@@ -101,22 +144,71 @@ namespace Files.App.Helpers
 
 		public static async Task UpsertSemanticChunksAsync(string dataset, IReadOnlyList<NaiSemanticChunk> chunks, CancellationToken token)
 		{
+			// LUSI owns no server-side store; the client-side retriever embeds the
+			// active chunks on demand, so there is nothing to upsert into LUSI.
+			if ((await NaiGatewayDiscovery.ActiveAsync(token)).IsLusi)
+				return;
 			using var response = await SendAsync("index/upsert", NaiSemanticProtocol.UpsertPayload(dataset, chunks), authenticated: true, token);
 			var root = response.RootElement;
 			if (root.GetProperty("app_id").GetString() != NaiSemanticProtocol.Profile || root.GetProperty("dataset").GetString() != dataset
 				|| root.GetProperty("upserted").GetInt32() != chunks.Count) throw new FormatException("Kelvin did not confirm the complete scoped index batch");
 		}
 
-		public static async Task<IReadOnlyList<NaiSemanticHit>> SearchSemanticAsync(string dataset, string query, IReadOnlyList<string> activeChunkIds, CancellationToken token)
+		public static async Task<IReadOnlyList<NaiSemanticHit>> SearchSemanticAsync(string dataset, string folder, string query, IReadOnlyList<string> activeChunkIds, CancellationToken token)
 		{
+			// LUSI-first: client-side embeddings + rerank over the active chunks.
+			var active = await NaiGatewayDiscovery.ActiveAsync(token);
+			if (active.Lusi is { } lusi)
+			{
+				try
+				{
+					var chunks = await CurrentChunksAsync(folder, activeChunkIds, token);
+					return chunks.Count > 0
+						? await NaiLusiRetriever.SearchAsync(lusi, NaiSemanticProtocol.EmbeddingModel, dataset, query, chunks, token)
+						: [];
+				}
+				catch (HttpRequestException) when (active.Lusi is not null) { /* fall through to Kelvin */ }
+			}
 			using var response = await SendAsync("search", NaiSemanticProtocol.SearchPayload(dataset, query, activeChunkIds), authenticated: true, token);
 			return NaiSemanticProtocol.ParseSearch(response.RootElement, dataset);
 		}
 
 		public static async Task DeleteSemanticChunksAsync(string dataset, IReadOnlyList<string> ids, CancellationToken token)
 		{
+			// LUSI owns no server-side store; nothing to delete remotely.
+			if ((await NaiGatewayDiscovery.ActiveAsync(token)).IsLusi)
+				return;
 			using var response = await SendAsync("index/delete", NaiSemanticProtocol.DeletePayload(dataset, ids), authenticated: true, token);
 			if (response.RootElement.GetProperty("deleted").GetInt32() != ids.Count) throw new FormatException("Kelvin did not acknowledge exact index IDs");
+		}
+
+		/// <summary>
+		/// Resolves the active document chunks (id, file id, text) for the
+		/// client-side retriever. Chunk text is re-read from the current local
+		/// sources so the retriever embeds real content (LUSI has no remote store).
+		/// </summary>
+		private static async Task<List<(string ChunkId, string FileId, string Text)>> CurrentChunksAsync(string folder, IReadOnlyList<string> activeChunkIds, CancellationToken token)
+		{
+			if (string.IsNullOrWhiteSpace(folder) || activeChunkIds.Count is < 1 or > 8192) return [];
+			var state = await NaiSemanticIndexService.Store.ReadAsync(folder, token);
+			if (state is null) return [];
+			var byId = new Dictionary<string, NaiIndexedDocument>(StringComparer.Ordinal);
+			foreach (var document in state.Documents)
+				foreach (var chunk in document.ChunkIds) if (!byId.ContainsKey(chunk)) byId.Add(chunk, document);
+			var chunks = new List<(string, string, string)>();
+			foreach (var chunkId in activeChunkIds)
+			{
+				if (!byId.TryGetValue(chunkId, out var document)) continue;
+				var path = NaiSemanticIndexStore.ResolvePath(folder, document.RelativePath);
+				if (path is null) continue;
+				string text;
+				try { text = await NaiDocumentReader.ReadAsync(path, 16384, token); }
+				catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException) { continue; }
+				if (string.IsNullOrWhiteSpace(text)) continue;
+				var limited = text.Length > NaiLusiRetriever.MaxDocumentCharacters ? text[..NaiLusiRetriever.MaxDocumentCharacters] : text;
+				chunks.Add((chunkId, document.Id, limited));
+			}
+			return chunks;
 		}
 
 		private static byte[] Payload(Action<Utf8JsonWriter> write)
@@ -130,6 +222,15 @@ namespace Files.App.Helpers
 		{
 			if (jpeg.Length is < 4 or > 8 * 1024 * 1024 || string.IsNullOrWhiteSpace(model))
 				throw new ArgumentException("Invalid approved image request");
+			// LUSI-first ("obrazky s AI" / image captioning): the canonical engine's
+			// vision-capable chat lane serves EXACTLY the selected model. Florence-2
+			// is used only as a captioning fallback when the box has no vision chat.
+			var active = await NaiGatewayDiscovery.ActiveAsync(token);
+			if (active.Lusi is { } lusi)
+			{
+				try { return await lusi.AnalyzeImageAsync(model, jpeg, language, token); }
+				catch (HttpRequestException) when (active.Lusi is not null) { /* fall through to Kelvin */ }
+			}
 			// Exact selected model through the paired gateway. Never use the routed
 			// vision endpoint, whose provider chain can silently change locality.
 			using var response = await SendAsync("chat/completions", Payload(json =>

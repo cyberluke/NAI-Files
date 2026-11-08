@@ -830,6 +830,11 @@ namespace Files.App.Views.Layouts
 		private void RootGrid_SizeChanged(object? sender, SizeChangedEventArgs? e)
 		{
 			MaxWidthForRenameTextbox = Math.Max(0, RootGrid.ActualWidth - 80);
+
+			// Re-flow the columns to fill the view port whenever the pane is resized (including on open via the
+			// native dialog integration) so headers never collapse to one side or truncate.
+			if (e is not null && FileList.Items.Any())
+				AutoFitColumnsIfEnabled(forceFill: true);
 		}
 
 		private void GridSplitter_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
@@ -878,15 +883,19 @@ namespace Files.App.Views.Layouts
 			if (!FileList.Items.Any())
 				return;
 
-			// Scale to whatever DetailsLayoutColumnItem properties exist on ColumnsViewModel so new columns don't need a code change here.
+			// Fit each column to its content first.
 			int totalColumnCount = typeof(ColumnsViewModel).GetProperties().Count(prop => prop.PropertyType == typeof(DetailsLayoutColumnItem));
 			for (int columnIndex = 1; columnIndex <= totalColumnCount; columnIndex++)
 				ResizeColumnToFit(columnIndex);
+
+			// Then scale the flexible columns so the header fills the whole view port, keeping the
+			// Name (and Size) headers visible and preventing truncation of file and folder names.
+			ScaleColumnsToFillPaneWidth();
 		}
 
-		private void AutoFitColumnsIfEnabled()
+		private void AutoFitColumnsIfEnabled(bool forceFill = false)
 		{
-			if (!UserSettingsService.LayoutSettingsService.AutoSizeColumnsInDetailsLayout)
+			if (!UserSettingsService.LayoutSettingsService.AutoSizeColumnsInDetailsLayout && !forceFill)
 				return;
 
 			// Trailing debounce so bursts of item adds and extended-property updates during a folder load collapse into one resize.
@@ -896,14 +905,82 @@ namespace Files.App.Views.Layouts
 				TimeSpan.FromMilliseconds(250));
 		}
 
+		/// <summary>
+		/// Grows flexible columns so the header spans the available view port, distributing the spare
+		/// width to the Name column first so file and folder names are never truncated, then to the
+		/// other flexible columns. Columns are never shrunk below their fitted size.
+		/// </summary>
+		private void ScaleColumnsToFillPaneWidth()
+		{
+			double available = ContentScroller?.ViewportWidth > 0
+				? ContentScroller.ViewportWidth
+				: RootGrid.ActualWidth;
+			if (available <= 0 || double.IsNaN(available) || double.IsInfinity(available))
+				return;
+
+			// The header reserves space for the leading select-all checkbox column, left padding and,
+			// when present, a vertical scrollbar. Account for these so the trailing column reaches the pane edge.
+			const double LeadingBooking = 24; // HeaderGrid left padding
+			const double ScrollBarAllowance = 20;
+			double usable = Math.Max(0, available - LeadingBooking - ScrollBarAllowance);
+
+			// Current header content width (columns plus their grid splitters).
+			double total = typeof(ColumnsViewModel)
+				.GetProperties()
+				.Where(prop => prop.PropertyType == typeof(DetailsLayoutColumnItem))
+				.Select(prop => ((DetailsLayoutColumnItem)prop.GetValue(ColumnsViewModel)!).LengthIncludingGridSplitterPixels)
+				.Sum();
+
+			double leftover = usable - total;
+			if (leftover <= 0)
+				return;
+
+			// Ordered list of flexible columns that may absorb the leftover width to fill the pane, Name first.
+			var flexible = new[]
+			{
+				ColumnsViewModel.NameColumn,
+				ColumnsViewModel.PathColumn,
+				ColumnsViewModel.TagColumn,
+				ColumnsViewModel.DateModifiedColumn,
+				ColumnsViewModel.ItemTypeColumn,
+				ColumnsViewModel.DateCreatedColumn,
+				ColumnsViewModel.SizeColumn,
+			};
+
+			foreach (var column in flexible)
+			{
+				if (leftover <= 0)
+					break;
+
+				double currentLength = column.UserCollapsed || column.IsHidden ? 0 : column.UserLength.Value;
+				double room = Math.Max(0, column.NormalMaxLength - currentLength);
+				double grant = Math.Min(leftover, room);
+				if (grant <= 0)
+					continue;
+
+				column.UserLength = new GridLength(currentLength + grant, GridUnitType.Pixel);
+				leftover -= grant;
+			}
+
+			var folderSettings = FolderSettings
+				?? throw new InvalidOperationException("The details layout does not have folder settings.");
+			folderSettings.ColumnsViewModel = ColumnsViewModel;
+		}
+
 		private void ShellViewModel_ItemLoadStatusChanged(object? sender, ItemLoadStatusChangedEventArgs e)
 		{
-			if (e.Status == ItemLoadStatusChangedEventArgs.ItemLoadStatus.Complete)
-				AutoFitColumnsIfEnabled();
+			if (e.Status != ItemLoadStatusChangedEventArgs.ItemLoadStatus.Complete)
+				return;
+
+			// Auto-size columns whenever a folder finishes loading. This runs by default (not gated behind
+			// the "auto size columns" toggle) so that headers always fill the pane on open, including when
+			// Files is launched through the native dialog integration.
+			AutoFitColumnsIfEnabled(forceFill: true);
 		}
 
 		private void FileListItems_VectorChanged(IObservableVector<object> sender, IVectorChangedEventArgs e)
 		{
+			// The opt-in toggle keeps columns re-fitted to content as items stream in mid-session.
 			AutoFitColumnsIfEnabled();
 		}
 
