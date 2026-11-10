@@ -47,6 +47,7 @@ namespace Files.App.Controls
 		private string _userInput = string.Empty;
 		private OmnibarTextChangeReason _textChangeReason = OmnibarTextChangeReason.None;
 		private bool _placeCaretAtEndOnFocus;
+		private bool _isFocusInFlyout;
 		private bool _isFirstSuggestionSelectionQueued;
 		private bool _isTextTypedByUser;
 		private bool _isSuggestionSelectedByUser;
@@ -116,6 +117,7 @@ namespace Files.App.Controls
 			_textBox.LostFocus += AutoSuggestBox_LostFocus;
 			_textBox.KeyDown += AutoSuggestBox_KeyDown;
 			_textBox.TextChanged += AutoSuggestBox_TextChanged;
+			_textBox.Loaded += (_, _) => ApplyClearButtonToolTip();
 			_textBoxSuggestionsPopup.GettingFocus += AutoSuggestBoxSuggestionsPopup_GettingFocus;
 			_textBoxSuggestionsPopup.Opened += AutoSuggestBoxSuggestionsPopup_Opened;
 			_textBoxSuggestionsListView.ItemClick += AutoSuggestBoxSuggestionsListView_ItemClick;
@@ -198,6 +200,28 @@ namespace Files.App.Controls
 			_sweepAnimating = false;
 		}
 
+		private void ApplyClearButtonToolTip()
+		{
+			if (_textBox is not null && FindDescendant(_textBox, "DeleteButton") is { } button)
+				ToolTipService.SetToolTip(button, ClearButtonToolTip);
+		}
+
+		[DynamicWindowsRuntimeCast(typeof(FrameworkElement))]
+		private static FrameworkElement? FindDescendant(DependencyObject parent, string name)
+		{
+			for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+			{
+				var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+				if (child is FrameworkElement element && element.Name == name)
+					return element;
+
+				if (FindDescendant(child, name) is { } descendant)
+					return descendant;
+			}
+
+			return null;
+		}
+
 		public void PopulateModes()
 		{
 			if (Modes is null || _modesHostGrid is null)
@@ -263,6 +287,9 @@ namespace Files.App.Controls
 
 			// Set the correct AutoSuggestBox cursor position
 			AutoSuggestBoxPadding = new(leftPadding, 0, rightPadding, 0);
+
+			// The clear button of the last mode sits at the rounded end of the bar
+			VisualStateManager.GoToState(_textBox, itemIndex == itemCount - 1 ? "DeleteButtonCornersRounded" : "DeleteButtonCornersDefault", false);
 
 			_isTextTypedByUser = false;
 			_isSuggestionSelectedByUser = false;
