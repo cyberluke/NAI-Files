@@ -1,0 +1,218 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<Page
+	x:Class="Files.App.Views.Settings.AiPage"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="using:Files.App.ViewModels.Settings"
+	mc:Ignorable="d">
+
+	<Page.DataContext>
+		<vm:AiViewModel x:Name="ViewModel" />
+	</Page.DataContext>
+
+	<Grid>
+		<ScrollViewer Padding="0,0,0,24">
+			<StackPanel Spacing="12">
+
+				<!--  Title  -->
+				<TextBlock
+					Style="{StaticResource App.Theme.SubtitleTextBlockStyle}"
+					Text="AI providers" />
+				<TextBlock
+					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+					Text="Files routes every AI request through one ordered ladder of backends. The first reachable provider in the list answers; the rest are skipped."
+					TextWrapping="Wrap" />
+
+				<!--  OpenAI-compatible gateway  -->
+				<Border
+					Padding="16"
+					Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+					BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+					BorderThickness="1"
+					CornerRadius="8">
+					<StackPanel Spacing="10">
+						<TextBlock
+							FontWeight="SemiBold"
+							Text="OpenAI-compatible gateway" />
+						<TextBlock
+							FontSize="12"
+							Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+							Text="Point Files at any OpenAI-compatible endpoint (cloud or a local server). Probe loads the model list from /v1/models."
+							TextWrapping="Wrap" />
+
+						<TextBox
+							Header="Base URL"
+							PlaceholderText="http://localhost:8080/v1"
+							Text="{x:Bind ViewModel.GatewayUrl, Mode=TwoWay}" />
+
+						<PasswordBox
+							x:Name="GatewayKeyBox"
+							Header="API key (optional)"
+							PasswordChanged="GatewayKeyBox_PasswordChanged"
+							PlaceholderText="Bearer token" />
+
+						<Grid ColumnSpacing="8">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+							<ComboBox
+								x:Name="GatewayModelBox"
+								Grid.Column="0"
+								Header="Model"
+								HorizontalAlignment="Stretch"
+								ItemsSource="{x:Bind ViewModel.GatewayModels}"
+								PlaceholderText="Probe to load models"
+								SelectionChanged="GatewayModelBox_SelectionChanged" />
+							<Button
+								Grid.Column="1"
+								VerticalAlignment="Bottom"
+								Command="{x:Bind ViewModel.ProbeCommand}"
+								Content="Probe /v1/models" />
+						</Grid>
+
+						<StackPanel Orientation="Horizontal" Spacing="8">
+							<Button
+								Command="{x:Bind ViewModel.SaveGatewayCommand}"
+								Content="Save gateway"
+								Style="{StaticResource AccentButtonStyle}" />
+							<ProgressRing
+								Width="20"
+								Height="20"
+								IsActive="{x:Bind ViewModel.IsProbing, Mode=OneWay}" />
+						</StackPanel>
+
+						<TextBlock
+							Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+							Text="{x:Bind ViewModel.ProbeStatus, Mode=OneWay}"
+							TextWrapping="Wrap" />
+					</StackPanel>
+				</Border>
+
+				<!--  Local NPU / GPU lanes  -->
+				<Border
+					Padding="16"
+					Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+					BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+					BorderThickness="1"
+					CornerRadius="8">
+					<StackPanel Spacing="10">
+						<TextBlock
+							FontWeight="SemiBold"
+							Text="Local NPU / GPU lanes" />
+						<TextBlock
+							FontSize="12"
+							Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+							Text="Optional OpenAI-compatible endpoints for on-device NPU and GPU inference servers. Leave blank to keep a lane inactive."
+							TextWrapping="Wrap" />
+
+						<Grid ColumnSpacing="8">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<TextBox
+								Grid.Column="0"
+								Header="NPU base URL"
+								PlaceholderText="http://127.0.0.1:9000/v1"
+								Text="{x:Bind ViewModel.NpuUrl, Mode=TwoWay}" />
+							<TextBox
+								Grid.Column="1"
+								Header="NPU model"
+								Text="{x:Bind ViewModel.NpuModel, Mode=TwoWay}" />
+						</Grid>
+
+						<Grid ColumnSpacing="8">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<TextBox
+								Grid.Column="0"
+								Header="GPU base URL"
+								PlaceholderText="http://127.0.0.1:9001/v1"
+								Text="{x:Bind ViewModel.GpuUrl, Mode=TwoWay}" />
+							<TextBox
+								Grid.Column="1"
+								Header="GPU model"
+								Text="{x:Bind ViewModel.GpuModel, Mode=TwoWay}" />
+						</Grid>
+
+						<Button Command="{x:Bind ViewModel.SaveLocalCommand}" Content="Save local lanes" />
+					</StackPanel>
+				</Border>
+
+				<!--  Priority ladder  -->
+				<TextBlock
+					Margin="0,8,0,0"
+					Style="{StaticResource App.Theme.SubtitleTextBlockStyle}"
+					Text="Provider priority" />
+				<TextBlock
+					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+					Text="Drag rows to reorder. Disabled providers are skipped; local NPU/GPU lanes use their own endpoint from the gateway form above only when pointed at a local server."
+					TextWrapping="Wrap" />
+
+				<ListView
+					AllowDrop="True"
+					CanReorderItems="True"
+					IsItemClickEnabled="False"
+					ItemsSource="{x:Bind ViewModel.Providers}"
+					ReorderMode="Enabled"
+					SelectionMode="None">
+					<ListView.ItemContainerStyle>
+						<Style TargetType="ListViewItem">
+							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+							<Setter Property="Padding" Value="4,2" />
+						</Style>
+					</ListView.ItemContainerStyle>
+					<ListView.ItemTemplate>
+						<DataTemplate x:DataType="vm:AiProviderRow">
+							<Grid ColumnSpacing="12" Padding="2,6">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+
+								<FontIcon
+									Grid.Column="0"
+									VerticalAlignment="Center"
+									FontSize="14"
+									Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+									Glyph="&#xE76F;" />
+
+								<StackPanel
+									Grid.Column="1"
+									VerticalAlignment="Center"
+									Spacing="2">
+									<TextBlock FontWeight="SemiBold" Text="{x:Bind DisplayName}" />
+									<TextBlock
+										FontSize="11"
+										Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+										Text="{x:Bind Subtitle}" />
+								</StackPanel>
+
+								<TextBlock
+									Grid.Column="2"
+									VerticalAlignment="Center"
+									FontSize="11"
+									Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+									Text="{x:Bind Badge}" />
+
+								<ToggleSwitch
+									Grid.Column="3"
+									MinWidth="0"
+									IsOn="{x:Bind Enabled, Mode=TwoWay}"
+									OffContent=""
+									OnContent="" />
+							</Grid>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</Page>

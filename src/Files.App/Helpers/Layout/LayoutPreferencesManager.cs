@@ -400,7 +400,27 @@ namespace Files.App.Helpers
 		{
 			if (App.IsDialogMode && DialogSession.Current is { } dialog)
 			{
+				// Keep the caller-scoped dialog layout (columns/visibility) in sync.
 				dialog.State.Layout = DialogSession.CloneLayout(preferencesItem);
+
+				// Persist only the folder's own sort/group to its per-folder entry so the choice is remembered
+				// across dialog sessions, without leaking the caller-scoped column widths into that folder.
+				if (!UserSettingsService.LayoutSettingsService.SyncFolderPreferencesAcrossDirectories)
+				{
+					var folderFRN = Win32Helper.GetFolderFRN(path);
+					var trimmedFolderPath = path.TrimPath();
+					if (trimmedFolderPath is not null)
+					{
+						var folderPreferences = GetLayoutPreferencesFromDatabase(trimmedFolderPath, folderFRN)
+							?? GetLayoutPreferencesFromAds(trimmedFolderPath, folderFRN)
+							?? (GetDefaultLayoutPreferences(trimmedFolderPath) ?? new LayoutPreferencesItem());
+						folderPreferences.DirectorySortOption = preferencesItem.DirectorySortOption;
+						folderPreferences.DirectorySortDirection = preferencesItem.DirectorySortDirection;
+						folderPreferences.DirectoryGroupOption = preferencesItem.DirectoryGroupOption;
+						folderPreferences.DirectoryGroupDirection = preferencesItem.DirectoryGroupDirection;
+						SetLayoutPreferencesToDatabase(trimmedFolderPath, folderFRN, folderPreferences);
+					}
+				}
 				return;
 			}
 			if (!UserSettingsService.LayoutSettingsService.SyncFolderPreferencesAcrossDirectories)
@@ -517,8 +537,21 @@ namespace Files.App.Helpers
 			isDefaultLayout = null;
 			if (App.IsDialogMode && DialogSession.Current is { } dialog)
 			{
-				isDefaultLayout = dialog.State.Layout is null;
-				return dialog.State.Layout is { } layout ? DialogSession.CloneLayout(layout) : new LayoutPreferencesItem();
+				// The dialog persists caller-scoped column/visibility preferences, but the folder's own
+				// sort/group choice must be honored per folder inside the dialog too. Start from the dialog
+				// layout (columns), then overlay that folder's remembered sort/group from the database so a
+				// folder opened through the native dialog integration keeps its sort across sessions.
+				var preferences = dialog.State.Layout is { } layout ? DialogSession.CloneLayout(layout) : new LayoutPreferencesItem();
+				var folderPreferences = GetFolderLayoutPreferences(path, out _);
+				if (folderPreferences is not null)
+				{
+					preferences.DirectorySortOption = folderPreferences.DirectorySortOption;
+					preferences.DirectorySortDirection = folderPreferences.DirectorySortDirection;
+					preferences.DirectoryGroupOption = folderPreferences.DirectoryGroupOption;
+					preferences.DirectoryGroupDirection = folderPreferences.DirectoryGroupDirection;
+				}
+				isDefaultLayout = folderPreferences is null;
+				return preferences;
 			}
 
 			// Guard against null
@@ -600,6 +633,39 @@ namespace Files.App.Helpers
 				PInvoke.DeleteFileFromApp($"{path}:files_layoutmode");
 
 			return layoutPreferences;
+		}
+
+		/// <summary>
+		/// Reads a folder's own layout preference from the per-folder store (or the global default when folder
+		/// preferences are synced across directories). Unlike <see cref="GetLayoutPreferencesForPath"/> this does
+		/// not route through dialog state, so it can be used to honor per-folder sort/group settings inside a dialog.
+		/// </summary>
+		private static LayoutPreferencesItem? GetFolderLayoutPreferences(string? path, out bool? isDefaultLayout)
+		{
+			isDefaultLayout = null;
+			if (path is null)
+				return null;
+
+			if (!UserSettingsService.LayoutSettingsService.SyncFolderPreferencesAcrossDirectories)
+			{
+				path = path.TrimPath() ?? string.Empty;
+				var preferences = SafetyExtensions.IgnoreExceptions(() =>
+				{
+					if (path.StartsWith("tag:", StringComparison.Ordinal))
+						return GetLayoutPreferencesFromDatabase("Home", null);
+
+					var folderFRN = Win32Helper.GetFolderFRN(path);
+					return GetLayoutPreferencesFromDatabase(path, folderFRN)
+						?? GetLayoutPreferencesFromAds(path, folderFRN);
+				}, App.Logger);
+
+				isDefaultLayout = preferences is null;
+				return preferences;
+			}
+
+			// Preferences are synced across directories: the shared default is the folder preference.
+			isDefaultLayout = false;
+			return new LayoutPreferencesItem();
 		}
 
 		private static LayoutPreferencesItem? GetLayoutPreferencesFromDatabase(string path, ulong? frn)

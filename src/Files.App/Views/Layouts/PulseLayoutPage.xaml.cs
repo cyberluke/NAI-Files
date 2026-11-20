@@ -185,8 +185,38 @@ namespace Files.App.Views.Layouts
 			FileList.ItemsSource ??= shellViewModel.FilesAndFolders;
 			feedBuilder.SetSource(shellViewModel.FilesAndFolders);
 
+			HookTimeRail();
+
 			if (eventArgs.Parameter is NavigationArguments { IsLayoutSwitch: true })
 				ReloadItemIcons();
+		}
+
+		private bool isTimeRailHooked;
+
+		private void HookTimeRail()
+		{
+			if (isTimeRailHooked)
+				return;
+
+			FeedScroller.ViewChanged += FeedScroller_ViewChanged;
+			isTimeRailHooked = true;
+			UpdateTimeRailProgress();
+		}
+
+		private void FeedScroller_ViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
+		{
+			UpdateTimeRailProgress();
+		}
+
+		private void UpdateTimeRailProgress()
+		{
+			if (TimeRail is null)
+				return;
+
+			// Map the feed's scroll position onto the rail: 0 at the top day, 1 at the newest scrolled-to day.
+			var scrollable = FeedScroller.ScrollableHeight;
+			var ratio = scrollable <= 0 ? 0 : FeedScroller.VerticalOffset / scrollable;
+			TimeRail.SetActiveProgress(ratio);
 		}
 
 		protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -212,6 +242,11 @@ namespace Files.App.Views.Layouts
 			CancelMarkdownLoads();
 			feedBuilder.Dispose();
 			SectionsRepeater.ItemsSource = null;
+			if (isTimeRailHooked)
+			{
+				FeedScroller.ViewChanged -= FeedScroller_ViewChanged;
+				isTimeRailHooked = false;
+			}
 			base.Dispose();
 		}
 

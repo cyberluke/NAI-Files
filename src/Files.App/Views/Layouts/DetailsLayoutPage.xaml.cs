@@ -47,6 +47,16 @@ namespace Files.App.Views.Layouts
 
 		private DispatcherQueueTimer? _autoFitColumnsTimer;
 
+		/// <summary>
+		/// Anchor item captured just before a re-sort so the scroll position can be restored after the
+		/// list reorders, preventing the view from jumping to the top or bottom when toggling a column sort.
+		/// </summary>
+		private ListedItem? _scrollAnchorItem;
+		private double _scrollAnchorSubRowOffset;
+
+		/// <summary>Set on navigate so the initial (items-empty) pane fill runs exactly once at first layout.</summary>
+		private bool _initialPaneFillPending;
+
 		// Properties
 
 		protected override ListViewBase ListViewBase => FileList;
@@ -215,6 +225,7 @@ namespace Files.App.Views.Layouts
 				IsTypeSearchResults = InstanceViewModel?.IsPageTypeSearchResults ?? false
 			});
 
+			_initialPaneFillPending = true;
 			RootGrid_SizeChanged(null, null);
 
 			SetItemContainerStyle();
@@ -339,12 +350,49 @@ namespace Files.App.Views.Layouts
 
 		private void FolderSettings_SortOptionPreferenceUpdated(object? sender, SortOption e)
 		{
+			CaptureScrollAnchor();
 			UpdateSortIndicator();
 		}
 
 		private void FolderSettings_SortDirectionPreferenceUpdated(object? sender, SortDirection e)
 		{
+			CaptureScrollAnchor();
 			UpdateSortIndicator();
+		}
+
+		/// <summary>
+		/// Remembers the item currently at the top of the view and its pixel offset within that row, so the
+		/// same position can be restored once the list finishes re-sorting.
+		/// </summary>
+		private void CaptureScrollAnchor()
+		{
+			var (first, _) = GetVisibleIndexRange();
+			if (first < 0 || ContentScroller is not { } scroller)
+				return;
+
+			_scrollAnchorSubRowOffset = Math.Max(0, scroller.VerticalOffset % Math.Max(1, RowHeight));
+			_scrollAnchorItem = first < FileList.Items.Count ? FileList.Items[first] as ListedItem : null;
+		}
+
+		/// <summary>
+		/// Re-scrolls so the anchor item returns to the same on-screen position after the collection re-sorts.
+		/// </summary>
+		private void RestoreScrollAnchor()
+		{
+			if (_scrollAnchorItem is null || ContentScroller is not { } scroller)
+				return;
+
+			var newIndex = FileList.Items.IndexOf(_scrollAnchorItem);
+			_scrollAnchorItem = null;
+
+			if (newIndex < 0)
+			{
+				// The anchor no longer exists (e.g. filtered out); keep the current position unchanged.
+				return;
+			}
+
+			var target = Math.Max(0, newIndex * RowHeight + _scrollAnchorSubRowOffset);
+			scroller.ChangeView(null, target, null, disableAnimation: true);
 		}
 
 		private void UpdateSortIndicator()
@@ -831,10 +879,23 @@ namespace Files.App.Views.Layouts
 		{
 			MaxWidthForRenameTextbox = Math.Max(0, RootGrid.ActualWidth - 80);
 
-			// Re-flow the columns to fill the view port whenever the pane is resized (including on open via the
-			// native dialog integration) so headers never collapse to one side or truncate.
-			if (e is not null && FileList.Items.Any())
+			// Fill the pane with the current column widths at the very first layout so headers render at a
+			// full width instead of a narrow/collapsed default that later auto-fitting would visibly jump from.
+			// When items are present, the full fit (content + fill) runs.
+			if (e is null)
+				return;
+
+			if (FileList.Items.Any())
+			{
 				AutoFitColumnsIfEnabled(forceFill: true);
+			}
+			else if (_initialPaneFillPending)
+			{
+				// Fill the pane once at the very first layout so headers render at a full width instead of a
+				// narrow/collapsed default that a later content auto-fit would visibly jump from.
+				if (ScaleColumnsToFillPaneWidth())
+					_initialPaneFillPending = false;
+			}
 		}
 
 		private void GridSplitter_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
@@ -906,17 +967,18 @@ namespace Files.App.Views.Layouts
 		}
 
 		/// <summary>
-		/// Grows flexible columns so the header spans the available view port, distributing the spare
-		/// width to the Name column first so file and folder names are never truncated, then to the
-		/// other flexible columns. Columns are never shrunk below their fitted size.
+		/// Grows flexible columns so the header spans the available view port, distributing the spare width to the
+		/// Name column first so file and folder names are never truncated, then to the other flexible columns.
+		/// Columns are never shrunk below their fitted size. Returns true when any width was granted and the pane
+		/// measurement was usable, so callers can treat a return of false as "not measured yet".
 		/// </summary>
-		private void ScaleColumnsToFillPaneWidth()
+		private bool ScaleColumnsToFillPaneWidth()
 		{
 			double available = ContentScroller?.ViewportWidth > 0
 				? ContentScroller.ViewportWidth
 				: RootGrid.ActualWidth;
 			if (available <= 0 || double.IsNaN(available) || double.IsInfinity(available))
-				return;
+				return false;
 
 			// The header reserves space for the leading select-all checkbox column, left padding and,
 			// when present, a vertical scrollbar. Account for these so the trailing column reaches the pane edge.
@@ -933,7 +995,7 @@ namespace Files.App.Views.Layouts
 
 			double leftover = usable - total;
 			if (leftover <= 0)
-				return;
+				return false;
 
 			// Ordered list of flexible columns that may absorb the leftover width to fill the pane, Name first.
 			var flexible = new[]
@@ -965,6 +1027,8 @@ namespace Files.App.Views.Layouts
 			var folderSettings = FolderSettings
 				?? throw new InvalidOperationException("The details layout does not have folder settings.");
 			folderSettings.ColumnsViewModel = ColumnsViewModel;
+
+			return true;
 		}
 
 		private void ShellViewModel_ItemLoadStatusChanged(object? sender, ItemLoadStatusChangedEventArgs e)
@@ -980,6 +1044,11 @@ namespace Files.App.Views.Layouts
 
 		private void FileListItems_VectorChanged(IObservableVector<object> sender, IVectorChangedEventArgs e)
 		{
+			// A re-sort clears and repopulates the list (Reset); restore the pre-sort scroll position so the
+			// view does not jump to a different logical location.
+			if (e.CollectionChange == Windows.Foundation.Collections.CollectionChange.Reset && _scrollAnchorItem is not null)
+				DispatcherQueue.TryEnqueue(() => RestoreScrollAnchor());
+
 			// The opt-in toggle keeps columns re-fitted to content as items stream in mid-session.
 			AutoFitColumnsIfEnabled();
 		}

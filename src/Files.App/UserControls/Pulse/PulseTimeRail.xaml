@@ -9,8 +9,12 @@
 	Width="88"
 	AutomationProperties.Name="{helpers:ResourceString Name=PulseTimeRail}"
 	Background="Transparent"
+	IsTabStop="True"
+	KeyDown="Rail_KeyDown"
 	PointerCanceled="Rail_PointerReleased"
 	PointerCaptureLost="Rail_PointerReleased"
+	PointerEntered="Rail_PointerEntered"
+	PointerExited="Rail_PointerExited"
 	PointerMoved="Rail_PointerMoved"
 	PointerPressed="Rail_PointerPressed"
 	PointerReleased="Rail_PointerReleased"
@@ -27,8 +31,21 @@
 			RadiusX="1"
 			RadiusY="1" />
 
-		<!--  Day ticks (positioned in code)  -->
+		<!--  Day ticks + labels (positioned in code)  -->
 		<Canvas x:Name="TicksCanvas" />
+
+		<!--  Current position: a short accent bar riding the spine as the feed scrolls  -->
+		<Border
+			x:Name="ActiveThumb"
+			Width="12"
+			Height="4"
+			HorizontalAlignment="Right"
+			Margin="0,0,6,0"
+			VerticalAlignment="Top"
+			Background="{ThemeResource AccentFillColorDefaultBrush}"
+			CornerRadius="2"
+			IsHitTestVisible="False"
+			Visibility="Collapsed" />
 
 		<!--  Scrub indicator: the day under the pointer while dragging  -->
 		<Border

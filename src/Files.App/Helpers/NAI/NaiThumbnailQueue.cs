@@ -52,11 +52,19 @@ namespace Files.App.Helpers
 			Task task;
 			lock (gate)
 			{
-				if (disposed || token.IsCancellationRequested || (viewportKnown && !visible.Contains(path))) return Task.FromCanceled(new CancellationToken(true));
+				// The viewport is a scheduling PREFERENCE, never a veto. Callers only request thumbnails for
+				// realized (visible) rows, and the worker already runs visible jobs first. Vetoing here dropped
+				// loads whenever the 50 ms viewport snapshot lagged container realization, and because the item
+				// is flagged ItemPropertiesInitialized before this call it was never retried until a full reload.
+				if (disposed || token.IsCancellationRequested) return Task.FromCanceled(new CancellationToken(true));
 				if (ownJobs.TryGetValue(path, out var existing) && !existing.Cancellation.IsCancellationRequested) return existing.Completion.Task;
 				if (jobs.Count >= Capacity)
 				{
-					var victim = jobs.LastOrDefault(job => !job.Running && !job.Owner.visible.Contains(job.Key));
+					// Prefer evicting a queued (not running) job that is outside every owner's visible set; once no
+					// viewport has been reported, fall back to the oldest queued job so a burst can never wedge.
+					var victim = viewportKnown
+						? jobs.LastOrDefault(job => !job.Running && !job.Owner.visible.Contains(job.Key))
+						: jobs.LastOrDefault(job => !job.Running);
 					if (victim is null) return Task.FromCanceled(new CancellationToken(true));
 					CancelLocked(victim);
 				}
@@ -74,9 +82,18 @@ namespace Files.App.Helpers
 		{
 			lock (gate)
 			{
-				visible = new(paths, StringComparer.OrdinalIgnoreCase);
+				var next = new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase);
+				// An empty report happens during initial layout before any item is realized (a width or range
+				// change fires ViewChanged while the panel is still empty). Keep the previous priority set in
+				// that case; it is re-established by the next non-empty report.
+				if (next.Count == 0)
+					return;
+
+				// Re-ordering priority must not cancel in-flight or queued loads: a job cancelled because its row
+				// briefly scrolled out has already marked its item initialized and would never be retried until a
+				// full reload. Pressure is instead handled by the Capacity eviction in Enqueue.
+				visible = next;
 				viewportKnown = true;
-				foreach (var job in ownJobs.Values.Where(job => !visible.Contains(job.Key)).ToArray()) CancelLocked(job);
 			}
 			Notify();
 		}

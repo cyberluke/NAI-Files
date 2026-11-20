@@ -24,6 +24,7 @@ namespace Files.App.ViewModels.Settings
 				(SettingsPageKind.TagsPage,       Strings.FileTags.GetLocalizedResource(),        () => new TagsPage()),
 				(SettingsPageKind.DevToolsPage,   Strings.DevTools.GetLocalizedResource(),        () => new DevToolsPage()),
 				(SettingsPageKind.AdvancedPage,   Strings.Advanced.GetLocalizedResource(),        () => new AdvancedPage()),
+				(SettingsPageKind.AiPage,         "AI",                                             () => new AiPage()),
 				(SettingsPageKind.AboutPage,      Strings.About.GetLocalizedResource(),           () => new AboutPage()),
 			};
 

@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Files.App.AI;
 using Windows.Security.Credentials;
 
 namespace Files.App.Helpers
@@ -26,6 +27,31 @@ namespace Files.App.Helpers
 
 		/// <summary>True when a Kelvin pairing credential exists (the explicit handshake).</summary>
 		internal static bool HasKelvinSecret => GetSecret() is not null;
+
+		/// <summary>Credential presence, surfaced to the unified AI provider ladder.</summary>
+		internal static bool HasKelvinCredential => GetSecret() is not null;
+
+		/// <summary>
+		/// Sends a prebuilt chat payload over the Kelvin wire and returns the assistant text.
+		/// Used by the unified <see cref="Ai.KelvinProvider"/> so Kelvin keeps one HTTP path.
+		/// </summary>
+		internal static async Task<string> CompleteChatAsync(byte[] payload, CancellationToken token)
+		{
+			using var response = await SendAsync("chat/completions", payload, authenticated: true, token);
+			var content = response.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+			return content ?? throw new InvalidOperationException("The AI provider returned no text");
+		}
+
+		/// <summary>Lists Kelvin's own chat models (does not consult the LUSI discovery seam).</summary>
+		internal static async Task<IReadOnlyList<string>> KelvinModelsAsync(CancellationToken token)
+		{
+			await VerifyAsync(null, token);
+			using var response = await SendAsync("models", null, authenticated: true, token);
+			return response.RootElement.GetProperty("data").EnumerateArray()
+				.Where(model => NaiModelCatalog.Supports(model, "chat"))
+				.Select(model => model.GetProperty("id").GetString())
+				.Where(id => !string.IsNullOrEmpty(id)).Select(id => id!).Distinct(StringComparer.Ordinal).Take(200).ToArray();
+		}
 		private static string? GetSecret()
 		{
 			try
@@ -95,17 +121,12 @@ namespace Files.App.Helpers
 		public static async Task<string> GenerateAsync(string model, string instruction, string request,
 			string displayedContent, string language, CancellationToken token)
 		{
-			// LUSI-first (canonical engine) — the OpenAI wire, then Kelvin fallback.
-			var active = await NaiGatewayDiscovery.ActiveAsync(token);
-			if (active.Lusi is { } lusi)
-			{
-				try { return await lusi.ChatAsync(model, instruction, request, displayedContent, language, token); }
-				catch (HttpRequestException) when (active.Lusi is not null) { /* fall through to Kelvin */ }
-			}
-			using var response = await SendAsync("chat/completions", NaiAiProtocol.ChatPayload(model, instruction, request, displayedContent, language),
-				authenticated: true, token);
-			var content = response.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
-			return content ?? throw new InvalidOperationException("The AI provider returned no text");
+			// Unified routing: the provider ladder (LUSI → Kelvin → configured OpenAI-compatible gateway
+			// → local NPU/GPU) selects the engine in the order the user set in Settings. Each adapter keeps
+			// its own wire, so behavior is unchanged for the default LUSI-first, Kelvin-fallback order.
+			var completion = await AiProviderRegistry.Instance.CompleteAsync(
+				new AiChatRequest(model, instruction, request, displayedContent, language), token);
+			return completion.Content;
 		}
 
 		public static async Task<NaiRuntimeSnapshot> RuntimeSnapshotAsync(CancellationToken token)

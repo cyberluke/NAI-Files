@@ -13,6 +13,7 @@ namespace Files.App.Data.Enums
 		TagsPage,
 		DevToolsPage,
 		AdvancedPage,
+		AiPage,
 		AboutPage,
 	}
 }
