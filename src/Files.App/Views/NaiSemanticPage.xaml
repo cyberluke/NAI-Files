@@ -19,7 +19,6 @@
 			<VariableSizedWrapGrid Orientation="Horizontal" ItemWidth="210" ItemHeight="44" MaximumRowsOrColumns="4">
 				<Button x:Name="IndexButton" Content="{helpers:ResourceString Name=NaiSemanticIndex}" Click="Index_Click" AutomationProperties.AutomationId="NaiSemanticIndex" IsEnabled="False"/>
 				<Button x:Name="ForgetButton" Content="{helpers:ResourceString Name=NaiSemanticForget}" Click="Forget_Click" AutomationProperties.AutomationId="NaiSemanticForget"/>
-				<Button x:Name="ConnectButton" Content="{helpers:ResourceString Name=NaiAiPair}" Click="Connect_Click"/>
 				<Button x:Name="FullResultsButton" Content="{helpers:ResourceString Name=NaiSemanticFullResults}" Click="FullResults_Click" AutomationProperties.AutomationId="NaiSemanticFullResults"/>
 				<Button x:Name="CancelButton" Content="{helpers:ResourceString Name=Cancel}" Click="Cancel_Click" IsEnabled="False"/>
 			</VariableSizedWrapGrid>

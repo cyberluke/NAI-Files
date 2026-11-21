@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using Files.App.AI.Semantic;
 using System.IO;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -21,6 +22,7 @@ namespace Files.App.Views
 		private IShellPage? host;
 		private bool disposed;
 		private bool indexing;
+		private bool backendReady;
 		private static string L(string key) => key.GetLocalizedResource();
 		public NaiSemanticPage() => InitializeComponent();
 		protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -53,8 +55,9 @@ namespace Files.App.Views
 		{
 			if (disposed || IndexButton is null) return;
 			var idle = operation is null;
-			IndexButton.IsEnabled = idle && ConsentBox.IsChecked == true && Directory.Exists(FolderBox.Text) && NaiAiClient.IsPaired;
-			FullResultsButton.IsEnabled = ForgetButton.IsEnabled = ChooseButton.IsEnabled = RecursiveBox.IsEnabled = ConnectButton.IsEnabled = idle;
+			// Embeddings come from LUSI, vectors from NAI Lattice; no Kelvin pairing gate.
+			IndexButton.IsEnabled = idle && ConsentBox.IsChecked == true && Directory.Exists(FolderBox.Text) && backendReady;
+			FullResultsButton.IsEnabled = ForgetButton.IsEnabled = ChooseButton.IsEnabled = RecursiveBox.IsEnabled = idle;
 			CancelButton.IsEnabled = !idle;
 		}
 		private async Task RunAsync(Func<CancellationToken, Task> work)
@@ -69,6 +72,7 @@ namespace Files.App.Views
 		}
 		private async Task RefreshStateAsync(CancellationToken token)
 		{
+			backendReady = await LatticeSemanticClient.IsAvailableAsync(token);
 			if (!Directory.Exists(FolderBox.Text)) { IndexStateText.Text = L("NaiSemanticChooseFolder"); Controls(); return; }
 			var state = await NaiSemanticIndexService.Store.ReadAsync(FolderBox.Text, token); token.ThrowIfCancellationRequested();
 			if (disposed) return;
@@ -91,7 +95,7 @@ namespace Files.App.Views
 		private void Scope_Changed(object sender, RoutedEventArgs e) { if (ConsentBox is not null) ConsentBox.IsChecked = false; Controls(); }
 		private void Consent_Changed(object sender, RoutedEventArgs e) { if (indexing && ConsentBox?.IsChecked != true) operation?.Cancel(); Controls(); }
 		private void Cancel_Click(object sender, RoutedEventArgs e) => operation?.Cancel();
-		private async void Connect_Click(object sender, RoutedEventArgs e) => await RunAsync(async token => { await NaiAiClient.PairAsync(token); StatusText.Text = L("NaiAiConnected"); });
+		// Kelvin pairing removed: semantic recall is LUSI embeddings + NAI Lattice vectors.
 		private async void Index_Click(object sender, RoutedEventArgs e)
 		{
 			if (ConsentBox.IsChecked != true) return;

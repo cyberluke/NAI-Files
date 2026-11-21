@@ -4,6 +4,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using Files.App.AI.Semantic;
 using Windows.Storage;
 
 namespace Files.App.Helpers
@@ -34,7 +35,6 @@ namespace Files.App.Helpers
 			var previous = await Store.ReadAsync(folder, token);
 			var state = previous ?? new NaiSemanticIndexManifest(1, folder, NaiSemanticProtocol.Dataset(folder), plan.Recursive, [], [], DateTimeOffset.UtcNow, true);
 			state = state with { Recursive = plan.Recursive, Partial = true };
-			await NaiAiClient.EnsureSemanticProfileAsync(token);
 			var documents = state.Documents.ToDictionary(item => item.Id, StringComparer.Ordinal);
 			var pending = state.PendingDeleteIds.ToHashSet(StringComparer.Ordinal);
 			int done = 0, indexed = 0, cached = 0, skipped = plan.Skipped, failed = 0;
@@ -70,7 +70,13 @@ namespace Files.App.Helpers
 					foreach (var chunk in chunks) if (!liveIds.Contains(chunk.Id)) pending.Add(chunk.Id);
 					state = state with { PendingDeleteIds = pending.ToArray() };
 					await Store.SaveAsync(state, token);
-					foreach (var batch in chunks.Chunk(8)) await NaiAiClient.UpsertSemanticChunksAsync(state.Dataset, batch, token);
+					foreach (var batch in chunks.Chunk(8))
+					{
+						var vectors = await LusiEmbedder.EmbedAsync(batch.Select(chunk => chunk.Text).ToArray(), query: false, token);
+						if (vectors.Count != batch.Length) throw new InvalidOperationException("LUSI returned a mismatched embedding count");
+						var points = batch.Select((chunk, index) => new SemanticIndexPoint(chunk.Id, vectors[index], chunk.Name, chunk.Text, state.Dataset)).ToArray();
+						await LatticeSemanticClient.IndexBatchAsync(points, token);
+					}
 					var updated = new NaiIndexedDocument(id, relative, length, modified, hash, chunks.Select(chunk => chunk.Id).ToArray(), parts.Sum(part => part.Length),
 						text.Length > 24000 || parts.Sum(part => part.Length) < limitedText.Length, ExtractionVersion, DateTimeOffset.UtcNow);
 					if (old is not null) foreach (var chunk in old.ChunkIds.Except(updated.ChunkIds, StringComparer.Ordinal)) pending.Add(chunk);
@@ -87,7 +93,7 @@ namespace Files.App.Helpers
 			}
 			foreach (var batch in pending.Chunk(500).ToArray())
 			{
-				await NaiAiClient.DeleteSemanticChunksAsync(state.Dataset, batch, token);
+				await LatticeSemanticClient.DeleteAsync(batch, token);
 				pending.ExceptWith(batch); state = state with { PendingDeleteIds = pending.ToArray() }; await Store.SaveAsync(state, token);
 			}
 			state = state with { Partial = plan.Limited || failed > 0, UpdatedAt = DateTimeOffset.UtcNow };
@@ -103,13 +109,25 @@ namespace Files.App.Helpers
 			var current = await Task.Run(() => eligible.Where(item => NaiSemanticIndexStore.IsCurrentLocalFile(folder, item)).ToDictionary(item => item.Id, StringComparer.Ordinal), token);
 			if (current.Count == 0) return new(Array.Empty<NaiSemanticFileMatch>(), 0, eligible.Length, state.Partial);
 			var chunks = current.Values.SelectMany(item => item.ChunkIds).ToArray();
-			var hits = await NaiAiClient.SearchSemanticAsync(state.Dataset, folder, query, chunks, token);
+			var queryVectors = await LusiEmbedder.EmbedAsync([query], query: true, token);
+			if (queryVectors.Count == 0)
+				return new(Array.Empty<NaiSemanticFileMatch>(), current.Count, eligible.Length - current.Count, state.Partial);
+
+			// Lattice searches its shared HNSW store; restrict the hits to this folder's chunks.
+			var hits = await LatticeSemanticClient.QueryVectorAsync(queryVectors[0], Math.Min(256, Math.Max(32, chunks.Length)), token);
+			var byChunk = new Dictionary<string, NaiIndexedDocument>(StringComparer.Ordinal);
+			foreach (var item in current.Values)
+				foreach (var chunkId in item.ChunkIds)
+					byChunk[chunkId] = item;
+
 			var matches = new List<NaiSemanticFileMatch>();
+			var seen = new HashSet<string>(StringComparer.Ordinal);
 			foreach (var hit in hits)
 			{
 				token.ThrowIfCancellationRequested();
-				if (!current.TryGetValue(hit.FileId, out var item) || !item.ChunkIds.Contains(hit.ChunkId, StringComparer.Ordinal) || !NaiSemanticIndexStore.IsCurrentLocalFile(folder, item)) continue;
-				if (NaiSemanticIndexStore.ResolvePath(folder, item.RelativePath) is string path) matches.Add(new(path, hit.Score, hit.Evidence, item.IndexedAt));
+				if (!byChunk.TryGetValue(hit.Id, out var item) || !seen.Add(item.Id) || !NaiSemanticIndexStore.IsCurrentLocalFile(folder, item)) continue;
+				if (NaiSemanticIndexStore.ResolvePath(folder, item.RelativePath) is string path)
+					matches.Add(new(path, hit.Score, item.RelativePath, item.IndexedAt));
 			}
 			return new(matches, current.Count, eligible.Length - current.Count, state.Partial);
 		}
@@ -124,7 +142,7 @@ namespace Files.App.Helpers
 			await Store.SaveAsync(state, token);
 			foreach (var batch in ids.Chunk(500))
 			{
-				await NaiAiClient.DeleteSemanticChunksAsync(state.Dataset, batch, token);
+				await LatticeSemanticClient.DeleteAsync(batch, token);
 				state = state with { PendingDeleteIds = state.PendingDeleteIds.Except(batch, StringComparer.Ordinal).ToArray() };
 				await Store.SaveAsync(state, token);
 			}
