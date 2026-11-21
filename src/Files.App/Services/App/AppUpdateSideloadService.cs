@@ -129,7 +129,7 @@ namespace Files.App.Services
 
 		public Task CheckForReleaseNotesAsync()
 		{
-			// Release notes live on the fork's GitHub releases page; no upstream feed probe.
+			// Release notes will be served from the NAI Files download domain once it is published.
 			AreReleaseNotesAvailable = false;
 			return Task.CompletedTask;
 		}
