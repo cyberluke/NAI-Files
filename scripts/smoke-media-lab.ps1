@@ -90,6 +90,34 @@ if (-not (Invoke-Produce 'image.sharpen' $image '.png' (@($head + @('-vf','unsha
 if (-not (Invoke-Produce 'image.denoise' $image '.png' (@($head + @('-vf','hqdn3d=1.5:1.5:6:6'))))) { $failures++ }
 if (-not (Invoke-Produce 'image.grayscale' $image '.png' (@($head + @('-vf','hue=s=0'))))) { $failures++ }
 
+# ---- Advanced video / audio / image surface ----
+if (-not (Invoke-Produce 'video.deband' $video '.mp4' (@($head + @('-vf','deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.deflicker' $video '.mp4' (@($head + @('-vf','deflicker=mode=pm:size=10','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.eq' $video '.mp4' (@($head + @('-vf','eq=contrast=1.08:brightness=0.02:saturation=1.12','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.curves' $video '.mp4' (@($head + @('-vf','curves=preset=lighter','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.nlmeans' $video '.mp4' (@($head + @('-vf','nlmeans=s=1.2:p=7:r=15','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.grain' $video '.mp4' (@($head + @('-vf','noise=alls=8:allf=t+u','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.vignette' $video '.mp4' (@($head + @('-vf','vignette=PI/5','-c:v','libx264','-crf','20','-c:a','copy'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.gif' $video '.gif' (@($head + @('-vf','fps=15,scale=480:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.webp' $video '.webp' (@($head + @('-vf','fps=15,scale=480:-1:flags=lanczos','-c:v','libwebp_anim','-loop','0','-q:v','70'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.thumbnail' $video '.png' (@($head + @('-vf','thumbnail=100','-frames:v','1'))))) { $failures++ }
+if (-not (Invoke-Analyze 'video.cropdetect' $video (@($head + @('-vf','cropdetect=24:16:0','-an','-f','null','-'))) 'cropdetect')) { $failures++ }
+if (-not (Invoke-Analyze 'video.blurdetect' $video (@($head + @('-vf','blurdetect','-an','-f','null','-'))) 'blurdetect')) { $failures++ }
+if (-not (Invoke-Analyze 'video.signalstats' $video (@($head + @('-vf','signalstats,metadata=print','-an','-f','null','-'))) 'signalstats')) { $failures++ }
+
+if (-not (Invoke-Produce 'audio.eq' $audio '.mp3' (@($head + @('-af','equalizer=f=1000:t=q:w=1:g=3','-c:a','libmp3lame','-b:a','192k'))))) { $failures++ }
+if (-not (Invoke-Produce 'audio.highpass' $audio '.mp3' (@($head + @('-af','highpass=f=80','-c:a','libmp3lame','-b:a','192k'))))) { $failures++ }
+if (-not (Invoke-Produce 'audio.stereo' $audio '.mp3' (@($head + @('-af','aformat=channel_layouts=stereo','-c:a','libmp3lame','-b:a','192k'))))) { $failures++ }
+if (-not (Invoke-Produce 'audio.speed125' $audio '.mp3' (@($head + @('-af','atempo=1.25','-c:a','libmp3lame','-b:a','192k'))))) { $failures++ }
+if (-not (Invoke-Produce 'audio.fadein' $audio '.mp3' (@($head + @('-af','afade=t=in:st=0:d=1.5','-c:a','libmp3lame','-b:a','192k'))))) { $failures++ }
+if (-not (Invoke-Produce 'audio.waveform' $audio '.png' (@($head + @('-filter_complex','showwavespic=s=1200x300:colors=#8A7CFF','-frames:v','1'))))) { $failures++ }
+if (-not (Invoke-Analyze 'audio.astats' $audio (@($head + @('-af','astats=metadata=1:reset=1','-vn','-f','null','-'))) 'astats')) { $failures++ }
+
+if (-not (Invoke-Produce 'image.rotate90' $image '.png' (@($head + @('-vf','transpose=1'))))) { $failures++ }
+if (-not (Invoke-Produce 'image.padSquare' $image '.png' (@($head + @('-vf','pad=width=max(iw\,ih):height=max(iw\,ih):x=(ow-iw)/2:y=(oh-ih)/2:color=black'))))) { $failures++ }
+if (-not (Invoke-Produce 'image.webp' $image '.webp' (@($head + @('-c:v','libwebp','-quality','85'))))) { $failures++ }
+if (-not (Invoke-Produce 'image.avif' $image '.avif' (@($head + @('-c:v','libaom-av1','-still-picture','1','-crf','30','-b:v','0'))))) { $failures++ }
+
 Write-Host ''
 if ($failures -eq 0) {
     Write-Host 'PASS: every Media Lab operation produced a valid result.' -ForegroundColor Green
