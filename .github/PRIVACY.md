@@ -24,11 +24,8 @@ choose to share.
 ## Data stored on this machine
 
 Settings, layout preferences, the per-folder layout database, thumbnails and
-logs are stored under:
-
-```text
-%LOCALAPPDATA%\Packages\NAI.Files_w1kma8hx1t516\
-```
+logs are stored in the app's package data under `%LOCALAPPDATA%\Packages\`.
+Use **Settings → About → Open log location** to open the exact log folder.
 
 Logs can contain file paths, folder names and usernames. Review and redact them
 before posting a log in a public issue.
