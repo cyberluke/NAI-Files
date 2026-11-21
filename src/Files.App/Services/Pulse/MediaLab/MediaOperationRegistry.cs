@@ -117,10 +117,10 @@ namespace Files.App.Services.Pulse.MediaLab
 					["bwdif"], h264,
 					[.. videoHead, "-vf", "bwdif", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
 
-				Produce("video.hdr", "HDR tone map", "HDR to SDR tone mapping (zscale + hable).",
+				Produce("video.hdr", "Tone map", "HDR roll-off / tone mapping (hable).",
 					MediaKind.Video, MediaLabGroup.Enhance, "tonemapped", ".mp4",
-					["zscale", "tonemap"], h264,
-					[.. videoHead, "-vf", "zscale=t=linear:npl=100,tonemap=hable:desat=0,zscale=p=bt709:t=bt709:m=bt709:r=tv,format=yuv420p", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
+					["tonemap"], h264,
+					[.. videoHead, "-vf", "format=gbrpf32le,tonemap=hable:desat=0,format=yuv420p", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
 
 				// ---- Video / Create ----
 				Produce("video.reverse", "Reverse", "Reverse video and audio.",
