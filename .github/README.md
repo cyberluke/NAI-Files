@@ -1,7 +1,8 @@
 # NAI Files
 
-NAI Files is a personal WinUI 3 file manager for **NAI OS**, with a media-first
-Pulse view, a built-in FFmpeg media lab, and local AI and semantic search.
+NAI Files is a personal WinUI 3 file manager for **NAI OS**, built around a
+media-first Pulse view, local AI and vision, fuzzy search, and native NAI OS
+integration.
 
 > NAI Files is a personal project. It is not affiliated with Microsoft.
 
@@ -13,39 +14,79 @@ Pulse view, a built-in FFmpeg media lab, and local AI and semantic search.
 
 ### Pulse view
 
-A chronological, time-railed feed for folders that contain images, videos and
-audio. Cards show real thumbnails, inline video playback, waveform strips,
-hover previews and contact sheets, and the layout adapts to portrait and
-landscape media.
+A chronological, time-railed feed for media folders. Cards show real
+thumbnails, inline video playback with trim, audio waveforms and playback,
+image crop/rotate/convert actions, archive previews, and Markdown agent-spec
+cards with status, scope and structure.
+
+Tabs, filter chips (All, Pictures, Videos, Music, Markdown, Documents,
+Archives), version stacks, and the day timeline keep large folders navigable.
 
 ### Pulse is the default for media folders
 
 - A manual per-folder layout choice always wins and is remembered.
 - Pictures and Videos open in Pulse.
-- Any folder that contains an image, video or audio file opens in Pulse.
+- Any folder with an image, video or audio file opens in Pulse.
 - A folder with no media stays in the default details view.
 
-The decision is re-evaluated on navigation while the folder still follows the
-adaptive default; changing the layout from the toolbar pins that folder.
+The decision is re-evaluated on navigation while the folder follows the adaptive
+default; changing the layout from the toolbar pins that folder.
+
+### AI assistant and providers
+
+- Toolbar AI assistant for chat and image work.
+- Pluggable providers: LUSI Engine (local), Kelvin AI Workstation, and
+  OpenAI-compatible gateways.
+- Per-capability routing for chat, vision and embeddings.
+- Local NPU/GPU lanes are preferred; provider and model routing is configurable.
+
+### Fuzzy search and AQS
+
+- Instant local fuzzy search from the toolbar (`Local fuzzy / AQS`).
+- AQS filters: `files:`, `unread:`, `read:`, `content:`, plus `$AQS`.
+- Index status is visible in the toolbar.
+
+### Pictures with AI
+
+Image intelligence analyzes pictures and lets you search by visible content,
+captions, OCR and tags.
+
+- Typing searches the local analysis cache; folder analysis requires explicit
+  approval.
+- Analysis uses the explicitly selected model through the paired AI engine:
+  LUSI Engine first, Kelvin AI Workstation as fallback, with no automatic cloud
+  fallback.
+- Saved semantic searches (lenses), related images, shared AI tags, cached
+  duplicate detection, and cross-language search.
+
+### Semantic file search
+
+Meaning-based search over files using NAI Lattice vectors and LUSI embeddings,
+running locally and reachable from the NAI OS sidebar.
+
+### NPU and GPU
+
+- Local AI work prefers the machine's NPU/GPU lanes and falls back according to
+  the selected provider.
+- The Resources panel shows live CPU, RAM, disk, network, GPU and NPU telemetry.
+- NAI Media Lab probes the bundled FFmpeg for the filters and encoders the
+  machine supports.
 
 ### NAI Media Lab
 
 46 FFmpeg 9 operations for video, audio and images: convert, trim, split,
 compress, HDR-to-SDR tonemap, extract frames and GIFs, contact sheets, audio
 normalize and denoise, and more. Operations run locally and write sibling
-outputs, with cancellable progress.
-
-### AI and semantic search
-
-- Pluggable AI providers: local LUSI, Kelvin and OpenAI-compatible gateways.
-- Per-capability routing for chat and vision, with local NPU/GPU lanes preferred.
-- File search backed by NAI Lattice vectors and LUSI embeddings, all local.
+outputs with cancellable progress.
 
 ### NAI OS integration
 
-- Follows the NAI OS language by default; a per-app override lives in
-  Settings → General.
+- Follows the NAI OS language by default; per-app override in Settings →
+  General.
 - NAI theme, SAP 72 font and rainbow folder icons.
+- NAI OS workspaces in the sidebar: Image intelligence, Files workspace,
+  AI engine and queue, NAI E-MAIL overview, and Semantic file search.
+- Live Resources panel for the machine's CPU, RAM, GPU and NPU.
 
 ### The file manager underneath
 
@@ -98,10 +139,11 @@ Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
 
 ## Repository layout
 
-- `src/Files.App` — WinUI 3 app: Pulse, Media Lab, AI, shell and settings.
+- `src/Files.App` — WinUI 3 app: Pulse, Media Lab, AI, NAI workspaces, shell and
+  settings.
 - `src/Files.App.Controls`, `Files.App.Storage`, `Files.App.CsWin32` — shared
   controls, storage abstractions and native interop.
-- `tests/` — inherited upstream test projects.
+- `tests/` — interaction, UI and unit test projects.
 - `.github/` — workflows and community documents.
 - `AGENTS.md` — development and agent guidelines.
 
