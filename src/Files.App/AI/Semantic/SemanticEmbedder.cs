@@ -34,8 +34,8 @@ namespace Files.App.AI.Semantic
 			if (TryResolveOpenAiEndpoint(out var endpoint))
 				return await ProbeAsync(endpoint.BaseUrl.TrimEnd('/') + "/models", endpoint.ApiKey, token);
 
-			var baseUrl = await ResolveLusiBaseUrlAsync(token);
-			return await ProbeAsync(baseUrl.TrimEnd('/') + "/v1/models", null, token);
+			var (baseUrl, tokenValue) = await ResolveLusiAsync(token);
+			return await ProbeAsync(baseUrl.TrimEnd('/') + "/v1/models", tokenValue, token);
 		}
 
 		/// <summary>Embeds inputs in order. `query` selects the query instruction vs document index.</summary>
@@ -87,15 +87,15 @@ namespace Files.App.AI.Semantic
 			}
 		}
 
-		private static async Task<string> ResolveLusiBaseUrlAsync(CancellationToken token)
+		private static async Task<(string BaseUrl, string Token)> ResolveLusiAsync(CancellationToken token)
 		{
 			var active = await NaiGatewayDiscovery.ActiveAsync(token);
-			return active.Lusi?.BaseUrl ?? LusiDefaultBaseUrl;
+			return active.Lusi is { } lusi ? (lusi.BaseUrl, lusi.Token) : (LusiDefaultBaseUrl, string.Empty);
 		}
 
 		private static async Task<IReadOnlyList<float[]>> EmbedLusiAsync(IReadOnlyList<string> inputs, bool query, CancellationToken token)
 		{
-			var baseUrl = await ResolveLusiBaseUrlAsync(token);
+			var (baseUrl, tokenValue) = await ResolveLusiAsync(token);
 
 			using var stream = new MemoryStream();
 			using (var writer = new Utf8JsonWriter(stream))
@@ -113,7 +113,14 @@ namespace Files.App.AI.Semantic
 			using var content = new ByteArrayContent(stream.ToArray());
 			content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-			using var response = await http.PostAsync(baseUrl.TrimEnd('/') + "/v1/embeddings", content, token);
+			using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl.TrimEnd('/') + "/v1/embeddings")
+			{
+				Content = content,
+			};
+			if (!string.IsNullOrEmpty(tokenValue))
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenValue);
+
+			using var response = await http.SendAsync(request, HttpCompletionOption.ResponseContentRead, token);
 			response.EnsureSuccessStatusCode();
 			return await ReadEmbeddingsAsync(response, token);
 		}
