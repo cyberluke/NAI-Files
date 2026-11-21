@@ -22,7 +22,7 @@
 		<StackPanel Spacing="8">
 			<TextBox
 				Header="{helpers:ResourceString Name=RepositoryURL}"
-				PlaceholderText="https://github.com/cyberluke/NAI_Files"
+				PlaceholderText="https://github.com/cyberluke/NAI-Files"
 				Text="{x:Bind ViewModel.RepoUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 		</StackPanel>
 	</Grid>

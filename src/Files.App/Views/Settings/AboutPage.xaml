@@ -73,19 +73,7 @@
 			</wctcontrols:SettingsCard>
 
 			<!--  Questions & discussions  -->
-			<wctcontrols:SettingsCard
-				HorizontalAlignment="Stretch"
-				Command="{x:Bind ViewModel.OpenDiscordCommand}"
-				Header="{helpers:ResourceString Name=QuestionsAndDiscussions}"
-				IsClickEnabled="True">
-				<wctcontrols:SettingsCard.HeaderIcon>
-					<FontIcon Glyph="&#xE8F2;" />
-				</wctcontrols:SettingsCard.HeaderIcon>
 
-				<wctcontrols:SettingsCard.ActionIcon>
-					<FontIcon Glyph="&#xE8A7;" />
-				</wctcontrols:SettingsCard.ActionIcon>
-			</wctcontrols:SettingsCard>
 
 			<!--  Feedback  -->
 			<wctcontrols:SettingsExpander HorizontalAlignment="Stretch" Header="{helpers:ResourceString Name=Feedback}">
@@ -139,21 +127,6 @@
 				FontSize="16"
 				FontWeight="Medium"
 				Text="{helpers:ResourceString Name=OpenSource}" />
-
-			<!--  Translate  -->
-			<wctcontrols:SettingsCard
-				HorizontalAlignment="Stretch"
-				Command="{x:Bind ViewModel.OpenCrowdinCommand}"
-				Header="{helpers:ResourceString Name=ImproveTranslation}"
-				IsClickEnabled="True">
-				<wctcontrols:SettingsCard.HeaderIcon>
-					<FontIcon Glyph="&#xF2B7;" />
-				</wctcontrols:SettingsCard.HeaderIcon>
-
-				<wctcontrols:SettingsCard.ActionIcon>
-					<FontIcon Glyph="&#xE8A7;" />
-				</wctcontrols:SettingsCard.ActionIcon>
-			</wctcontrols:SettingsCard>
 
 			<!--  Third Party Licenses  -->
 			<wctcontrols:SettingsExpander Header="{helpers:ResourceString Name=ThirdPartyLibraries}">

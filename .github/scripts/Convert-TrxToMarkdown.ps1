@@ -99,7 +99,7 @@ foreach ($item in $xmlDoc.TestRun.Results.UnitTestResult)
 
 $stringBuilder = New-Object System.Text.StringBuilder
 
-$title = "## Tested with Files <img alt=""logo"" src=""https://github.com/cyberluke/NAI_Files/assets/62196528/6d4b489a-12be-4819-9bbc-a5f95858e77d"" width=""28"" align=""top"" />"
+$title = "## Tested with Files <img alt=""logo"" src=""https://github.com/cyberluke/NAI-Files/assets/62196528/6d4b489a-12be-4819-9bbc-a5f95858e77d"" width=""28"" align=""top"" />"
 $AbbreviatedOid = $env:GITHUB_SHA
 $AbbreviatedOid = $AbbreviatedOid.Substring(0, 7)
 $resultOverview = ""
@@ -137,7 +137,7 @@ else
 [void]$stringBuilder.AppendLine("<table>");
 [void]$stringBuilder.AppendLine("<tr>");
 [void]$stringBuilder.AppendLine("<td><strong>Commit:</strong></td>");
-[void]$stringBuilder.AppendLine("<td><a href=""https://github.com/cyberluke/NAI_Files/pull/$env:PULL_REQUEST_ID/commits/$AbbreviatedOid""><code>$AbbreviatedOid</code></a></td>");
+[void]$stringBuilder.AppendLine("<td><a href=""https://github.com/cyberluke/NAI-Files/pull/$env:PULL_REQUEST_ID/commits/$AbbreviatedOid""><code>$AbbreviatedOid</code></a></td>");
 [void]$stringBuilder.AppendLine("</tr>");
 [void]$stringBuilder.AppendLine("<tr>");
 [void]$stringBuilder.AppendLine("<td><strong>Status:</strong></td>");
@@ -145,7 +145,7 @@ else
 [void]$stringBuilder.AppendLine("</tr>");
 [void]$stringBuilder.AppendLine("<tr>");
 [void]$stringBuilder.AppendLine("<td><strong>Full log:</strong></td>");
-[void]$stringBuilder.AppendLine("<td><a href=""https://github.com/cyberluke/NAI_Files/actions/runs/$env:GITHUB_RUN_ID/job/$env:GITHUB_JOB"">https://github.com/cyberluke/NAI_Files/actions/runs/$GITHUB_RUN_ID/job/$GITHUB_JOB</a></td>");
+[void]$stringBuilder.AppendLine("<td><a href=""https://github.com/cyberluke/NAI-Files/actions/runs/$env:GITHUB_RUN_ID/job/$env:GITHUB_JOB"">https://github.com/cyberluke/NAI-Files/actions/runs/$GITHUB_RUN_ID/job/$GITHUB_JOB</a></td>");
 [void]$stringBuilder.AppendLine("</tr>");
 [void]$stringBuilder.AppendLine("</table>");
 [void]$stringBuilder.AppendLine("");

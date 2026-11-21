@@ -41,12 +41,10 @@ namespace Files.App.ViewModels.Settings
 		// Sponsor link removed (NAI_Files fork).
 		public ICommand OpenLogLocationCommand { get; }
 		public ICommand OpenDocumentationCommand { get; }
-		public ICommand OpenDiscordCommand { get; }
 		public ICommand SubmitFeatureRequestCommand { get; }
 		public ICommand SubmitBugReportCommand { get; }
 		public ICommand OpenGitHubRepoCommand { get; }
 		// Privacy link removed (NAI_Files fork).
-		public ICommand OpenCrowdinCommand { get; }
 
 		// Constructor
 
@@ -84,13 +82,11 @@ namespace Files.App.ViewModels.Settings
 			CopyUserIDCommand = new RelayCommand(CopyUserID);
 			// SupportUsCommand removed (NAI_Files fork).
 			OpenDocumentationCommand = new AsyncRelayCommand(DoOpenDocumentation);
-			OpenDiscordCommand = new AsyncRelayCommand(DoOpenDiscord);
 			SubmitFeatureRequestCommand = new AsyncRelayCommand(DoSubmitFeatureRequest);
 			SubmitBugReportCommand = new AsyncRelayCommand(DoSubmitBugReport);
 			OpenGitHubRepoCommand = new AsyncRelayCommand(DoOpenGitHubRepo);
 			// OpenPrivacyPolicyCommand removed (NAI_Files fork).
 			OpenLogLocationCommand = new AsyncRelayCommand(OpenLogLocation);
-			OpenCrowdinCommand = new AsyncRelayCommand(DoOpenCrowdin);
 		}
 
 		// Methods
@@ -116,11 +112,6 @@ namespace Files.App.ViewModels.Settings
 			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.DocumentationUrl)).AsTask();
 		}
 
-		public Task DoOpenDiscord()
-		{
-			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.DiscordUrl)).AsTask();
-		}
-
 		public Task DoSubmitFeatureRequest()
 		{
 			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.FeatureRequestUrl)).AsTask();
@@ -137,11 +128,6 @@ namespace Files.App.ViewModels.Settings
 		}
 
 		// Privacy link removed (NAI_Files fork).
-
-		public Task DoOpenCrowdin()
-		{
-			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.CrowdinUrl)).AsTask();
-		}
 
 		public void CopyAppVersion()
 		{

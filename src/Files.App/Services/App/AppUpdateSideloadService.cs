@@ -76,7 +76,7 @@ namespace Files.App.Services
 		public Task CheckForUpdatesAsync()
 		{
 			// Upstream CDN self-update removed for the NAI_Files fork; install updates from
-			// https://github.com/cyberluke/NAI_Files/releases.
+			// https://github.com/cyberluke/NAI-Files/releases.
 			IsUpdateAvailable = false;
 			return Task.CompletedTask;
 		}
