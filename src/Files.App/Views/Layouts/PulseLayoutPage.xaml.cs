@@ -1174,6 +1174,25 @@ namespace Files.App.Views.Layouts
 			}
 		}
 
+		// NAI Media Lab (capability-aware FFmpeg operations)
+
+		private async void MediaLab_Click(object sender, RoutedEventArgs e)
+		{
+			if (sender is not FrameworkElement { DataContext: PulseCardViewModel card })
+				return;
+
+			ResetRenameDoubleClick();
+			audioPlayer.Stop(card);
+			hoverPreview.Reset();
+
+			await RunMediaActionAsync(async () =>
+			{
+				var tools = ffmpeg ??= await PulseFfmpeg.RequireAsync();
+				var dialog = new PulseMediaLabDialog(card, tools) { XamlRoot = XamlRoot };
+				await dialog.ShowAsync();
+			});
+		}
+
 		// Quick FFmpeg actions (the custom "more actions" menu on video cards)
 
 		private async void VideoExtractAudio_Click(object sender, RoutedEventArgs e)

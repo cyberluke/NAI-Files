@@ -5252,4 +5252,11 @@
   <data name="PulseQuickExtractAudio" xml:space="preserve"><value>Extract audio (MP3)</value></data>
   <data name="PulseQuickMute" xml:space="preserve"><value>Mute video</value></data>
   <data name="PulseQuickRotateRight" xml:space="preserve"><value>Rotate 90° right</value></data>
-  <data name="PulseQuickFlip" xml:space="preserve"><value>Flip horizontally</value></data></root>
+  <data name="PulseQuickFlip" xml:space="preserve"><value>Flip horizontally</value></data>  <data name="PulseMediaLabTitle" xml:space="preserve"><value>NAI Media Lab</value></data>
+  <data name="PulseMediaLabGroup" xml:space="preserve"><value>Group</value></data>
+  <data name="PulseMediaLabRun" xml:space="preserve"><value>Run</value></data>
+  <data name="PulseMediaLabEnhance" xml:space="preserve"><value>Enhance</value></data>
+  <data name="PulseMediaLabCreate" xml:space="preserve"><value>Create</value></data>
+  <data name="PulseMediaLabAnalyze" xml:space="preserve"><value>Analyze</value></data>
+  <data name="PulseMediaLabEmpty" xml:space="preserve"><value>No operations are available for this file with the current FFmpeg build.</value></data>
+  <data name="PulseMediaLabReport" xml:space="preserve"><value>Analysis report (selectable):</value></data></root>

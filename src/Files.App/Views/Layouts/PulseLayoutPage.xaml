@@ -402,6 +402,7 @@
 
 									<!--  Image tools: edit (crop/rotate/resize) + convert, bottom left  -->
 									<StackPanel
+										Canvas.ZIndex="10"
 										Margin="8"
 										HorizontalAlignment="Left"
 										VerticalAlignment="Bottom"
@@ -438,6 +439,22 @@
 												FontSize="12"
 												Foreground="White"
 												Glyph="&#xE8C6;" />
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{helpers:ResourceString Name=PulseMediaLabTitle}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="MediaLab_Click"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{helpers:ResourceString Name=PulseMediaLabTitle}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE9D9;" />
 										</Button>
 									</StackPanel>
 								</Grid>
@@ -552,8 +569,9 @@
 											Text="{x:Bind Item.MediaDuration, Mode=OneWay}" />
 									</Border>
 
-									<!--  Media tools: trim/extract (pill), convert and video tools, bottom left  -->
+									<!--  Media tools: trim + more. Above the poster/play overlay (z-order) so they stay clickable on portrait.  -->
 									<StackPanel
+										Canvas.ZIndex="10"
 										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource ToolsMarginConverter}}"
 										HorizontalAlignment="Left"
 										VerticalAlignment="Bottom"
@@ -579,54 +597,7 @@
 													Text="{x:Bind TrimButtonText, Mode=OneWay}" />
 											</StackPanel>
 										</Button>
-										<Button
-											Width="28"
-											Height="28"
-											Padding="0"
-											AutomationProperties.Name="{x:Bind ConvertButtonTooltip, Mode=OneWay}"
-											Background="#B3000000"
-											BorderBrush="#66FFFFFF"
-											BorderThickness="1"
-											Click="VideoConvert_Click"
-											CornerRadius="14"
-											ToolTipService.ToolTip="{x:Bind ConvertButtonTooltip, Mode=OneWay}">
-											<FontIcon
-												FontSize="12"
-												Foreground="White"
-												Glyph="&#xE8AB;" />
-										</Button>
-										<Button
-											Width="28"
-											Height="28"
-											Padding="0"
-											AutomationProperties.Name="{x:Bind VideoToolsButtonTooltip, Mode=OneWay}"
-											Background="#B3000000"
-											BorderBrush="#66FFFFFF"
-											BorderThickness="1"
-											Click="VideoTools_Click"
-											CornerRadius="14"
-											ToolTipService.ToolTip="{x:Bind VideoToolsButtonTooltip, Mode=OneWay}">
-											<FontIcon
-												FontSize="12"
-												Foreground="White"
-												Glyph="&#xE714;" />
-										</Button>
-										<Button
-											Width="28"
-											Height="28"
-											Padding="0"
-											AutomationProperties.Name="{x:Bind SplitButtonTooltip, Mode=OneWay}"
-											Background="#B3000000"
-											BorderBrush="#66FFFFFF"
-											BorderThickness="1"
-											Click="VideoSplit_Click"
-											CornerRadius="14"
-											ToolTipService.ToolTip="{x:Bind SplitButtonTooltip, Mode=OneWay}">
-											<FontIcon
-												FontSize="12"
-												Foreground="White"
-												Glyph="&#xE8C6;" />
-										</Button>
+										
 										<Button
 											Width="28"
 											Height="28"
@@ -643,6 +614,12 @@
 												Glyph="&#xE70D;" />
 											<Button.Flyout>
 												<MenuFlyout>
+													<MenuFlyoutItem Click="MediaLab_Click" Text="{helpers:ResourceString Name=PulseMediaLabTitle}" />
+													<MenuFlyoutSeparator />
+													<MenuFlyoutItem Click="VideoTools_Click" Text="{x:Bind VideoToolsButtonTooltip, Mode=OneWay}" />
+													<MenuFlyoutItem Click="VideoConvert_Click" Text="{x:Bind ConvertButtonTooltip, Mode=OneWay}" />
+													<MenuFlyoutItem Click="VideoSplit_Click" Text="{x:Bind SplitButtonTooltip, Mode=OneWay}" />
+													<MenuFlyoutSeparator />
 													<MenuFlyoutItem Click="VideoExtractAudio_Click" Text="{helpers:ResourceString Name=PulseQuickExtractAudio}" />
 													<MenuFlyoutItem Click="VideoMute_Click" Text="{helpers:ResourceString Name=PulseQuickMute}" />
 													<MenuFlyoutItem Click="VideoRotateRight_Click" Text="{helpers:ResourceString Name=PulseQuickRotateRight}" />
@@ -772,6 +749,7 @@
 
 									<!--  Transport: play/pause in the center, stop (rewind) next to it while a track is loaded  -->
 									<StackPanel
+										Canvas.ZIndex="10"
 										HorizontalAlignment="Center"
 										VerticalAlignment="Center"
 										Orientation="Horizontal"
@@ -840,6 +818,22 @@
 												FontSize="12"
 												Foreground="White"
 												Glyph="&#xE8AB;" />
+										</Button>
+										<Button
+											Width="34"
+											Height="34"
+											Padding="0"
+											AutomationProperties.Name="{helpers:ResourceString Name=PulseMediaLabTitle}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											Click="MediaLab_Click"
+											CornerRadius="17"
+											ToolTipService.ToolTip="{helpers:ResourceString Name=PulseMediaLabTitle}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE9D9;" />
 										</Button>
 										<Button
 											Width="34"

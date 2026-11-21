@@ -624,6 +624,31 @@ namespace Files.App.Services.Pulse
 				"-map", "0:v:0?", "-map", "0:a:0?", "-vf", horizontal ? "hflip" : "vflip", "-c:a", "aac", "-b:a", "192k",
 			}, outputPath, cancellationToken);
 
+		/// <summary>Runs arbitrary ffmpeg arguments (output path is appended by the runner) and moves the result into place.</summary>
+		public Task<bool> RunCustomAsync(IReadOnlyList<string> args, string outputPath, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
+			=> RunWithProgressAsync(args.ToList(), outputPath, 0, cancellationToken, progress);
+
+		/// <summary>Runs an analysis pass (`-f null -`) and returns ffmpeg's combined log.</summary>
+		public async Task<string> RunAnalysisAsync(IReadOnlyList<string> args, CancellationToken cancellationToken = default)
+		{
+			var psi = NewFfmpegProcess();
+			foreach (var arg in args)
+				psi.ArgumentList.Add(arg);
+			psi.ArgumentList.Add("-f");
+			psi.ArgumentList.Add("null");
+			psi.ArgumentList.Add("-");
+			return await PulseProcess.TextAsync(psi, cancellationToken, TimeSpan.FromMinutes(15));
+		}
+
+		/// <summary>Probes the binary's capability list (`-filters`, `-encoders`, `-hwaccels`).</summary>
+		public async Task<IReadOnlyList<string>> ProbeCapabilitiesAsync(string switchName, CancellationToken cancellationToken = default)
+		{
+			var psi = NewFfmpegProcess();
+			psi.ArgumentList.Add(switchName);
+			var text = await PulseProcess.TextAsync(psi, cancellationToken, TimeSpan.FromSeconds(30));
+			return text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+		}
+
 		private static string FormatSeconds(TimeSpan value)
 			=> value.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
 

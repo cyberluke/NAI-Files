@@ -1,0 +1,89 @@
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<ContentDialog
+	x:Class="Files.App.Dialogs.PulseMediaLabDialog"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:helpers="using:Files.App.Helpers"
+	xmlns:medialab="using:Files.App.Services.Pulse.MediaLab"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	CloseButtonText="{helpers:ResourceString Name=PulseTrimCancel}"
+	DefaultButton="Close"
+	MaxWidth="860"
+	Style="{StaticResource DefaultContentDialogStyle}"
+	mc:Ignorable="d">
+
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+		<StackPanel
+			MinWidth="420"
+			MaxWidth="800"
+			Spacing="10">
+			<TextBlock
+				x:Name="SourceText"
+				FontSize="12"
+				Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+				TextWrapping="Wrap" />
+
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<ComboBox
+					x:Name="GroupBox"
+					MinWidth="170"
+					Header="{helpers:ResourceString Name=PulseMediaLabGroup}"
+					SelectionChanged="GroupBox_SelectionChanged" />
+				<Button
+					x:Name="RunButton"
+					VerticalAlignment="Bottom"
+					Click="Run_Click"
+					Content="{helpers:ResourceString Name=PulseMediaLabRun}"
+					Style="{StaticResource AccentButtonStyle}" />
+				<ProgressRing
+					x:Name="Busy"
+					Width="20"
+					Height="20"
+					VerticalAlignment="Center"
+					IsActive="False" />
+			</StackPanel>
+
+			<ListView
+				x:Name="OperationsList"
+				MaxHeight="260"
+				SelectionChanged="OperationsList_SelectionChanged"
+				SelectionMode="Single">
+				<ListView.ItemTemplate>
+					<DataTemplate x:DataType="medialab:MediaOperation">
+						<StackPanel Padding="0,4" Spacing="2">
+							<TextBlock FontWeight="SemiBold" Text="{x:Bind Title}" />
+							<TextBlock
+								FontSize="11"
+								Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+								Text="{x:Bind Description}"
+								TextWrapping="Wrap" />
+						</StackPanel>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+			</ListView>
+
+			<ProgressBar
+				x:Name="Progress"
+				Maximum="100"
+				Minimum="0"
+				Visibility="Collapsed" />
+
+			<TextBlock x:Name="StatusText" TextWrapping="Wrap" />
+
+			<ScrollViewer
+				x:Name="ResultScroller"
+				MaxHeight="220"
+				HorizontalScrollBarVisibility="Auto"
+				VerticalScrollBarVisibility="Auto"
+				Visibility="Collapsed">
+				<TextBlock
+					x:Name="ResultText"
+					FontFamily="Consolas"
+					FontSize="11"
+					IsTextSelectionEnabled="True"
+					TextWrapping="NoWrap" />
+			</ScrollViewer>
+		</StackPanel>
+	</ScrollViewer>
+</ContentDialog>
