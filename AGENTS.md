@@ -123,14 +123,6 @@ Use concise commit messages that describe the behavior change, for example:
 Add source-generated settings storage
 ```
 
-## Remotes
-
-- `origin` — `files-community/Files` (upstream, read-only; cherry-pick source)
-- `fork` — `cyberluke/NAI-Files` (product; push `nai` here)
-- `legacy` — `cyberluke/NAI_Files_legacy` (old renamed fork)
-
-Push product changes to `fork`, never to `origin`.
-
 ## Open a PR
 
 Open pull requests against `cyberluke/NAI-Files`. Upstream Files does not track
