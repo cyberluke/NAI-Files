@@ -94,6 +94,12 @@ namespace Files.App.Views.Layouts
 			InitializeComponent();
 			DataContext = this;
 
+			// End the gesture even when a child (scroller, container) handled the event first:
+			// a missed release used to leave the marquee armed and the next hover drew a box.
+			AddHandler(PointerReleasedEvent, new PointerEventHandler(PageRoot_PointerReleased), true);
+			AddHandler(PointerCanceledEvent, new PointerEventHandler(PageRoot_PointerCanceled), true);
+			AddHandler(PointerCaptureLostEvent, new PointerEventHandler(PageRoot_PointerCaptureLost), true);
+
 			feedBuilder = new PulseFeedBuilder(DispatcherQueue)
 			{
 				AutoGroupVersions = LayoutSettingsService.PulseAutoGroupVersions,
@@ -808,8 +814,11 @@ namespace Files.App.Views.Layouts
 		{
 			base.LayoutPage_PointerPressed(sender, e);
 
+			// A missed release (the pointer ended over a child that handled it) can leave the
+			// previous gesture armed; finish it before arming the new one instead of ignoring
+			// the press and resurrecting the old box on the next move.
 			if (isMarqueeArmed || isMarqueeActive)
-				return;
+				EndMarquee(commit: true);
 
 			var source = e.OriginalSource as DependencyObject;
 			if (source?.FindAscendantOrSelf<ItemContainer>() is not null)
@@ -850,6 +859,14 @@ namespace Files.App.Views.Layouts
 			if (!isMarqueeArmed && !isMarqueeActive)
 				return;
 
+			// The button state is authoritative: moves keep arriving while hovering, so a lost
+			// release must end the gesture here instead of letting a plain hover draw the box.
+			if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+			{
+				EndMarquee(commit: true);
+				return;
+			}
+
 			marqueeLastPoint = e.GetCurrentPoint(MarqueeCanvas).Position;
 
 			if (!isMarqueeActive)
@@ -879,6 +896,10 @@ namespace Files.App.Views.Layouts
 		private void PageRoot_PointerReleased(object sender, PointerRoutedEventArgs e)
 		{
 			if (!isMarqueeArmed && !isMarqueeActive)
+				return;
+
+			// Releasing another button (e.g. right) must not end a left-button marquee.
+			if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
 				return;
 
 			EndMarquee(commit: true);
@@ -922,18 +943,15 @@ namespace Files.App.Views.Layouts
 			{
 				if (commit && marqueeSelection is { } selection)
 				{
-					if (marqueeCtrl && marqueeExistingSelection is { } existing)
-					{
-						foreach (var item in selection)
-						{
-							if (!existing.Contains(item))
-								FileList.SelectedItems.Add(item);
-						}
-					}
-					else
-					{
+					// Only items the hidden list actually owns can be selected; adding a card
+					// that is not in the list throws and used to abort the rest of the box.
+					var available = new HashSet<ListedItem>(FileList.Items.OfType<ListedItem>(), ReferenceEqualityComparer.Instance);
+					if (!marqueeCtrl)
 						FileList.SelectedItems.Clear();
-						foreach (var item in selection)
+
+					foreach (var item in selection)
+					{
+						if (available.Contains(item) && !FileList.SelectedItems.Contains(item))
 							FileList.SelectedItems.Add(item);
 					}
 
@@ -947,6 +965,9 @@ namespace Files.App.Views.Layouts
 				}
 			}
 
+			marqueeStartPoint = default;
+			marqueeLastPoint = default;
+			marqueeRect = default;
 			marqueeSelection = null;
 			marqueeExistingSelection = null;
 		}
@@ -975,29 +996,45 @@ namespace Files.App.Views.Layouts
 			if (marqueeSelection is not { } selection)
 				return;
 
-			selection.Clear();
-			foreach (var (card, root) in cardRoots)
+			// Scan the realized containers live. ItemsView recycles containers without always
+			// raising Unloaded/Loaded, so the Loaded-time registry went stale and silently
+			// skipped cards; the container's current DataContext is always authoritative.
+			var visible = new HashSet<ListedItem>(ReferenceEqualityComparer.Instance);
+			var intersected = new HashSet<ListedItem>(ReferenceEqualityComparer.Instance);
+			foreach (var view in sectionViews)
 			{
-				if (!root.IsLoaded || root.ActualWidth <= 0 || root.ActualHeight <= 0)
-					continue;
+				foreach (var container in view.ItemsView.FindDescendants().OfType<ItemContainer>())
+				{
+					if (container.Child is not FrameworkElement root || root.DataContext is not PulseCardViewModel card)
+						continue;
+					if (root.ActualWidth <= 0 || root.ActualHeight <= 0)
+						continue;
 
-				var bounds = root.TransformToVisual(MarqueeCanvas)
-					.TransformBounds(new Windows.Foundation.Rect(0, 0, root.ActualWidth, root.ActualHeight));
-				if (bounds.IntersectsWith(marqueeRect))
-					selection.Add(card.Item);
+					var bounds = root.TransformToVisual(MarqueeCanvas)
+						.TransformBounds(new Windows.Foundation.Rect(0, 0, root.ActualWidth, root.ActualHeight));
+
+					visible.Add(card.Item);
+					if (bounds.IntersectsWith(marqueeRect))
+						intersected.Add(card.Item);
+				}
 			}
+
+			// Drop only cards still on screen that left the box. Cards the box swept while
+			// edge-scrolling moved them out of the realized range stay selected.
+			foreach (var item in selection.ToList())
+			{
+				if (visible.Contains(item) && !intersected.Contains(item))
+					selection.Remove(item);
+			}
+			foreach (var item in intersected)
+				selection.Add(item);
 
 			// Live visuals: the tentative state is page-local until the commit writes it to the list.
-			if (marqueeCtrl && marqueeExistingSelection is { } existing)
-			{
-				foreach (var (card, root) in cardRoots)
-					card.IsSelected = existing.Contains(card.Item) || selection.Contains(card.Item);
-			}
-			else
-			{
-				foreach (var (card, root) in cardRoots)
-					card.IsSelected = selection.Contains(card.Item);
-			}
+			var visualSelection = marqueeCtrl && marqueeExistingSelection is { } existing
+				? new HashSet<ListedItem>(existing.Concat(selection), ReferenceEqualityComparer.Instance)
+				: selection;
+			foreach (var view in sectionViews)
+				view.SyncSelection(visualSelection);
 		}
 
 		// Edge auto-scroll: while the marquee is near the top/bottom of the feed viewport, a timer

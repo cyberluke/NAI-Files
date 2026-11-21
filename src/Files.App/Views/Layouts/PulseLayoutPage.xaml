@@ -16,11 +16,8 @@
 	xmlns:wctconverters="using:CommunityToolkit.WinUI.Converters"
 	x:Name="PageRoot"
 	NavigationCacheMode="Enabled"
-	PointerCanceled="PageRoot_PointerCanceled"
-	PointerCaptureLost="PageRoot_PointerCaptureLost"
 	PointerMoved="PageRoot_PointerMoved"
 	PointerPressed="PageRoot_PointerPressed"
-	PointerReleased="PageRoot_PointerReleased"
 	PointerWheelChanged="LayoutPage_PointerWheelChanged"
 	mc:Ignorable="d">
 
