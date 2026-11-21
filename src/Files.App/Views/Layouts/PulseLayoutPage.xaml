@@ -402,12 +402,12 @@
 										ContentTemplate="{StaticResource PulseCardOverlaysTemplate}"
 										IsTabStop="False" />
 
-									<!--  Image tools: edit (crop/rotate/resize) + convert, bottom left  -->
+									<!--  Image tools: edit/convert/lab. Above the footer and, on portrait, at the top.  -->
 									<StackPanel
 										Canvas.ZIndex="10"
-										Margin="8"
+										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource ToolsMarginConverter}}"
 										HorizontalAlignment="Left"
-										VerticalAlignment="Bottom"
+										VerticalAlignment="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource PortraitAlignmentConverter}}"
 										Orientation="Horizontal"
 										Spacing="6">
 										<Button
@@ -755,6 +755,7 @@
 									<!--  Transport: play/pause in the center, stop (rewind) next to it while a track is loaded  -->
 									<StackPanel
 										Canvas.ZIndex="10"
+										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource ToolsMarginConverter}}"
 										HorizontalAlignment="Center"
 										VerticalAlignment="Center"
 										Orientation="Horizontal"
