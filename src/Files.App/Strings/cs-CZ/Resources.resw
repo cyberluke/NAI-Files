@@ -4945,6 +4945,7 @@
   <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Index</value></data>
   <data name="NaiSemanticTitle" xml:space="preserve"><value>Sémantické hledání souborů</value></data>
   <data name="NaiSemanticDescription" xml:space="preserve"><value>Hledání ve schváleném obsahu dokumentů přes LUSI embeddings s vektory uloženými v NAI Lattice. Je oddělené od místního fuzzy/AQS hledání názvů. Indexování je výslovné, omezené a zrušitelné; zastaralé verze zdrojů se vylučují.</value></data>
+  <data name="NaiSemanticEngineUnavailable" xml:space="preserve"><value>Místní engine LUSI (embeddings) a NAI Lattice (vektory) musí běžet. Spusťte runtime NAI OS a zkuste to znovu.</value></data>
   <data name="NaiSemanticRecursive" xml:space="preserve"><value>Zahrnout podsložky (nikdy nenásledovat odkazy)</value></data>
   <data name="NaiSemanticConsent" xml:space="preserve"><value>Souhlasím se čtením zkontrolovaných místních dokumentů a uložením omezených úryvků a vektorů v NAI Lattice. Bez online souborů, odkazů a cloudového fallbacku. Před indexováním zkontroluji seznam souborů.</value></data>
   <data name="NaiSemanticIndex" xml:space="preserve"><value>Zkontrolovat a indexovat</value></data>

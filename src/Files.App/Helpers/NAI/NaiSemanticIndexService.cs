@@ -72,7 +72,7 @@ namespace Files.App.Helpers
 					await Store.SaveAsync(state, token);
 					foreach (var batch in chunks.Chunk(8))
 					{
-						var vectors = await LusiEmbedder.EmbedAsync(batch.Select(chunk => chunk.Text).ToArray(), query: false, token);
+						var vectors = await SemanticEmbedder.EmbedAsync(batch.Select(chunk => chunk.Text).ToArray(), query: false, token);
 						if (vectors.Count != batch.Length) throw new InvalidOperationException("LUSI returned a mismatched embedding count");
 						var points = batch.Select((chunk, index) => new SemanticIndexPoint(chunk.Id, vectors[index], chunk.Name, chunk.Text, state.Dataset)).ToArray();
 						await LatticeSemanticClient.IndexBatchAsync(points, token);
@@ -109,7 +109,7 @@ namespace Files.App.Helpers
 			var current = await Task.Run(() => eligible.Where(item => NaiSemanticIndexStore.IsCurrentLocalFile(folder, item)).ToDictionary(item => item.Id, StringComparer.Ordinal), token);
 			if (current.Count == 0) return new(Array.Empty<NaiSemanticFileMatch>(), 0, eligible.Length, state.Partial);
 			var chunks = current.Values.SelectMany(item => item.ChunkIds).ToArray();
-			var queryVectors = await LusiEmbedder.EmbedAsync([query], query: true, token);
+			var queryVectors = await SemanticEmbedder.EmbedAsync([query], query: true, token);
 			if (queryVectors.Count == 0)
 				return new(Array.Empty<NaiSemanticFileMatch>(), current.Count, eligible.Length - current.Count, state.Partial);
 

@@ -72,7 +72,13 @@ namespace Files.App.Views
 		}
 		private async Task RefreshStateAsync(CancellationToken token)
 		{
-			backendReady = await LatticeSemanticClient.IsAvailableAsync(token);
+			backendReady = await LatticeSemanticClient.IsAvailableAsync(token) && await SemanticEmbedder.IsAvailableAsync(token);
+			if (!backendReady)
+			{
+				IndexStateText.Text = L("NaiSemanticEngineUnavailable");
+				Controls();
+				return;
+			}
 			if (!Directory.Exists(FolderBox.Text)) { IndexStateText.Text = L("NaiSemanticChooseFolder"); Controls(); return; }
 			var state = await NaiSemanticIndexService.Store.ReadAsync(FolderBox.Text, token); token.ThrowIfCancellationRequested();
 			if (disposed) return;

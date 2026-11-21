@@ -5206,6 +5206,7 @@
   <data name="NaiSemanticIndexShort" xml:space="preserve"><value>Index</value></data>
   <data name="NaiSemanticTitle" xml:space="preserve"><value>Semantic file search</value></data>
   <data name="NaiSemanticDescription" xml:space="preserve"><value>Search approved document contents through the local LUSI embedding engine with vectors stored in NAI Lattice. This is separate from local filename fuzzy/AQS search. Indexing is explicit, bounded and cancellable; stale source versions are excluded.</value></data>
+  <data name="NaiSemanticEngineUnavailable" xml:space="preserve"><value>The local LUSI engine (embeddings) and NAI Lattice (vectors) must be running. Start the NAI OS runtime and try again.</value></data>
   <data name="NaiSemanticRecursive" xml:space="preserve"><value>Include subfolders (never follow links)</value></data>
   <data name="NaiSemanticConsent" xml:space="preserve"><value>Allow reading reviewed local documents and storing bounded excerpts and vectors in NAI Lattice. No online-only files, links or cloud fallback. I will review the file list before indexing.</value></data>
   <data name="NaiSemanticIndex" xml:space="preserve"><value>Review and index documents</value></data>
