@@ -1,5 +1,5 @@
 # THIRD PARTY NOTICES
-Files uses third-party libraries and resources that may be distributed under licenses different than Files.
+NAI Files uses third-party libraries and resources that may be distributed under licenses different than NAI Files.
 
 In the event that we accidentally failed to list a required notice, please bring it to our attention by opening an issue.
 

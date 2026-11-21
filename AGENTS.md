@@ -1,6 +1,7 @@
-# Files Development Guidelines
+# NAI Files Development Guidelines
 
-This project is a C#/.NET WinUI 3 desktop app; an alternative to File Explorer.
+NAI Files is the WinUI 3 file manager for NAI OS: a fork of
+`files-community/Files` with Pulse, Media Lab, local AI and semantic search.
 
 - Protect context usage. Any command with unknown or potentially large output must be capped. Prefer targeted commands such as `rg`, `Get-Content -TotalCount`, `Select-Object -First`, or focused `git diff -- <path>`; for example, `COMMAND 2>&1 | Select-Object -First 200`. If a line cap is still too noisy, narrow the query instead of dumping full output.
 - Always follow `.editorconfig`
@@ -57,33 +58,49 @@ This project is a C#/.NET WinUI 3 desktop app; an alternative to File Explorer.
 └── Files.InteractionTests
 ```
 
+## NAI-specific areas
+
+- `src/Files.App/Views/Layouts/PulseLayoutPage.xaml(.cs)` — Pulse feed, cards, layout and selection.
+- `src/Files.App/Services/Pulse/MediaLab` — FFmpeg operation registry and runners.
+- `src/Files.App/AI` — provider registry, AI settings and semantic clients.
+- `src/Files.App/Helpers/Application/NaiLanguageBridge.cs` — NAI OS language sync and override.
+- `src/Files.App/Helpers/Layout/AdaptiveLayoutHelpers.cs` — media-folder Pulse default.
+
 ## Build
 
-Prefer explicit platform/configuration builds.
-Unless the task is specifically about resolving or inspecting warnings, add `-v:quiet -clp:ErrorsOnly` to `msbuild` commands so the log proves success or shows only actionable errors.
+The verified path is the `dotnet` CLI with the SDK pinned in `global.json`.
+Unless the task is specifically about resolving or inspecting warnings, add
+`-v:quiet -clp:ErrorsOnly` so the log proves success or shows only actionable
+errors.
 
 ```powershell
-msbuild -restore Files.slnx -p:Configuration=Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
 ```
 
-If `msbuild` isn't available in the current shell, run it from Visual Studio Developer PowerShell. Match `-arch`, `-host_arch`, and `-p:Platform` to the platform you're verifying; use `x64` for x64 work and `arm64` for ARM64 work.
+For focused C# work, build the affected project first. Do not run build
+commands in parallel.
 
 ```powershell
-pwsh.exe -NoProfile -Command "& {
-  Import-Module 'C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\Tools\Microsoft.VisualStudio.DevShell.dll'
-  Enter-VsDevShell 1ba2cc4e -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64'
-  msbuild -restore src/Files.App/Files.App.csproj -p:Configuration=Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
-}"
+dotnet build src/Files.Shared/Files.Shared.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+dotnet build src/Files.Core.SourceGenerator/Files.Core.SourceGenerator.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
 ```
 
-For focused C# work, build the affected project first.
-Do not run build commands in parallel.
+`Files.slnx` and the full solution need the pinned SDK; VS 2022's MSBuild may
+not load it. Use `dotnet build`, or a Visual Studio installation that ships the
+matching MSBuild. Match the platform to the work: `x64` for x64 work and
+`arm64` for ARM64 work.
+
+### Package and install
 
 ```powershell
-msbuild -restore src/Files.Shared/Files.Shared.csproj -p:Configuration=Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
-msbuild -restore src/Files.Core.SourceGenerator/Files.Core.SourceGenerator.csproj -p:Configuration=Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
-msbuild -restore src/Files.App/Files.App.csproj -p:Configuration=Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 `
+  -p:AppxBundle=Never -p:GenerateAppxPackageOnBuild=true `
+  -p:AppxPackageDir=artifacts/AppxPackages/
 ```
+
+The produced MSIX must be signed with the trusted development certificate before
+`Add-AppxPackage`.
 
 ## Test
 
@@ -106,7 +123,18 @@ Use concise commit messages that describe the behavior change, for example:
 Add source-generated settings storage
 ```
 
+## Remotes
+
+- `origin` — `files-community/Files` (upstream, read-only; cherry-pick source)
+- `fork` — `cyberluke/NAI-Files` (product; push `nai` here)
+- `legacy` — `cyberluke/NAI_Files_legacy` (old renamed fork)
+
+Push product changes to `fork`, never to `origin`.
+
 ## Open a PR
+
+Open pull requests against `cyberluke/NAI-Files`. Upstream Files does not track
+this fork, so do not open an upstream PR.
 
 When asked to open a PR, use a short PR title that names the behavior, not the implementation mechanics only, and prepend the PR type:
 

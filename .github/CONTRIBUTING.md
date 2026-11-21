@@ -1,68 +1,84 @@
-# Contributing to Files
-Files thrives off of the contributions and input from users. There are several ways you can get involved.
+# Contributing to NAI Files
 
-We are happy to hear your feedback for the future of Files. Check the
-[issues tab](https://github.com/cyberluke/NAI-Files/issues) to see if others have
-submitted similar feedback. You can add your feedback to existing issues or you can open a new issue.
+NAI Files is an independent fork of [Files](https://github.com/files-community/Files).
+Contributions belong in **[cyberluke/NAI-Files](https://github.com/cyberluke/NAI-Files)**,
+not in the upstream repository. Upstream Files does not track this fork's
+changes, so a pull request opened there will not reach NAI Files.
 
-We always look at your feedback when we decide what to work on next and we look forward to hearing your ideas. Remember that
-all community interactions must abide by the [Code of Conduct](./CODE_OF_CONDUCT.md).
+Community interactions must follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-## Finding issues you can help with
-Looking for something to work on?
-Issues marked as ready to build are a good place to start. If you're interested in working on an issue, leave a comment to let everyone know and to help
-avoid duplicated effort from others.
+## Ways to help
 
-## Contributions we accept
-We welcome your contributions to the Files project, especially to fix bugs and to make
-improvements which address the top issues reported by Files users. Some general guidelines:
+- **Report a bug** with the bug report form. Include the NAI Files version,
+  Windows version and a log when possible.
+- **Request a feature** through the feature request link on the new-issue page.
+- **Send a pull request** for a bug or an approved change.
+- **Test a build** on your hardware, especially Pulse, Media Lab and the AI
+  settings, and report what you observe.
 
-* **DO** create one pull request per Issue, and ensure that the Issue is linked in the pull request.
-* **DO** follow our [Coding and Style](https://github.com/cyberluke/NAI-Files/contributing/code-style) guidelines, and keep code changes as small as possible.
-* **DO** include corresponding tests whenever possible.
-* **DO** check for additional occurrences of the same problem in other parts of the codebase before submitting your PR.
-* **DO** [link the issue](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) you are addressing in the 
-   pull request.
-* **DO** write a good description for your pull request. More detail is better. Describe *why* the change is being 
-   made and *why* you have chosen a particular solution. Describe any manual testing you performed to validate your change.
-* **DO NOT** submit a PR unless the connected issue is marked as ready to build or approved by an org member.
-   This enables us to have a discussion on the idea before anyone invests time on the implementation.
-* **DO NOT** merge multiple changes into one PR unless they have the same root cause.
+Search the [issues](https://github.com/cyberluke/NAI-Files/issues) before
+opening a new one. Add to an existing report instead of duplicating it.
 
-> Submitting a pull request for an approved Issue is not a guarantee it will be approved.
-> The change must meet our high bar for code quality, architecture, and performance.
+## Before you open a pull request
 
-## Making changes to the code
+1. Open or find an issue that describes the change. Non-trivial work should be
+   discussed first so nobody invests time in a direction that will not land.
+2. Keep one pull request per issue and link the issue in the description.
+3. Keep the change scoped. Avoid opportunistic refactors, formatting churn,
+   dependency updates and generated-file edits.
+4. Follow [`.editorconfig`](../.editorconfig) and the rules in
+   [`AGENTS.md`](../AGENTS.md). Keep changed text files in CRLF line endings.
 
-If your change is complex, please clean up the branch history before submitting a pull request.
-You can use [git rebase](https://docs.microsoft.com/en-us/azure/devops/repos/git/rebase#squash-local-commits)
-to group your changes into a small number of commits which we can review one at a time.
+## Build and verify
 
-When completing a pull request, we will generally squash your changes into a single commit. Please
-let us know if your pull request needs to be merged as separate commits.
+Use the SDK pinned in `global.json`:
 
-## Running interaction tests (optional)
-The tests drive the app through [Appium](https://appium.io), which automates it using WinAppDriver.
-Install WinAppDriver, and Node.js to run Appium on:
 ```powershell
-winget install Microsoft.WindowsApplicationDriver
-winget install OpenJS.NodeJS
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
 ```
-Then install Appium and the Windows driver it automates through:
+
+For focused work, build the affected project first:
+
 ```powershell
-npm install --global appium
-appium driver install --source=npm appium-windows-driver
+dotnet build src/Files.Shared/Files.Shared.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
 ```
-The tests launch Appium themselves when it is not already running, so keep it on your `PATH`.
 
-Finally, you will need to run the Files.Package at least once to have the debug version be registered on your machine.
-Once you have the debug version registered, you can run the tests from the test explorer in Visual Studio.
+There is no agent-ready automated test suite. A pull request must at least
+build cleanly, and the description must list the manual steps you used to test
+the change. If the change touches Pulse, Media Lab, AI or file operations, say
+which folder types and files you exercised.
 
-## Review Process
-After submitting a pull request, members of the Files team will review your code. Any member of the community may
-participate in the review, but at least one member of the Files team will ultimately approve
-the request.
+The inherited interaction tests in `tests/` are optional and use Appium and
+WinAppDriver; they are not required for a normal contribution.
 
-Often, multiple iterations will be needed to respond to feedback from reviewers. Try looking at
-[past pull requests](https://github.com/cyberluke/NAI-Files/pulls?q=is%3Apr+is%3Aclosed) to see
-what the experience might be like.
+## Pull request titles and bodies
+
+Use a short title that names the behavior and prepend the type:
+
+- `Fix:` — a bug fix
+- `Feature:` — a feature or enhancement
+- `Code Quality:` — anything else
+
+For the body, follow [PULL_REQUEST_TEMPLATE.md](./PULL_REQUEST_TEMPLATE.md).
+Describe why the change is needed, what you chose, and what you verified.
+
+## Translations
+
+NAI Files does not use Crowdin. The app follows the NAI OS language by default
+and stores a per-app override in Settings → General. Translation changes go
+through the normal resource files and the upstream Files localization
+infrastructure; do not add Crowdin project links.
+
+## Review
+
+The maintainer reviews pull requests. Community members may comment, but the
+maintainer approves and merges. Expect iterations; keep the branch history
+readable and squash fixups when asked.
+
+## Remotes
+
+- `origin` — `files-community/Files` (upstream, read-only)
+- `fork` — `cyberluke/NAI-Files` (the product repository)
+
+Push work to `fork`, never to `origin`.

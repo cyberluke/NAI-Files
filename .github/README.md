@@ -1,51 +1,124 @@
-<p align="center">
-  <img alt="Files hero image" src="./assets/ReadmeHero.png" />
-</p>
+# NAI Files
 
-<p align="center">
-  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI-Files/">
-    <img src="https://img.shields.io/badge/Files-Website-F9B81F" alt="Files Website" /></a>
-  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI-Files/actions/workflows/ci.yml">
-    <img src="https://github.com/cyberluke/NAI-Files/actions/workflows/ci.yml/badge.svg" alt="Files CI Status" /></a>
-  <a style="text-decoration:none" href="https://crowdin.com/project/files-app">
-    <img src="https://badges.crowdin.net/files-app/localized.svg" alt="Files Localization Status" /></a>
-  <a style="text-decoration:none" href="https://discord.gg/files">
-    <img src="https://img.shields.io/discord/725513575971684472?label=Discord&color=7289da" alt="Files Discord" /></a>
-</p>
+NAI Files is the file manager for **NAI OS**: a WinUI 3 desktop app built on the
+[Files](https://github.com/files-community/Files) codebase, with a media-first
+Pulse view, a built-in FFmpeg media lab, and local AI and semantic search.
 
-Files is a modern file manager that helps users organize their files and folders. Our mission with Files is to build the best file manager for Windows, and we’re proud to be building it out in the open so everyone can participate. User feedback helps shape the features we work on, & the bug reports on GitHub help to make Files more reliable. Built and maintained by the open-source community, Files features robust multitasking experiences, file tags, deep integrations, and an intuitive design.
+> NAI Files is an independent fork. It is not affiliated with Microsoft or the
+> Files Community; upstream Files and its trademarks belong to their authors.
 
-## Installing and running Files
+## Why NAI Files
 
-Files is a community-driven project that depends on your support to grow and improve. Please consider purchasing Files through the Microsoft Store or supporting us on GitHub if you use the classic installer.
+### Pulse view
 
-You can also use the preview version alongside the stable release to get early access to new features and improvements.
+A chronological, time-railed feed for folders that contain images, videos and
+audio. Cards show real thumbnails, inline video playback, waveform strips,
+hover previews and contact sheets, and the layout adapts to portrait and
+landscape media.
 
-<p align="left">
-  <!-- Store Badge -->
-  <a style="text-decoration:none" href="https://apps.microsoft.com/detail/9NGHP3DX8HDX?launch=true&mode=full">
-    <picture>
-      <source media="(prefers-color-scheme: light)" srcset="./assets/StoreBadge-dark.png" height="80" />
-      <img src="./assets/StoreBadge-light.png" height="80" /></picture></a>
-  &ensp;
-  <!-- Classic Installer Badge -->
-  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI-Files/releases">
-    <picture>
-      <source media="(prefers-color-scheme: light)" srcset="./assets/ClassicInstallerBadge-dark.png" height="80" />
-      <img src="./assets/ClassicInstallerBadge-light.png" height="80" /></picture></a>
-</p>
+### Pulse is the default for media folders
 
-## Building from source
+- A manual per-folder layout choice always wins and is remembered.
+- Pictures and Videos open in Pulse.
+- Any folder that contains an image, video or audio file opens in Pulse.
+- A folder with no media stays in the default details view.
 
-Instructions for building the source code can be found on our [documentation site](https://github.com/cyberluke/NAI-Files/contributing/building-from-source).
+The decision is re-evaluated on navigation while the folder still follows the
+adaptive default; changing the layout from the toolbar pins that folder.
 
+### NAI Media Lab
 
-## Contributing to Files
+46 FFmpeg 9 operations for video, audio and images: convert, trim, split,
+compress, HDR-to-SDR tonemap, extract frames and GIFs, contact sheets, audio
+normalize and denoise, and more. Operations run locally and write sibling
+outputs, with cancellable progress.
 
-Want to contribute to this project? Let us know with an [issue](https://github.com/cyberluke/NAI-Files/issues) that communicates your intent to create a [pull request](https://github.com/cyberluke/NAI-Files/pulls). Also, view our [contributing guidelines](https://github.com/cyberluke/NAI-Files/blob/main/.github/CONTRIBUTING.md) to make sure you're up to date on the coding conventions.
+### AI and semantic search
 
-Looking for a place to start? Check out the [task board](https://github.com/orgs/files-community/projects/3/views/2), where you can sort tasks by size and priority.
+- Pluggable AI providers: local LUSI, Kelvin and OpenAI-compatible gateways.
+- Per-capability routing for chat and vision, with local NPU/GPU lanes preferred.
+- File search backed by NAI Lattice vectors and LUSI embeddings, all local.
 
-## Screenshots
+### NAI OS integration
 
-![Files](./assets/FilesScreenshot.png)
+- Follows the NAI OS language by default; a per-app override lives in
+  Settings → General.
+- NAI theme, SAP 72 font and rainbow folder icons.
+- Local-first: no analytics, no Crowdin, no Discord.
+
+### The file manager underneath
+
+Tabs, panes, tags, archives, FTP/SFTP, Git status, the preview pane, batch
+rename, and the rest of the Files feature set remain available.
+
+## Install
+
+NAI Files is distributed as a signed MSIX and built from source. It is not on
+the Microsoft Store and does not run an automatic updater; updates are manual.
+
+1. Build the package (below) or download one from
+   [Releases](https://github.com/cyberluke/NAI-Files/releases) when available.
+2. Trust the certificate used to sign the package.
+3. Install it:
+
+```powershell
+Add-AppxPackage -Path .\Files.App_<version>_x64_Debug.msix
+```
+
+## Build from source
+
+### Prerequisites
+
+- Windows 10 2004 (10.0.19041) or newer; Windows 11 recommended.
+- .NET SDK **11.0.100-rc.3** (pinned in `global.json`); NuGet restore brings the
+  Windows App SDK and WinUI 3 packages.
+- Visual Studio 2022 with the WinUI/Windows App SDK components is optional when
+  using the `dotnet` CLI.
+- For packaging: Windows SDK 10.0.26100 (`makeappx`, `signtool`) and a trusted
+  code-signing certificate.
+
+### Build the app
+
+```powershell
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly
+```
+
+Use `-p:Platform=arm64` for ARM64.
+
+### Build an MSIX
+
+```powershell
+dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 `
+  -p:AppxBundle=Never -p:GenerateAppxPackageOnBuild=true `
+  -p:AppxPackageDir=artifacts/AppxPackages/
+```
+
+Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
+
+## Repository layout
+
+- `src/Files.App` — WinUI 3 app: Pulse, Media Lab, AI, shell and settings.
+- `src/Files.App.Controls`, `Files.App.Storage`, `Files.App.CsWin32` — shared
+  controls, storage abstractions and native interop.
+- `tests/` — inherited upstream test projects.
+- `.github/` — workflows and community documents.
+- `AGENTS.md` — development and agent guidelines.
+
+## Contributing
+
+- Bugs and feature requests:
+  [issues](https://github.com/cyberluke/NAI-Files/issues)
+- Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security: [SECURITY.md](SECURITY.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+## Remotes
+
+- `origin` — `files-community/Files` (upstream, read-only; used for cherry-picks)
+- `fork` — `cyberluke/NAI-Files` (this product; `nai` is the default branch)
+
+## License
+
+NAI Files is distributed under the MIT license (`LICENSE-MIT`); some components
+are under the MPL (`LICENSE-MPL`). Third-party notices are in
+[NOTICE.md](NOTICE.md). NAI Files is based on Files by the Files Community.

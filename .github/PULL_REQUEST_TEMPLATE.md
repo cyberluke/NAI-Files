@@ -1,19 +1,30 @@
-<!-- 
-🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
-I ACKNOWLEDGE THE FOLLOWING BEFORE PROCEEDING:
-1. PR may be deleted if it is not following the template
-2. Try not to make duplicates. Do a quick search before posting
-3. Add a clear title starting with "Feature:" or "Fix:"
--->
+## Summary
 
-**Resolved / Related Issues**
+Describe the behavior change and why it is needed.
 
-To prevent extra work, all changes to the Files codebase must link to an approved issue marked as `Ready to build`. Please insert the issue number following the hashtag with the issue number that this Pull Request resolves.
-- Closes #
+## Related issue
 
-**Steps used to test these changes**
+Closes #
 
-Stability is a top priority for Files and all changes are required to go through testing before being merged into the repo. Please include a list of steps that you used to test this PR.
+## Type
 
-1. Opened Files ...
-2. ...
+- [ ] Fix
+- [ ] Feature
+- [ ] Code Quality
+
+## Verification
+
+- [ ] `dotnet build src/Files.App/Files.App.csproj -c Debug -p:Platform=x64 -v:quiet -clp:ErrorsOnly`
+- [ ] Manual test completed; steps below
+- [ ] No unrelated files or generated output included
+
+Manual steps:
+
+1.
+2.
+3.
+
+## Notes
+
+Anything reviewers should know: screenshots, edge cases, follow-ups, or parts
+that could not be verified.
