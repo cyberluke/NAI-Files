@@ -5,6 +5,10 @@ Pulse view, a built-in FFmpeg media lab, and local AI and semantic search.
 
 > NAI Files is a personal project. It is not affiliated with Microsoft.
 
+<p align="center">
+  <img alt="NAI Files Pulse view" src="./assets/pulse.webp" />
+</p>
+
 ## Why NAI Files
 
 ### Pulse view
