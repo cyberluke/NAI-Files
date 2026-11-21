@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -4983,4 +4983,12 @@
   <data name="DialogFolderMissing" xml:space="preserve"><value>Složka není dostupná: {0}</value></data>
   <data name="DialogAccessDenied" xml:space="preserve"><value>Přístup odepřen: {0}</value></data>
   <data name="DialogTypeMismatch" xml:space="preserve"><value>Soubor neodpovídá vybranému typu: {0}</value></data>
-</root>
+  <data name="PulseQuickWorking" xml:space="preserve"><value>Pracuji…</value></data>
+  <data name="PulseQuickSaved" xml:space="preserve"><value>Uloženo jako {0}</value></data>
+  <data name="PulseQuickFailed" xml:space="preserve"><value>Akce selhala.</value></data>
+  <data name="PulseQuickCancelled" xml:space="preserve"><value>Zrušeno.</value></data>
+  <data name="PulseQuickMoreActions" xml:space="preserve"><value>Další akce</value></data>
+  <data name="PulseQuickExtractAudio" xml:space="preserve"><value>Extrahovat zvuk (MP3)</value></data>
+  <data name="PulseQuickMute" xml:space="preserve"><value>Ztlumit video</value></data>
+  <data name="PulseQuickRotateRight" xml:space="preserve"><value>Otočit o 90° doprava</value></data>
+  <data name="PulseQuickFlip" xml:space="preserve"><value>Převrátit vodorovně</value></data></root>

@@ -4,6 +4,7 @@
 using CommunityToolkit.WinUI;
 using Files.App.Dialogs;
 using Files.App.Services.Pulse;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using Files.App.UserControls.Pulse;
 using Microsoft.UI.Input;
@@ -33,6 +34,7 @@ namespace Files.App.Views.Layouts
 
 		private readonly PulseFeedBuilder feedBuilder;
 		private readonly HoverPreviewCoordinator hoverPreview;
+		private PulseFfmpeg? ffmpeg;
 		private readonly PulseWaveformService waveforms;
 		private readonly PulseAudioPlayer audioPlayer;
 		private readonly Dictionary<ListedItem, CancellationTokenSource> markdownLoads = new(ReferenceEqualityComparer.Instance);
@@ -1170,6 +1172,66 @@ namespace Files.App.Views.Layouts
 					await dialog.ShowAsync();
 				});
 			}
+		}
+
+		// Quick FFmpeg actions (the custom "more actions" menu on video cards)
+
+		private async void VideoExtractAudio_Click(object sender, RoutedEventArgs e)
+			=> await RunVideoQuickActionAsync(sender, Strings.PulseQuickExtractAudio.GetLocalizedResource(), "audio", ".mp3",
+				(tools, path, output, token, progress) => tools.ExtractAudioAsync(path, output, token, progress));
+
+		private async void VideoMute_Click(object sender, RoutedEventArgs e)
+			=> await RunVideoQuickActionAsync(sender, Strings.PulseQuickMute.GetLocalizedResource(), "muted", ".mp4",
+				(tools, path, output, token, _) => tools.MuteVideoAsync(path, output, token));
+
+		private async void VideoRotateRight_Click(object sender, RoutedEventArgs e)
+			=> await RunVideoQuickActionAsync(sender, Strings.PulseQuickRotateRight.GetLocalizedResource(), "rotated", ".mp4",
+				(tools, path, output, token, _) => tools.RotateVideoAsync(path, output, 1, token));
+
+		private async void VideoFlipHorizontal_Click(object sender, RoutedEventArgs e)
+			=> await RunVideoQuickActionAsync(sender, Strings.PulseQuickFlip.GetLocalizedResource(), "flipped", ".mp4",
+				(tools, path, output, token, _) => tools.FlipVideoAsync(path, output, true, token));
+
+		private async Task RunVideoQuickActionAsync(
+			object sender, string title, string suffix, string extension,
+			Func<PulseFfmpeg, string, string, CancellationToken, IProgress<double>, Task<bool>> action)
+		{
+			if (sender is not FrameworkElement { DataContext: PulseCardViewModel card })
+				return;
+
+			ResetRenameDoubleClick();
+			audioPlayer.Stop(card);
+			hoverPreview.Reset();
+
+			var sourcePath = card.Item.GetRequiredPath();
+			var outputPath = ResolveQuickOutputPath(sourcePath, suffix, extension);
+
+			await RunMediaActionAsync(async () =>
+			{
+				var tools = ffmpeg ??= await PulseFfmpeg.RequireAsync();
+				var dialog = new PulseQuickActionDialog(title, Path.GetFileName(sourcePath), async (progress, token) =>
+				{
+					var succeeded = await action(tools, sourcePath, outputPath, token, progress);
+					return succeeded ? outputPath : null;
+				})
+				{ XamlRoot = XamlRoot };
+
+				await dialog.ShowAsync();
+			});
+		}
+
+		private static string ResolveQuickOutputPath(string sourcePath, string suffix, string extension)
+		{
+			var directory = Path.GetDirectoryName(sourcePath) ?? string.Empty;
+			var stem = Path.GetFileNameWithoutExtension(sourcePath);
+			if (string.IsNullOrWhiteSpace(stem))
+				stem = "media";
+
+			var candidate = Path.Combine(directory, $"{stem} ({suffix}).{extension}");
+			var counter = 2;
+			while (File.Exists(candidate))
+				candidate = Path.Combine(directory, $"{stem} ({suffix}) ({counter++}).{extension}");
+			return candidate;
 		}
 
 		private async void VideoTools_Click(object sender, RoutedEventArgs e)

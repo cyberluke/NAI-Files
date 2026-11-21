@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
+using Files.App.AI;
+using Files.App.AI.Vision;
 using System.IO;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -135,8 +137,10 @@ namespace Files.App.Views
 			loadingModels = true;
 			try
 			{
-				foreach (var model in await NaiAiClient.ModelsAsync(lifetime.Token, "vision")) ModelBox.Items.Add(model);
-				if (ApplicationData.Current.LocalSettings.Values.TryGetValue("NaiVision.Model", out var modelId) && ModelBox.Items.Contains(modelId)) ModelBox.SelectedItem = modelId;
+				foreach (var model in await VisionAnalyzer.ListModelsAsync(lifetime.Token)) ModelBox.Items.Add(model);
+				var bound = AiProviderRegistry.Instance.GetBinding(AiCapability.Vision)?.Model;
+				if (!string.IsNullOrWhiteSpace(bound) && ModelBox.Items.Contains(bound)) ModelBox.SelectedItem = bound;
+				else if (ApplicationData.Current.LocalSettings.Values.TryGetValue("NaiVision.Model", out var modelId) && ModelBox.Items.Contains(modelId)) ModelBox.SelectedItem = modelId;
 				if (ModelBox.Items.Count == 0) StatusText.Text = L("NaiAiUnavailable");
 			}
 			catch (OperationCanceledException) { }

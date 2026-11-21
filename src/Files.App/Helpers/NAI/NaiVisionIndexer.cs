@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using Files.App.AI.Vision;
 using Windows.Storage;
 
 namespace Files.App.Helpers
@@ -18,8 +19,6 @@ namespace Files.App.Helpers
 			IProgress<NaiVisionProgress> progress, CancellationToken token)
 		{
 			if (!consent) throw new InvalidOperationException("Explicit image-analysis consent is required");
-			if (!(await NaiAiClient.ModelsAsync(token, "vision")).Contains(model, StringComparer.Ordinal))
-				throw new InvalidOperationException("NaiNoCompatibleModel".GetLocalizedResource());
 			var paths = await Task.Run(() => Directory.EnumerateFiles(folder, "*", SearchOption.TopDirectoryOnly)
 				.Where(NaiVisionImage.Supports).Take(10000).ToArray(), token);
 			var existing = (await Cache.ReadAsync(folder, token)).Where(entry => entry.Model == model && entry.Language == language && entry.PromptVersion == "nai-vision-v1")
@@ -39,7 +38,7 @@ namespace Files.App.Helpers
 					var image = await NaiVisionImage.PrepareAsync(path, token);
 					await inference.WaitAsync(token);
 					string result;
-					try { result = await NaiAiClient.AnalyzeImageAsync(model, image.Jpeg, language, token); }
+					try { result = await VisionAnalyzer.AnalyzeAsync(image.Jpeg, model, language, token); }
 					finally { inference.Release(); }
 					token.ThrowIfCancellationRequested();
 					info.Refresh();

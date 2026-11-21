@@ -437,7 +437,7 @@
 											<FontIcon
 												FontSize="12"
 												Foreground="White"
-												Glyph="&#xE8AB;" />
+												Glyph="&#xE8C6;" />
 										</Button>
 									</StackPanel>
 								</Grid>
@@ -626,6 +626,29 @@
 												FontSize="12"
 												Foreground="White"
 												Glyph="&#xE8C6;" />
+										</Button>
+										<Button
+											Width="28"
+											Height="28"
+											Padding="0"
+											AutomationProperties.Name="{helpers:ResourceString Name=PulseQuickMoreActions}"
+											Background="#B3000000"
+											BorderBrush="#66FFFFFF"
+											BorderThickness="1"
+											CornerRadius="14"
+											ToolTipService.ToolTip="{helpers:ResourceString Name=PulseQuickMoreActions}">
+											<FontIcon
+												FontSize="12"
+												Foreground="White"
+												Glyph="&#xE70D;" />
+											<Button.Flyout>
+												<MenuFlyout>
+													<MenuFlyoutItem Click="VideoExtractAudio_Click" Text="{helpers:ResourceString Name=PulseQuickExtractAudio}" />
+													<MenuFlyoutItem Click="VideoMute_Click" Text="{helpers:ResourceString Name=PulseQuickMute}" />
+													<MenuFlyoutItem Click="VideoRotateRight_Click" Text="{helpers:ResourceString Name=PulseQuickRotateRight}" />
+													<MenuFlyoutItem Click="VideoFlipHorizontal_Click" Text="{helpers:ResourceString Name=PulseQuickFlip}" />
+												</MenuFlyout>
+											</Button.Flyout>
 										</Button>
 									</StackPanel>
 									<ContentControl

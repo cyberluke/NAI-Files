@@ -584,6 +584,46 @@ namespace Files.App.Services.Pulse
 			}
 		}
 
+		/// <summary>Extracts the audio track as MP3 (the whole duration).</summary>
+		public Task<bool> ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
+			=> ConvertAudioAsync(inputPath, PulseAudioFormat.Mp3, outputPath, null, cancellationToken, progress);
+
+		/// <summary>Copies the video stream without audio.</summary>
+		public Task<bool> MuteVideoAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default)
+			=> RunSilentAsync(new List<string>
+			{
+				"-y", "-hide_banner", "-nostdin", "-i", inputPath,
+				"-map", "0:v:0?", "-c:v", "copy", "-an",
+			}, outputPath, cancellationToken);
+
+		/// <summary>Rotates the video clockwise by the given quarter turns (1..3).</summary>
+		public Task<bool> RotateVideoAsync(string inputPath, string outputPath, int quarterTurns, CancellationToken cancellationToken = default)
+		{
+			var filter = (quarterTurns % 4) switch
+			{
+				1 => "transpose=1",
+				2 => "transpose=1,transpose=1",
+				3 => "transpose=2",
+				_ => null,
+			};
+
+			return filter is null
+				? Task.FromResult(false)
+				: RunSilentAsync(new List<string>
+				{
+					"-y", "-hide_banner", "-nostdin", "-i", inputPath,
+					"-map", "0:v:0?", "-map", "0:a:0?", "-vf", filter, "-c:a", "aac", "-b:a", "192k",
+				}, outputPath, cancellationToken);
+		}
+
+		/// <summary>Flips the video horizontally or vertically.</summary>
+		public Task<bool> FlipVideoAsync(string inputPath, string outputPath, bool horizontal, CancellationToken cancellationToken = default)
+			=> RunSilentAsync(new List<string>
+			{
+				"-y", "-hide_banner", "-nostdin", "-i", inputPath,
+				"-map", "0:v:0?", "-map", "0:a:0?", "-vf", horizontal ? "hflip" : "vflip", "-c:a", "aac", "-b:a", "192k",
+			}, outputPath, cancellationToken);
+
 		private static string FormatSeconds(TimeSpan value)
 			=> value.TotalSeconds.ToString("0.###", CultureInfo.InvariantCulture);
 
