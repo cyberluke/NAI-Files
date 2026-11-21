@@ -64,8 +64,10 @@ namespace Files.App.Dialogs
 			this.card = card;
 			sourcePath = card.Item.GetRequiredPath();
 			InitializeComponent();
+			PulseDialogChrome.EnableDrag(this);
 
 			FileNameText.Text = System.IO.Path.GetFileName(sourcePath);
+			PrefillFormat(sourcePath);
 			QualitySlider.ValueChanged += (_, e) => QualityText.Text = ((int)e.NewValue).ToString(CultureInfo.InvariantCulture);
 			ImageHost.SizeChanged += (_, _) => RenderCrop();
 
@@ -400,6 +402,20 @@ namespace Files.App.Dialogs
 		}
 
 		// ---- apply ---------------------------------------------------------------
+
+		/// <summary>Selects the format that matches the source extension so Apply never silently converts.</summary>
+		private void PrefillFormat(string path)
+		{
+			FormatComboBox.SelectedIndex = System.IO.Path.GetExtension(path).ToLowerInvariant() switch
+			{
+				".png" => 0,
+				".jpg" or ".jpeg" => 1,
+				".webp" => 2,
+				".bmp" => 3,
+				".tif" or ".tiff" => 4,
+				_ => 0,
+			};
+		}
 
 		private void FormatComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{

@@ -2354,6 +2354,9 @@
   <data name="RecentFilesDisabledOnWindowsWarning" xml:space="preserve">
     <value>Recently used files is currently disabled in Windows File Explorer.</value>
   </data>
+  <data name="RecentFilesEnableButton" xml:space="preserve">
+    <value>Enable in Windows</value>
+  </data>
   <data name="EditSettingsFile" xml:space="preserve">
     <value>Edit settings file</value>
   </data>
@@ -2851,7 +2854,7 @@
     <value>Trim audio</value>
   </data>
   <data name="PulseTrimCancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Close</value>
   </data>
   <data name="PulseTrimExport" xml:space="preserve">
     <value>Export</value>

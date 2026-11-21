@@ -20,7 +20,11 @@
 			IsIconVisible="True"
 			IsOpen="True"
 			Message="{helpers:ResourceString Name=RecentFilesDisabledOnWindowsWarning}"
-			Severity="Warning" />
+			Severity="Warning">
+			<InfoBar.ActionButton>
+				<Button Click="EnableRecentFiles_Click" Content="{helpers:ResourceString Name=RecentFilesEnableButton}" />
+			</InfoBar.ActionButton>
+		</InfoBar>
 
 		<!--  Message when there are no recent files to display  -->
 		<TextBlock

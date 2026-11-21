@@ -344,10 +344,8 @@ namespace Files.App.UserControls
 
 		private void NaiSearchMode_Changed(object sender, SelectionChangedEventArgs e)
 		{
-			if (ViewModel is not { } model || NaiFuzzySearchLabel is null || NaiSearchModeBox is null) return;
+			if (ViewModel is not { } model || NaiSearchModeBox is null) return;
 			model.NaiSemanticMode = NaiSearchModeBox.SelectedIndex == 1;
-			NaiFuzzySearchLabel.Text = (model.NaiSemanticMode ? "NaiSearchSemantic" : "NaiFuzzySearch").GetLocalizedResource();
-			Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(NaiSearchButton, NaiFuzzySearchLabel.Text);
 		}
 		private void NaiSemanticIndex_Click(object sender, RoutedEventArgs e)
 		{

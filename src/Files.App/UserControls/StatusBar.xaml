@@ -40,7 +40,8 @@
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
+			<!--  Fixed height: the thumbnail bar must never resize the pane when it appears  -->
+			<RowDefinition Height="3" />
 		</Grid.RowDefinitions>
 		<ProgressBar x:Name="ThumbnailProgressBar" Grid.Row="1" Grid.ColumnSpan="4"
 			Height="3" MinHeight="3" Visibility="Collapsed" IsHitTestVisible="True" />
@@ -66,9 +67,6 @@
 					x:Load="{x:Bind ShowInfoText, Mode=OneWay}"
 					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
 					Text="{x:Bind StatusBarViewModel.DirectoryItemCount, Mode=OneWay}" />
-				<TextBlock x:Name="ThumbnailProgressText" VerticalAlignment="Center"
-					Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"
-					AutomationProperties.AutomationId="NaiThumbnailProgress" />
 
 				<!--  Divider  -->
 				<Border

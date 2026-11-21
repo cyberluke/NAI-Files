@@ -11,12 +11,13 @@
 	CloseButtonText="{helpers:ResourceString Name=PulseTrimCancel}"
 	CornerRadius="{StaticResource OverlayCornerRadius}"
 	HighContrastAdjustment="None"
-	MaxWidth="640"
+	MaxWidth="780"
 	RequestedTheme="{x:Bind RootAppElement.RequestedTheme, Mode=OneWay}"
 	Style="{StaticResource DefaultContentDialogStyle}"
 	mc:Ignorable="d">
 
-	<Grid MinWidth="520" RowSpacing="12">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+	<Grid RowSpacing="12">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -88,6 +89,12 @@
 						</StackPanel>
 					</Button>
 				</Grid>
+				<Image
+					x:Name="FramePreview"
+					MaxHeight="180"
+					HorizontalAlignment="Left"
+					Stretch="Uniform"
+					Visibility="Collapsed" />
 			</StackPanel>
 		</Border>
 
@@ -204,6 +211,12 @@
 						</StackPanel>
 					</Button>
 				</Grid>
+				<Image
+					x:Name="GifPreview"
+					MaxHeight="180"
+					HorizontalAlignment="Left"
+					Stretch="Uniform"
+					Visibility="Collapsed" />
 			</StackPanel>
 		</Border>
 
@@ -229,4 +242,5 @@
 				Maximum="100" />
 		</Grid>
 	</Grid>
+	</ScrollViewer>
 </ContentDialog>

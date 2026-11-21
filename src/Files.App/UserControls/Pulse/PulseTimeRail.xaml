@@ -6,7 +6,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:helpers="using:Files.App.Helpers"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	Width="88"
+	Width="96"
 	AutomationProperties.Name="{helpers:ResourceString Name=PulseTimeRail}"
 	Background="Transparent"
 	IsTabStop="True"
@@ -22,28 +22,38 @@
 	mc:Ignorable="d">
 
 	<Grid Margin="0,12">
+		<!--  Wide grab track: a comfortable 4K-safe target around the thin spine  -->
+		<Rectangle
+			Width="22"
+			HorizontalAlignment="Right"
+			Margin="0,0,1,0"
+			Fill="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+			Opacity="0.35"
+			RadiusX="11"
+			RadiusY="11" />
+
 		<!--  Spine  -->
 		<Rectangle
-			Width="2"
+			Width="3"
 			HorizontalAlignment="Right"
-			Margin="0,0,11,0"
+			Margin="0,0,9,0"
 			Fill="{ThemeResource DividerStrokeColorDefaultBrush}"
-			RadiusX="1"
-			RadiusY="1" />
+			RadiusX="1.5"
+			RadiusY="1.5" />
 
 		<!--  Day ticks + labels (positioned in code)  -->
 		<Canvas x:Name="TicksCanvas" />
 
-		<!--  Current position: a short accent bar riding the spine as the feed scrolls  -->
+		<!--  Current position: an accent bar riding the spine as the feed scrolls  -->
 		<Border
 			x:Name="ActiveThumb"
-			Width="12"
-			Height="4"
+			Width="18"
+			Height="6"
 			HorizontalAlignment="Right"
-			Margin="0,0,6,0"
+			Margin="0,0,3,0"
 			VerticalAlignment="Top"
 			Background="{ThemeResource AccentFillColorDefaultBrush}"
-			CornerRadius="2"
+			CornerRadius="3"
 			IsHitTestVisible="False"
 			Visibility="Collapsed" />
 
@@ -51,7 +61,7 @@
 		<Border
 			x:Name="ScrubBubble"
 			HorizontalAlignment="Right"
-			Margin="0,0,20,0"
+			Margin="0,0,27,0"
 			Padding="8,4"
 			Background="{ThemeResource AccentFillColorDefaultBrush}"
 			CornerRadius="6"

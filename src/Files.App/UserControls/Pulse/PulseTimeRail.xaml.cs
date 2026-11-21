@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Shapes;
 using System.Globalization;
 using Windows.System;
 using WinRT;
+using DispatcherQueueTimer = Microsoft.UI.Dispatching.DispatcherQueueTimer;
 
 namespace Files.App.UserControls.Pulse
 {
@@ -20,25 +21,35 @@ namespace Files.App.UserControls.Pulse
 	/// there, so a folder with thousands of files is navigated by time, not by scrolling. A
 	/// position thumb follows the feed's own scroll so the rail doubles as a timeline indicator,
 	/// and the keyboard (Up/Down/PageUp/PageDown/Home/End) moves the active day when focused.
+	///
+	/// The rail is deliberately wide (a 22 px grab track, larger dots and thumb) so it is easy
+	/// to hit on 4K. Navigation is buffered: while scrubbing only the preview follows the pointer,
+	/// and the actual jump is committed after a short pause or on release, which keeps the feed
+	/// from lurching on every pixel of movement.
 	/// </summary>
 	public sealed partial class PulseTimeRail : UserControl
 	{
 		private const double MinTickSpacing = 22;
 		private const int MaxLabels = 14;
-		private const double DotSize = 6;
-		private const double HoverDotSize = 9;
+		private const double DotSize = 8;
+		private const double HoverDotSize = 12;
+		private const double SpineCenterFromRight = 10.5;
+		private const int NavigateDebounceMs = 120;
 
 		private readonly record struct Tick(double Y, PulseSectionHeader Section, Ellipse Dot);
 
+		private readonly DispatcherQueueTimer? navigationTimer;
 		private IReadOnlyList<PulseSectionHeader> sections = [];
 		private readonly List<Tick> ticks = [];
 		private bool isScrubbing;
 		private bool isPointerOver;
-		private DateTime? lastRequestedDay;
+		private double hoverY = -1;
 		private int activeIndex = -1;
 		private double activeProgress;
+		private DateTime? pendingDay;
+		private DateTime? lastRaisedDay;
 
-		/// <summary>Raised while scrubbing (and on keyboard moves) whenever the day under the pointer changes.</summary>
+		/// <summary>Raised when the buffered day selection settles (after a short pause or on release).</summary>
 		public event EventHandler<DateTime>? DayRequested;
 
 		public IReadOnlyList<PulseSectionHeader> Sections
@@ -56,15 +67,17 @@ namespace Files.App.UserControls.Pulse
 		public PulseTimeRail()
 		{
 			InitializeComponent();
+
+			navigationTimer = DispatcherQueue.CreateTimer();
+			navigationTimer.Interval = TimeSpan.FromMilliseconds(NavigateDebounceMs);
+			navigationTimer.IsRepeating = false;
+			navigationTimer.Tick += (_, _) => RaisePendingDay();
+
 			SizeChanged += (_, _) => Rebuild();
 			Loaded += (_, _) => Rebuild();
 		}
 
-		// Geometry helpers: the content area inside the 12 px vertical margin.
-
 		private double ContentHeight => Math.Max(0, ActualHeight - 24);
-
-		private double TickToCanvas(double y) => y;
 
 		[DynamicWindowsRuntimeCast(typeof(Brush))]
 		private void Rebuild()
@@ -82,6 +95,9 @@ namespace Files.App.UserControls.Pulse
 
 			Visibility = Visibility.Visible;
 
+			var secondaryBrush = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"];
+			var labelWidth = Math.Max(0, Width - 30);
+
 			// Ticks are spread by index (feed order), not by elapsed time: a gap of months must not
 			// collapse the busy recent days into a few pixels.
 			var step = sections.Count == 1 ? 0 : height / (sections.Count - 1);
@@ -97,11 +113,11 @@ namespace Files.App.UserControls.Pulse
 				{
 					Width = DotSize,
 					Height = DotSize,
-					Fill = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+					Fill = secondaryBrush,
 					IsHitTestVisible = false,
 				};
-				Canvas.SetLeft(dot, Width - 15);
-				Canvas.SetTop(dot, TickToCanvas(y) - DotSize / 2);
+				Canvas.SetLeft(dot, Width - SpineCenterFromRight - DotSize / 2);
+				Canvas.SetTop(dot, y - DotSize / 2);
 				TicksCanvas.Children.Add(dot);
 				ticks.Add(new Tick(y, section, dot));
 
@@ -113,13 +129,13 @@ namespace Files.App.UserControls.Pulse
 				{
 					Text = FormatLabel(section),
 					FontSize = 11,
-					Foreground = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+					Foreground = secondaryBrush,
 					TextAlignment = TextAlignment.Right,
-					Width = Width - 24,
+					Width = labelWidth,
 					IsHitTestVisible = false,
 				};
 				Canvas.SetLeft(label, 0);
-				Canvas.SetTop(label, TickToCanvas(y) - 8);
+				Canvas.SetTop(label, y - 8);
 				TicksCanvas.Children.Add(label);
 			}
 
@@ -133,7 +149,6 @@ namespace Files.App.UserControls.Pulse
 			if (section.Day == today || section.Day == today.AddDays(-1))
 				return section.Label;
 
-			// Same year: day and month; otherwise month and year keep the rail readable
 			return section.Day.Year == today.Year
 				? section.Day.ToString("dd.MM.", CultureInfo.InvariantCulture)
 				: section.Day.ToString("MM.yy", CultureInfo.InvariantCulture);
@@ -146,12 +161,14 @@ namespace Files.App.UserControls.Pulse
 		public void SetActiveProgress(double ratio)
 		{
 			activeProgress = double.IsNaN(ratio) ? 0 : Math.Clamp(ratio, 0, 1);
+
 			if (ticks.Count > 0)
 			{
-				// Nearest day under the thumb keeps the accessible "current day" in sync with scrolling.
 				var index = (int)Math.Round(activeProgress * (ticks.Count - 1));
-				SetActiveIndex(index, raise: false);
+				if (index != activeIndex)
+					SetActiveIndex(index);
 			}
+
 			UpdateThumb();
 		}
 
@@ -160,40 +177,37 @@ namespace Files.App.UserControls.Pulse
 			if (ActiveThumb is null || ticks.Count == 0)
 				return;
 
-			var top = activeProgress * ContentHeight;
-			ActiveThumb.Margin = new Thickness(0, Math.Clamp(top - 2, 0, Math.Max(0, ContentHeight - 4)), 6, 0);
-			AutomationProperties.SetName(this, ActiveDayText());
-		}
-
-		private string ActiveDayText()
-		{
-			if (activeIndex >= 0 && activeIndex < ticks.Count)
-				return ticks[activeIndex].Section.DateText;
-			return string.Empty;
+			var top = Math.Clamp(activeProgress * ContentHeight - ActiveThumb.Height / 2, 0, Math.Max(0, ContentHeight - ActiveThumb.Height));
+			ActiveThumb.Margin = new Thickness(0, top, 3, 0);
 		}
 
 		[DynamicWindowsRuntimeCast(typeof(Brush))]
-		private void SetActiveIndex(int index, bool raise)
+		private void SetActiveIndex(int index)
 		{
 			if (ticks.Count == 0)
 				return;
 
 			activeIndex = Math.Clamp(index, 0, ticks.Count - 1);
+
 			for (int i = 0; i < ticks.Count; i++)
 			{
 				var isActive = i == activeIndex;
-				ticks[i].Dot.Width = isActive || (isPointerOver && i == HoverIndex) ? HoverDotSize : DotSize;
-				ticks[i].Dot.Height = ticks[i].Dot.Width;
-				Canvas.SetTop(ticks[i].Dot, TickToCanvas(ticks[i].Y) - ticks[i].Dot.Height / 2);
-				ticks[i].Dot.Fill = (Brush)Application.Current.Resources[
+				var isHover = isPointerOver && i == HoverIndex;
+				var size = isActive || isHover ? HoverDotSize : DotSize;
+				var dot = ticks[i].Dot;
+
+				if (Math.Abs(dot.Width - size) > 0.01)
+				{
+					dot.Width = size;
+					dot.Height = size;
+				}
+
+				Canvas.SetTop(dot, ticks[i].Y - size / 2);
+				dot.Fill = (Brush)Application.Current.Resources[
 					isActive ? "AccentFillColorDefaultBrush" : "TextFillColorSecondaryBrush"];
 			}
 
-			if (raise && ticks[activeIndex].Section.Day != lastRequestedDay)
-			{
-				lastRequestedDay = ticks[activeIndex].Section.Day;
-				DayRequested?.Invoke(this, ticks[activeIndex].Section.Day);
-			}
+			AutomationProperties.SetName(this, ticks[activeIndex].Section.DateText);
 		}
 
 		private int HoverIndex
@@ -202,6 +216,7 @@ namespace Files.App.UserControls.Pulse
 			{
 				if (hoverY < 0)
 					return -1;
+
 				var nearest = -1;
 				var best = double.MaxValue;
 				for (int i = 0; i < ticks.Count; i++)
@@ -213,7 +228,32 @@ namespace Files.App.UserControls.Pulse
 			}
 		}
 
-		private double hoverY = -1;
+		// Buffered navigation
+
+		private void RequestDay(DateTime day, bool immediate)
+		{
+			pendingDay = day;
+
+			if (immediate || navigationTimer is null)
+			{
+				navigationTimer?.Stop();
+				RaisePendingDay();
+				return;
+			}
+
+			// Restart the one-shot timer so a continuous drag only navigates once the pointer rests.
+			navigationTimer.Stop();
+			navigationTimer.Start();
+		}
+
+		private void RaisePendingDay()
+		{
+			if (pendingDay is not { } day || day == lastRaisedDay)
+				return;
+
+			lastRaisedDay = day;
+			DayRequested?.Invoke(this, day);
+		}
 
 		// Pointer
 
@@ -221,16 +261,17 @@ namespace Files.App.UserControls.Pulse
 		{
 			isPointerOver = true;
 			hoverY = e.GetCurrentPoint(this).Position.Y - 12;
-			SetActiveIndex(activeIndex, raise: false);
+			SetActiveIndex(activeIndex < 0 ? 0 : activeIndex);
 		}
 
 		private void Rail_PointerExited(object sender, PointerRoutedEventArgs e)
 		{
 			isPointerOver = false;
 			hoverY = -1;
+
 			if (!isScrubbing)
 			{
-				SetActiveIndex(activeIndex, raise: false);
+				SetActiveIndex(activeIndex < 0 ? 0 : activeIndex);
 				ScrubBubble.Visibility = Visibility.Collapsed;
 			}
 		}
@@ -242,7 +283,7 @@ namespace Files.App.UserControls.Pulse
 
 			Focus(FocusState.Pointer);
 			isScrubbing = CapturePointer(e.Pointer);
-			lastRequestedDay = null;
+			lastRaisedDay = null;
 			ScrubBubble.Visibility = Visibility.Visible;
 			UpdateScrub(e.GetCurrentPoint(this).Position.Y);
 			e.Handled = true;
@@ -259,10 +300,8 @@ namespace Files.App.UserControls.Pulse
 				var near = HoverIndex;
 				if (near >= 0)
 				{
-					ScrubText.Text = ticks[near].Section.DateText;
-					ScrubBubble.Margin = new Thickness(0, Math.Clamp(ticks[near].Y - 2, 0, Math.Max(0, ActualHeight - 36)), 20, 0);
-					ScrubBubble.Visibility = Visibility.Visible;
-					SetActiveIndex(activeIndex, raise: false);
+					ShowBubble(near);
+					SetActiveIndex(near);
 				}
 				return;
 			}
@@ -278,6 +317,11 @@ namespace Files.App.UserControls.Pulse
 
 			isScrubbing = false;
 			ReleasePointerCaptures();
+
+			// Flush the buffered jump immediately on release.
+			if (activeIndex >= 0 && activeIndex < ticks.Count)
+				RequestDay(ticks[activeIndex].Section.Day, immediate: true);
+
 			ScrubBubble.Visibility = isPointerOver ? Visibility.Visible : Visibility.Collapsed;
 			e.Handled = true;
 		}
@@ -300,12 +344,19 @@ namespace Files.App.UserControls.Pulse
 				}
 			}
 
-			ScrubText.Text = ticks[nearest].Section.DateText;
-			ScrubBubble.Margin = new Thickness(0, Math.Clamp(ticks[nearest].Y - 2, 0, Math.Max(0, ActualHeight - 36)), 20, 0);
-			ScrubBubble.VerticalAlignment = VerticalAlignment.Top;
+			ShowBubble(nearest);
+			SetActiveIndex(nearest);
 
-			activeIndex = nearest;
-			SetActiveIndex(nearest, raise: true);
+			// Buffer the actual jump; the preview above remains instant.
+			RequestDay(ticks[nearest].Section.Day, immediate: false);
+		}
+
+		private void ShowBubble(int index)
+		{
+			ScrubText.Text = ticks[index].Section.DateText;
+			ScrubBubble.Margin = new Thickness(0, Math.Clamp(ticks[index].Y - 2, 0, Math.Max(0, ActualHeight - 36)), 27, 0);
+			ScrubBubble.VerticalAlignment = VerticalAlignment.Top;
+			ScrubBubble.Visibility = Visibility.Visible;
 		}
 
 		// Keyboard
@@ -315,22 +366,27 @@ namespace Files.App.UserControls.Pulse
 			if (ticks.Count == 0)
 				return;
 
-			var target = activeIndex;
+			var current = activeIndex < 0 ? 0 : activeIndex;
 			var page = Math.Max(1, ticks.Count / 6);
-			switch (e.Key)
+			var target = e.Key switch
 			{
-				case VirtualKey.Up: target = activeIndex <= 0 ? 0 : activeIndex - 1; break;
-				case VirtualKey.Down: target = activeIndex < 0 ? 0 : activeIndex + 1; break;
-				case VirtualKey.PageUp: target = activeIndex - page; break;
-				case VirtualKey.PageDown: target = activeIndex + page; break;
-				case VirtualKey.Home: target = 0; break;
-				case VirtualKey.End: target = ticks.Count - 1; break;
-				default: return;
-			}
+				VirtualKey.Up => current - 1,
+				VirtualKey.Down => current + 1,
+				VirtualKey.PageUp => current - page,
+				VirtualKey.PageDown => current + page,
+				VirtualKey.Home => 0,
+				VirtualKey.End => ticks.Count - 1,
+				_ => int.MinValue,
+			};
 
-			SetActiveIndex(target, raise: true);
+			if (target == int.MinValue)
+				return;
+
+			SetActiveIndex(target);
 			activeProgress = ticks.Count <= 1 ? 0 : activeIndex / (double)(ticks.Count - 1);
 			UpdateThumb();
+			ShowBubble(activeIndex);
+			RequestDay(ticks[activeIndex].Section.Day, immediate: true);
 			e.Handled = true;
 		}
 	}

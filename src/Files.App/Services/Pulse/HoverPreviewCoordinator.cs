@@ -127,7 +127,9 @@ namespace Files.App.Services.Pulse
 			{
 				player = new MediaPlayer
 				{
-					IsMuted = true,
+					// Inline playback carries audio (the trim/convert proxy keeps an AAC track).
+					IsMuted = false,
+					Volume = 0.8,
 					IsLoopingEnabled = true,
 					AutoPlay = true,
 				};

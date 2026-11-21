@@ -52,7 +52,6 @@ namespace Files.App.Views.Layouts
 		// down for the activation delay — so a plain click (even with mouse jitter) can never draw a box.
 
 		private const double MarqueeActivationThreshold = 4;
-		private static readonly TimeSpan MarqueeActivationDelay = TimeSpan.FromMilliseconds(200);
 		private const double MarqueeEdgeScrollZone = 48;
 		private const double MarqueeEdgeScrollStep = 24;
 
@@ -65,7 +64,6 @@ namespace Files.App.Views.Layouts
 		private Windows.Foundation.Rect marqueeRect;
 		private HashSet<ListedItem>? marqueeSelection;
 		private HashSet<ListedItem>? marqueeExistingSelection;
-		private Microsoft.UI.Dispatching.DispatcherQueueTimer? marqueeActivationTimer;
 		private Microsoft.UI.Dispatching.DispatcherQueueTimer? marqueeScrollTimer;
 		private int marqueeScrollDirection;
 
@@ -838,7 +836,6 @@ namespace Files.App.Views.Layouts
 			marqueeStartPoint = e.GetCurrentPoint(MarqueeCanvas).Position;
 			marqueeLastPoint = marqueeStartPoint;
 			isMarqueeCaptured = false;
-			StopMarqueeActivationTimer();
 			marqueeExistingSelection = ctrlPressed
 				? new HashSet<ListedItem>(FileList.SelectedItems.OfType<ListedItem>(), ReferenceEqualityComparer.Instance)
 				: null;
@@ -855,51 +852,27 @@ namespace Files.App.Views.Layouts
 
 			if (!isMarqueeActive)
 			{
-				// Jitter while pressing: keep waiting for a real drag, no timer yet.
+				// True drag only: a click (or jitter below the threshold) never draws the box.
 				if (Math.Abs(marqueeLastPoint.X - marqueeStartPoint.X) < MarqueeActivationThreshold &&
 					Math.Abs(marqueeLastPoint.Y - marqueeStartPoint.Y) < MarqueeActivationThreshold)
 					return;
 
-				// The threshold is crossed, but a plain click may still be in flight
-				// (mouse jitter). Capture the pointer now so the gesture keeps routing
-				// to this page, but engage the rubber band only once the button has
-				// stayed down for the activation delay — quick clicks never draw.
 				if (!isMarqueeCaptured)
 				{
 					isMarqueeCaptured = true;
 					CapturePointer(e.Pointer);
 				}
-				if (marqueeActivationTimer is null)
-				{
-					marqueeActivationTimer = DispatcherQueue.CreateTimer();
-					marqueeActivationTimer.Interval = MarqueeActivationDelay;
-					marqueeActivationTimer.IsRepeating = false;
-					marqueeActivationTimer.Tick += (_, _) => ActivateMarquee();
-				}
-				if (!marqueeActivationTimer.IsRunning)
-					marqueeActivationTimer.Start();
-				return;
+
+				// The pointer really moved: engage the rubber band immediately and track it.
+				isMarqueeActive = true;
+				MarqueeRect.Visibility = Visibility.Visible;
+				marqueeSelection = new HashSet<ListedItem>(ReferenceEqualityComparer.Instance);
 			}
 
 			UpdateMarqueeRect(marqueeLastPoint);
 			UpdateMarqueeSelection();
 			UpdateMarqueeEdgeScroll(e.GetCurrentPoint(FeedScroller).Position);
 		}
-
-		/// <summary>Engages the rubber band after the hold delay: shows the box and starts tracking.</summary>
-		private void ActivateMarquee()
-		{
-			if (!isMarqueeArmed || isMarqueeActive)
-				return;
-
-			isMarqueeActive = true;
-			MarqueeRect.Visibility = Visibility.Visible;
-			marqueeSelection = new HashSet<ListedItem>(ReferenceEqualityComparer.Instance);
-			UpdateMarqueeRect(marqueeLastPoint);
-			UpdateMarqueeSelection();
-		}
-
-		private void StopMarqueeActivationTimer() => marqueeActivationTimer?.Stop();
 
 		private void PageRoot_PointerReleased(object sender, PointerRoutedEventArgs e)
 		{
@@ -932,7 +905,6 @@ namespace Files.App.Views.Layouts
 			var wasActive = isMarqueeActive;
 			isMarqueeArmed = false;
 			isMarqueeActive = false;
-			StopMarqueeActivationTimer();
 			StopMarqueeEdgeScroll();
 			MarqueeRect.Visibility = Visibility.Collapsed;
 
@@ -1449,12 +1421,44 @@ namespace Files.App.Views.Layouts
 				if (Feed[i].Day != day)
 					continue;
 
-				// Realize the section if it is virtualized away, then scroll it to the top edge
-				var element = SectionsRepeater.GetOrCreateElement(i);
-				element.UpdateLayout();
-				element.StartBringIntoView(new BringIntoViewOptions { AnimationDesired = false, VerticalAlignmentRatio = 0 });
+				JumpToSection(i);
 				return;
 			}
+		}
+
+		/// <summary>
+		/// Scrolls the feed to a section with an eased animation. The section is realized first so a
+		/// virtualized-away day can still be targeted; its offset inside the scroller content is
+		/// measured and animated with <see cref="ScrollViewer.ChangeView(double?, double?, float?, bool)"/>,
+		/// falling back to BringIntoView when the transform is not ready yet.
+		/// </summary>
+		private void JumpToSection(int index)
+		{
+			if (index < 0 || index >= Feed.Count)
+				return;
+
+			var element = SectionsRepeater.GetOrCreateElement(index);
+			element.UpdateLayout();
+
+			if (element is FrameworkElement framework && FeedScroller.Content is UIElement content)
+			{
+				try
+				{
+					var offset = framework.TransformToVisual(content).TransformPoint(new Windows.Foundation.Point(0, 0)).Y;
+					if (!double.IsNaN(offset) && !double.IsInfinity(offset) && offset >= 0)
+					{
+						// disableAnimation: false keeps the ScrollViewer's eased animation.
+						FeedScroller.ChangeView(null, offset, null, disableAnimation: false);
+						return;
+					}
+				}
+				catch
+				{
+					// Element not connected yet; fall back to BringIntoView.
+				}
+			}
+
+			element.StartBringIntoView(new BringIntoViewOptions { AnimationDesired = true, VerticalAlignmentRatio = 0 });
 		}
 	}
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.ApplicationModel.DataTransfer;
@@ -19,6 +20,9 @@ namespace Files.App.UserControls.Widgets
 		{
 			InitializeComponent();
 		}
+
+		private void EnableRecentFiles_Click(object sender, RoutedEventArgs e)
+			=> ViewModel.EnableRecentItemsInWindows();
 
 		private void RecentFilesListView_ItemClick(object sender, ItemClickEventArgs e)
 		{

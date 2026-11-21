@@ -256,6 +256,37 @@ namespace Files.App.ViewModels.UserControls.Widgets
 			return false;
 		}
 
+		/// <summary>
+		/// Turns Windows recent-item tracking back on (the exact setting the warning is about) and
+		/// refreshes the widget. This runs only from the explicit "Enable in Windows" button in the
+		/// warning banner, so the user's click is the consent.
+		/// </summary>
+		public void EnableRecentItemsInWindows()
+		{
+			try
+			{
+				using (var advanced = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"))
+				{
+					advanced?.SetValue("Start_TrackDocs", 1, RegistryValueKind.DWord);
+					advanced?.SetValue("Start_TrackProgs", 1, RegistryValueKind.DWord);
+				}
+
+				using (var explorer = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer"))
+					explorer?.SetValue("ShowRecent", 1, RegistryValueKind.DWord);
+
+				// A user policy that hides recent documents wins over the preference; clear it too.
+				using (var policy = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", writable: true))
+					policy?.DeleteValue("NoRecentDocsHistory", throwOnMissingValue: false);
+			}
+			catch (Exception ex)
+			{
+				App.Logger.LogWarning(ex, "Could not enable Windows recent items");
+			}
+
+			IsRecentFilesDisabledInWindows = !CheckIsRecentItemsEnabled();
+			_ = RefreshWidgetAsync();
+		}
+
 		// Event methods
 
 		private async void Manager_RecentFilesChanged(object? sender, NotifyCollectionChangedEventArgs e)

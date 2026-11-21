@@ -57,6 +57,11 @@
 			x:Key="DurationMarginConverter"
 			FalseValue="{StaticResource PulseDurationMargin}"
 			TrueValue="{StaticResource PulseDurationPortraitMargin}" />
+		<!--  Media tools share the same portrait lift so the overlaid footer never covers the buttons  -->
+		<wctconverters:BoolToObjectConverter
+			x:Key="ToolsMarginConverter"
+			FalseValue="{StaticResource PulseDurationMargin}"
+			TrueValue="{StaticResource PulseDurationPortraitMargin}" />
 
 		<x:Double x:Key="PulseFooterHeight">52</x:Double>
 		<CornerRadius x:Key="PulseCardCornerRadius">10</CornerRadius>
@@ -549,7 +554,7 @@
 
 									<!--  Media tools: trim/extract (pill), convert and video tools, bottom left  -->
 									<StackPanel
-										Margin="8"
+										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource ToolsMarginConverter}}"
 										HorizontalAlignment="Left"
 										VerticalAlignment="Bottom"
 										Orientation="Horizontal"

@@ -66,6 +66,7 @@ namespace Files.App.Dialogs
 			this.card = card;
 			sourcePath = card.Item.GetRequiredPath();
 			InitializeComponent();
+			PulseDialogChrome.EnableDrag(this);
 			isInitialized = true;
 			IsPrimaryButtonEnabled = false;
 			PlayPauseButton.IsEnabled = false;

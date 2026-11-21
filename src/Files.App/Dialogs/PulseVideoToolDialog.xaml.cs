@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media.Imaging;
 using System.Globalization;
 using System.IO;
 using WinRT;
@@ -48,6 +49,7 @@ namespace Files.App.Dialogs
 			this.card = card;
 			sourcePath = card.Item.GetRequiredPath();
 			InitializeComponent();
+			PulseDialogChrome.EnableDrag(this);
 			isInitialized = true;
 			ExtractButton.IsEnabled = false;
 			CreateGifButton.IsEnabled = false;
@@ -153,6 +155,12 @@ namespace Files.App.Dialogs
 				var succeeded = await ffmpeg.ExtractFrameAsync(sourcePath, timestamp, format, PulseImageFormatSpec.MapQuality(format, 92), outputPath, lifetime.Token);
 				if (isClosed) return;
 				StatusText.Text = succeeded ? Strings.PulseVideoExtractDone.GetLocalizedResource() : Strings.PulseTrimExportFailed.GetLocalizedResource();
+
+				if (succeeded && File.Exists(outputPath))
+				{
+					FramePreview.Source = new BitmapImage(new Uri(outputPath, UriKind.Absolute));
+					FramePreview.Visibility = Visibility.Visible;
+				}
 			}
 			catch (OperationCanceledException)
 			{
@@ -188,6 +196,12 @@ namespace Files.App.Dialogs
 				var succeeded = await ffmpeg.CreateGifAsync(sourcePath, start, end, fps, width, outputPath, lifetime.Token, progress);
 				if (isClosed) return;
 				StatusText.Text = succeeded ? Strings.PulseVideoGifDone.GetLocalizedResource() : Strings.PulseTrimExportFailed.GetLocalizedResource();
+
+				if (succeeded && File.Exists(outputPath))
+				{
+					GifPreview.Source = new BitmapImage(new Uri(outputPath, UriKind.Absolute));
+					GifPreview.Visibility = Visibility.Visible;
+				}
 			}
 			catch (OperationCanceledException)
 			{

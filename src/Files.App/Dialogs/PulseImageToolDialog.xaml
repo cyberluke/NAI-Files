@@ -20,7 +20,8 @@
 	Style="{StaticResource DefaultContentDialogStyle}"
 	mc:Ignorable="d">
 
-	<Grid MinWidth="540" RowSpacing="10">
+	<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+	<Grid RowSpacing="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -48,6 +49,7 @@
 		<!--  Preview with interactive crop overlay  -->
 		<Border
 			Grid.Row="1"
+			MaxHeight="320"
 			HorizontalAlignment="Center"
 			Background="#120F2E"
 			CornerRadius="8">
@@ -267,4 +269,5 @@
 				IsActive="False" />
 		</Grid>
 	</Grid>
+	</ScrollViewer>
 </ContentDialog>

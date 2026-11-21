@@ -20,7 +20,7 @@
 	Style="{StaticResource DefaultContentDialogStyle}"
 	mc:Ignorable="d">
 
-	<Grid MinWidth="460" RowSpacing="12">
+	<Grid RowSpacing="12">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />

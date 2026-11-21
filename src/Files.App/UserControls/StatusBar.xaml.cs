@@ -54,16 +54,17 @@ namespace Files.App.UserControls
 
 		private void UpdateThumbnailProgress()
 		{
-			if (ThumbnailProgressBar is null || ThumbnailProgressText is null) return;
+			if (ThumbnailProgressBar is null) return;
 			var progress = ThumbnailSource?.ThumbnailProgress;
 			var active = progress is not null && progress.Pending + progress.Running > 0;
+			// The bar row is a fixed 3 px, so showing it never resizes the view pane. Counts live in the tooltip
+			// instead of inline text, which would shift the neighbouring status items on every tick.
 			ThumbnailProgressBar.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
 			ThumbnailProgressBar.Maximum = Math.Max(1, progress?.Total ?? 1);
 			ThumbnailProgressBar.Value = progress?.Settled ?? 0;
-			ThumbnailProgressText.Text = progress is null || progress.Total == 0 ? string.Empty
+			var text = progress is null || progress.Total == 0 ? string.Empty
 				: string.Format("NaiThumbnailProgress".GetLocalizedResource(), progress.Completed, progress.Pending, progress.Running, progress.Unavailable, progress.Failed);
-			ToolTipService.SetToolTip(ThumbnailProgressBar, ThumbnailProgressText.Text);
-			QueueRemeasure();
+			ToolTipService.SetToolTip(ThumbnailProgressBar, text);
 		}
 
 		public StatusBarViewModel? StatusBarViewModel

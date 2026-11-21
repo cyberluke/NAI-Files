@@ -265,15 +265,6 @@
 			</ComboBox>
 			<Button Height="38" Padding="8,6" Content="{helpers:ResourceString Name=NaiSemanticIndexShort}" Click="NaiSemanticIndex_Click"
 				AutomationProperties.AutomationId="NaiSemanticIndexButton" />
-			<Button x:Name="NaiSearchButton" Height="38" Padding="12,6" Command="{x:Bind Commands.Search, Mode=OneWay}"
-				AutomationProperties.AutomationId="NaiFuzzySearchButton"
-				AutomationProperties.Name="{helpers:ResourceString Name=NaiFuzzySearch}"
-				ToolTipService.ToolTip="{helpers:ResourceString Name=NaiFuzzySearch}">
-				<StackPanel Orientation="Horizontal" Spacing="8">
-					<helpers:NaiSearchIcon IsBusy="{x:Bind ViewModel.NaiSearchBusy, Mode=OneWay}" />
-					<TextBlock x:Name="NaiFuzzySearchLabel" Text="{helpers:ResourceString Name=NaiFuzzySearch}" FontWeight="SemiBold" VerticalAlignment="Center" />
-				</StackPanel>
-			</Button>
 		</StackPanel>
 
 		<!--  Omnibar  -->
