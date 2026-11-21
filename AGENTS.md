@@ -1,7 +1,7 @@
 # NAI Files Development Guidelines
 
-NAI Files is the WinUI 3 file manager for NAI OS: a fork of
-`files-community/Files` with Pulse, Media Lab, local AI and semantic search.
+NAI Files is a personal WinUI 3 file manager for NAI OS, with Pulse, Media Lab,
+local AI and semantic search.
 
 - Protect context usage. Any command with unknown or potentially large output must be capped. Prefer targeted commands such as `rg`, `Get-Content -TotalCount`, `Select-Object -First`, or focused `git diff -- <path>`; for example, `COMMAND 2>&1 | Select-Object -First 200`. If a line cap is still too noisy, narrow the query instead of dumping full output.
 - Always follow `.editorconfig`
@@ -125,8 +125,7 @@ Add source-generated settings storage
 
 ## Open a PR
 
-Open pull requests against `cyberluke/NAI-Files`. Upstream Files does not track
-this fork, so do not open an upstream PR.
+Open pull requests against `cyberluke/NAI-Files`.
 
 When asked to open a PR, use a short PR title that names the behavior, not the implementation mechanics only, and prepend the PR type:
 

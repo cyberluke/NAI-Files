@@ -1,11 +1,9 @@
 # NAI Files
 
-NAI Files is the file manager for **NAI OS**: a WinUI 3 desktop app built on the
-[Files](https://github.com/files-community/Files) codebase, with a media-first
+NAI Files is a personal WinUI 3 file manager for **NAI OS**, with a media-first
 Pulse view, a built-in FFmpeg media lab, and local AI and semantic search.
 
-> NAI Files is an independent fork. It is not affiliated with Microsoft or the
-> Files Community; upstream Files and its trademarks belong to their authors.
+> NAI Files is a personal project. It is not affiliated with Microsoft.
 
 ## Why NAI Files
 
@@ -48,7 +46,7 @@ outputs, with cancellable progress.
 ### The file manager underneath
 
 Tabs, panes, tags, archives, FTP/SFTP, Git status, the preview pane, batch
-rename, and the rest of the Files feature set remain available.
+rename, and the rest of the file manager feature set remain available.
 
 ## Install
 
@@ -115,4 +113,4 @@ Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
 
 NAI Files is distributed under the MIT license (`LICENSE-MIT`); some components
 are under the MPL (`LICENSE-MPL`). Third-party notices are in
-[NOTICE.md](NOTICE.md). NAI Files is based on Files by the Files Community.
+[NOTICE.md](NOTICE.md).

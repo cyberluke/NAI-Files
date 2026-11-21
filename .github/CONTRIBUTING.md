@@ -1,9 +1,7 @@
 # Contributing to NAI Files
 
-NAI Files is an independent fork of [Files](https://github.com/files-community/Files).
-Contributions belong in **[cyberluke/NAI-Files](https://github.com/cyberluke/NAI-Files)**,
-not in the upstream repository. Upstream Files does not track this fork's
-changes, so a pull request opened there will not reach NAI Files.
+NAI Files is a personal project. Contributions belong in
+**[cyberluke/NAI-Files](https://github.com/cyberluke/NAI-Files)**.
 
 Community interactions must follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
@@ -49,8 +47,8 @@ build cleanly, and the description must list the manual steps you used to test
 the change. If the change touches Pulse, Media Lab, AI or file operations, say
 which folder types and files you exercised.
 
-The inherited interaction tests in `tests/` are optional and use Appium and
-WinAppDriver; they are not required for a normal contribution.
+The interaction tests in `tests/` are optional and use Appium and WinAppDriver;
+they are not required for a normal contribution.
 
 ## Pull request titles and bodies
 
@@ -67,18 +65,10 @@ Describe why the change is needed, what you chose, and what you verified.
 
 NAI Files does not use Crowdin. The app follows the NAI OS language by default
 and stores a per-app override in Settings → General. Translation changes go
-through the normal resource files and the upstream Files localization
-infrastructure; do not add Crowdin project links.
+through the normal resource files; do not add Crowdin project links.
 
 ## Review
 
 The maintainer reviews pull requests. Community members may comment, but the
 maintainer approves and merges. Expect iterations; keep the branch history
 readable and squash fixups when asked.
-
-## Remotes
-
-- `origin` — `files-community/Files` (upstream, read-only)
-- `fork` — `cyberluke/NAI-Files` (the product repository)
-
-Push work to `fork`, never to `origin`.
