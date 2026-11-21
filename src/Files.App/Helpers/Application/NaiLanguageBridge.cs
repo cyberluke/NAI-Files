@@ -55,19 +55,26 @@ namespace Files.App.Helpers
 
 		public static void Initialize()
 		{
-			// A manual per-app choice wins and survives restarts.
-			if (ReadManualOverride() is { } manual)
+			// A language failure must never prevent Files from starting.
+			try
 			{
-				ApplicationLanguages.PrimaryLanguageOverride = manual;
-				AppLanguageHelper.RefreshFromOverride();
-				appliedLanguage = manual;
-				IsFollowingNaiOS = false;
-				return;
-			}
+				// A manual per-app choice wins and survives restarts.
+				if (ReadManualOverride() is { } manual)
+				{
+					ApplicationLanguages.PrimaryLanguageOverride = manual;
+					appliedLanguage = manual;
+					IsFollowingNaiOS = false;
+					return;
+				}
 
-			Apply(initial: true);
-			Hook(naiOsSettingsPath, ref naiOsWatcher);
-			Hook(seelenSettingsPath, ref seelenWatcher);
+				Apply(initial: true);
+				Hook(naiOsSettingsPath, ref naiOsWatcher);
+				Hook(seelenSettingsPath, ref seelenWatcher);
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Trace.WriteLine("NAI language initialization failed: " + ex);
+			}
 		}
 
 		/// <summary>Re-enables following NAI OS and clears the manual override.</summary>
@@ -116,7 +123,7 @@ namespace Files.App.Helpers
 				watcher.Renamed += (_, _) => ScheduleApply();
 				watcher.EnableRaisingEvents = true;
 			}
-			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+			catch (Exception ex)
 			{
 				watcher?.Dispose();
 				watcher = null;
@@ -166,17 +173,14 @@ namespace Files.App.Helpers
 				}
 
 				if (initial)
-				{
 					ApplicationLanguages.PrimaryLanguageOverride = language;
-					AppLanguageHelper.RefreshFromOverride();
-				}
 				else
 					IsRestartRequired |= AppLanguageHelper.TryChange(language);
 
 				appliedLanguage = language;
 				LanguageChanged?.Invoke();
 			}
-			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+			catch (Exception ex)
 			{
 				System.Diagnostics.Trace.WriteLine("Unable to read the NAI OS language: " + ex.Message);
 			}
