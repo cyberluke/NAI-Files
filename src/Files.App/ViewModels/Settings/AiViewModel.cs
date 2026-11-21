@@ -17,6 +17,7 @@ namespace Files.App.ViewModels.Settings
 		private bool isRebuilding;
 
 		public ObservableCollection<AiProviderRow> Providers { get; } = [];
+		public ObservableCollection<AiCapabilityRow> Capabilities { get; } = [];
 		public ObservableCollection<string> GatewayModels { get; } = [];
 
 		[ObservableProperty] public partial string GatewayUrl { get; set; } = string.Empty;
@@ -62,6 +63,10 @@ namespace Files.App.ViewModels.Settings
 						continue;
 					Providers.Add(new AiProviderRow(provider, registry.IsEnabled(id), OnRowEnabledChanged));
 				}
+
+				Capabilities.Clear();
+				foreach (var capability in Enum.GetValues<AiCapability>())
+					Capabilities.Add(new AiCapabilityRow(registry, capability, registry.GetBinding(capability)));
 			}
 			finally
 			{
@@ -193,4 +198,48 @@ namespace Files.App.ViewModels.Settings
 				onEnabledChanged(Id, value);
 		}
 	}
+
+	/// <summary>One row of the capability matrix: which provider and model serves a use case.</summary>
+	public sealed partial class AiCapabilityRow : ObservableObject
+	{
+		private readonly AiProviderRegistry registry;
+		private readonly bool isInitializing;
+
+		public AiCapabilityRow(AiProviderRegistry registry, AiCapability capability, AiCapabilityBinding? binding)
+		{
+			this.registry = registry;
+			Capability = capability;
+			Label = capability.ToString();
+			Providers = registry.Providers
+				.Where(provider => provider.Capabilities.Contains(capability))
+				.Select(provider => new AiProviderOption(provider.Id, provider.DisplayName))
+				.ToArray();
+
+			isInitializing = true;
+			ProviderId = binding?.ProviderId ?? Providers.FirstOrDefault()?.Id ?? string.Empty;
+			Model = binding?.Model ?? string.Empty;
+			isInitializing = false;
+		}
+
+		public AiCapability Capability { get; }
+		public string Label { get; }
+		public IReadOnlyList<AiProviderOption> Providers { get; }
+
+		[ObservableProperty] public partial string ProviderId { get; set; } = string.Empty;
+		[ObservableProperty] public partial string Model { get; set; } = string.Empty;
+
+		partial void OnProviderIdChanged(string value)
+		{
+			if (!isInitializing)
+				registry.SetBinding(Capability, value, Model);
+		}
+
+		partial void OnModelChanged(string value)
+		{
+			if (!isInitializing)
+				registry.SetBinding(Capability, ProviderId, value);
+		}
+	}
+
+	public sealed record AiProviderOption(string Id, string DisplayName);
 }

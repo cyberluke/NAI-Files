@@ -10,11 +10,20 @@ namespace Files.App.AI.Providers
 	/// </summary>
 	internal sealed class KelvinProvider : IAiProvider
 	{
+		private static readonly IReadOnlySet<AiCapability> capabilities = new HashSet<AiCapability>
+		{
+			AiCapability.Chat,
+			AiCapability.Vision,
+			AiCapability.Ocr,
+			AiCapability.Caption,
+		};
+
 		public string Id => AiProviderIds.Kelvin;
 		public string DisplayName => "Kelvin AI Workstation";
 		public AiProviderKind Kind => AiProviderKind.Kelvin;
 		public bool IsLocal => false;
 		public bool RequiresConfiguration => false;
+		public IReadOnlySet<AiCapability> Capabilities => capabilities;
 
 		public Task<AiProviderStatus> ProbeAsync(CancellationToken token)
 			=> Task.FromResult(NaiAiClient.HasKelvinCredential

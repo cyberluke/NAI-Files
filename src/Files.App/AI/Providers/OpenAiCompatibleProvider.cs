@@ -14,6 +14,13 @@ namespace Files.App.AI.Providers
 	/// </summary>
 	internal sealed class OpenAiCompatibleProvider : IAiProvider
 	{
+		private static readonly IReadOnlySet<AiCapability> capabilities = new HashSet<AiCapability>
+		{
+			AiCapability.Chat,
+			AiCapability.Vision,
+			AiCapability.Embedding,
+		};
+
 		private static readonly HttpClient http = new(new SocketsHttpHandler
 		{
 			UseProxy = false,
@@ -39,6 +46,7 @@ namespace Files.App.AI.Providers
 		public AiProviderKind Kind { get; }
 		public bool IsLocal { get; }
 		public bool RequiresConfiguration => true;
+		public IReadOnlySet<AiCapability> Capabilities => capabilities;
 
 		private AiEndpointConfig Config => config();
 

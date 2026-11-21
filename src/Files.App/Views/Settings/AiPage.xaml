@@ -212,6 +212,44 @@
 						</DataTemplate>
 					</ListView.ItemTemplate>
 				</ListView>
+
+				<!--  Capability routing: one provider/model per use case, reused by every feature  -->
+				<TextBlock
+					Margin="0,8,0,0"
+					Style="{StaticResource App.Theme.SubtitleTextBlockStyle}"
+					Text="Capability routing" />
+				<TextBlock
+					Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+					Text="Choose the provider and model once per use case. Image analysis, semantic indexing and the assistant reuse these bindings, so individual wizards never need a provider picker."
+					TextWrapping="Wrap" />
+
+				<ItemsControl ItemsSource="{x:Bind ViewModel.Capabilities}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate x:DataType="vm:AiCapabilityRow">
+							<Grid Padding="0,4" ColumnSpacing="8">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="110" />
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="*" />
+								</Grid.ColumnDefinitions>
+								<TextBlock
+									Grid.Column="0"
+									VerticalAlignment="Center"
+									Text="{x:Bind Label}" />
+								<ComboBox
+									Grid.Column="1"
+									DisplayMemberPath="DisplayName"
+									ItemsSource="{x:Bind Providers}"
+									SelectedValue="{x:Bind ProviderId, Mode=TwoWay}"
+									SelectedValuePath="Id" />
+								<TextBox
+									Grid.Column="2"
+									PlaceholderText="model"
+									Text="{x:Bind Model, Mode=TwoWay}" />
+							</Grid>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
 			</StackPanel>
 		</ScrollViewer>
 	</Grid>

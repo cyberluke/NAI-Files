@@ -74,6 +74,29 @@ namespace Files.App.AI
 				container.Values[EnabledPrefix + id] = enabled;
 		}
 
+		/// <summary>Reads the provider/model chosen for one capability, or null when unset.</summary>
+		public AiCapabilityBinding? GetCapability(AiCapability capability)
+		{
+			var container = TryContainer();
+			if (container is null)
+				return null;
+
+			var providerKey = $"cap.{capability}.provider";
+			var modelKey = $"cap.{capability}.model";
+			var provider = container.Values.TryGetValue(providerKey, out var rawProvider) && rawProvider is string p ? p : null;
+			var model = container.Values.TryGetValue(modelKey, out var rawModel) && rawModel is string m ? m : null;
+			return string.IsNullOrWhiteSpace(provider) ? null : new AiCapabilityBinding(provider, model ?? string.Empty);
+		}
+
+		public void SetCapability(AiCapability capability, string providerId, string model)
+		{
+			if (TryContainer() is { } container)
+			{
+				container.Values[$"cap.{capability}.provider"] = providerId ?? string.Empty;
+				container.Values[$"cap.{capability}.model"] = model ?? string.Empty;
+			}
+		}
+
 		public AiEndpointConfig GetEndpoint(string id)
 		{
 			var container = TryContainer();

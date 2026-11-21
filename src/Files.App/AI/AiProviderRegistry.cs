@@ -56,6 +56,36 @@ namespace Files.App.AI
 
 		public AiEndpointConfig GetEndpoint(string id) => settings.GetEndpoint(id);
 
+		/// <summary>The provider/model chosen for a capability, or null when the user has not chosen one.</summary>
+		public AiCapabilityBinding? GetBinding(AiCapability capability) => settings.GetCapability(capability);
+
+		/// <summary>Persists the provider/model used for one capability (the settings matrix).</summary>
+		public void SetBinding(AiCapability capability, string providerId, string model)
+			=> settings.SetCapability(capability, providerId, model);
+
+		/// <summary>
+		/// Resolves the provider for a capability: the explicit binding when it still supports the
+		/// capability, otherwise the first enabled provider in the ladder that does.
+		/// </summary>
+		public IAiProvider? Resolve(AiCapability capability)
+		{
+			var binding = settings.GetCapability(capability);
+			if (binding is not null && Find(binding.ProviderId) is { } bound && bound.Capabilities.Contains(capability))
+				return bound;
+
+			return Priority
+				.Select(Find)
+				.FirstOrDefault(provider => provider is not null && IsEnabled(provider.Id) && provider.Capabilities.Contains(capability));
+		}
+
+		/// <summary>Runs one completion through the provider bound to a capability.</summary>
+		public async Task<AiCompletion> CompleteAsync(AiCapability capability, AiChatRequest request, CancellationToken token)
+		{
+			var provider = Resolve(capability)
+				?? throw new InvalidOperationException($"No AI provider is available for {capability}");
+			return await provider.CompleteAsync(request, token);
+		}
+
 		/// <summary>Saves an endpoint and (re)enables its provider so it takes effect immediately.</summary>
 		public void SetEndpoint(string id, string? baseUrl, string? apiKey, string? model)
 		{

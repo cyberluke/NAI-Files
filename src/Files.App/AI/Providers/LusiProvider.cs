@@ -11,11 +11,22 @@ namespace Files.App.AI.Providers
 	/// </summary>
 	internal sealed class LusiProvider : IAiProvider
 	{
+		private static readonly IReadOnlySet<AiCapability> capabilities = new HashSet<AiCapability>
+		{
+			AiCapability.Chat,
+			AiCapability.Vision,
+			AiCapability.Ocr,
+			AiCapability.Caption,
+			AiCapability.Embedding,
+			AiCapability.Rerank,
+		};
+
 		public string Id => AiProviderIds.Lusi;
 		public string DisplayName => "LUSI Engine (local)";
 		public AiProviderKind Kind => AiProviderKind.Lusi;
 		public bool IsLocal => true;
 		public bool RequiresConfiguration => false;
+		public IReadOnlySet<AiCapability> Capabilities => capabilities;
 
 		public async Task<AiProviderStatus> ProbeAsync(CancellationToken token)
 		{

@@ -25,6 +25,9 @@ namespace Files.App.AI
 		/// <summary>True when the user must configure an endpoint before this provider can run.</summary>
 		bool RequiresConfiguration { get; }
 
+		/// <summary>Capabilities this backend can serve (chat, vision, OCR, embeddings, …).</summary>
+		IReadOnlySet<AiCapability> Capabilities { get; }
+
 		/// <summary>Probes reachability without changing state.</summary>
 		Task<AiProviderStatus> ProbeAsync(CancellationToken token);
 
