@@ -1355,7 +1355,7 @@
 			<ScrollViewer
 				x:Name="FeedScroller"
 				Grid.Column="0"
-				Padding="12,0,8,12"
+				Padding="12,0,24,12"
 				AllowDrop="{x:Bind InstanceViewModel.IsPageTypeSearchResults, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
 				DragOver="ItemsLayout_DragOver"
 				Drop="ItemsLayout_Drop"

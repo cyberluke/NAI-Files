@@ -4855,7 +4855,7 @@
   <data name="NaiTelemetryDisk" xml:space="preserve"><value>Ổ hệ thống trống/tổng</value></data>
   <data name="NaiTelemetryObserved" xml:space="preserve"><value>Đo lúc {0}</value></data>
   <data name="NaiTelemetrySource" xml:space="preserve"><value>Bộ đếm thời gian nhóm CPU Windows, RAM vật lý, dung lượng ổ hệ thống và tín hiệu Wi-Fi. Dung lượng không phải mức sử dụng I/O. Không ước lượng GPU/NPU từ phần tài nguyên được đặt trước.</value></data>
-  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Cấu trúc và hàng đợi Kelvin</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Cấu trúc và hàng đợi</value></data>
   <data name="NaiRuntimeDescription" xml:space="preserve"><value>Ảnh chụp trạng thái chỉ đọc từ Kelvin AI Workstation bằng ghép nối riêng của Files. Không khởi động mô hình. Hiển thị quan hệ nhà cung cấp và phân công thiết bị thực, không suy diễn lưu lượng hay hiệu năng.</value></data>
   <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Làm mới trạng thái</value></data>
   <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Không lấy được trạng thái trực tiếp. Trạng thái đang hiển thị đã cũ; kết nối Kelvin AI Workstation qua NAI Assistant. {0}</value></data>

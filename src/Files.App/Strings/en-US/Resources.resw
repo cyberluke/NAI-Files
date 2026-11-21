@@ -5170,7 +5170,7 @@
   <data name="NaiTelemetryDisk" xml:space="preserve"><value>System drive free/total</value></data>
   <data name="NaiTelemetryObserved" xml:space="preserve"><value>Measured at {0}</value></data>
   <data name="NaiTelemetrySource" xml:space="preserve"><value>Windows processor-group time counters, physical RAM, system-volume capacity and Wi-Fi signal. Disk capacity is not I/O utilization. Unknown GPU/NPU values are not estimated from scheduling reservations.</value></data>
-  <data name="NaiRuntimeTitle" xml:space="preserve"><value>AI engine topology and queue</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>AI engine and queue</value></data>
   <data name="NaiRuntimeDescription" xml:space="preserve"><value>Read-only paired AI engine snapshot (LUSI Engine first, Kelvin AI Workstation as fallback) using Files' own pairing. No model is started. Provider membership and actual device assignments are shown; these are not measured traffic or inferred performance.</value></data>
   <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Refresh snapshot</value></data>
   <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Live snapshot unavailable. Any displayed snapshot is stale; the LUSI Engine / Kelvin AI Workstation may be offline. {0}</value></data>

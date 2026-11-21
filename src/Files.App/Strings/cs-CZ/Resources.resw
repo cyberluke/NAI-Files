@@ -4909,7 +4909,7 @@
   <data name="NaiTelemetryDisk" xml:space="preserve"><value>Systémový disk volno/celkem</value></data>
   <data name="NaiTelemetryObserved" xml:space="preserve"><value>Změřeno v {0}</value></data>
   <data name="NaiTelemetrySource" xml:space="preserve"><value>Časové čítače skupiny procesorů Windows, fyzická RAM, kapacita systémového disku a signál Wi-Fi. Kapacita disku není vytížení I/O. Neznámé hodnoty GPU/NPU se neodhadují z rezervací plánovače.</value></data>
-  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Topologie a fronta Kelvin</value></data>
+  <data name="NaiRuntimeTitle" xml:space="preserve"><value>Topologie a fronta</value></data>
   <data name="NaiRuntimeDescription" xml:space="preserve"><value>Snímek Kelvin AI Workstation pouze pro čtení s vlastním párováním Průzkumníku. Nespouští modely. Zobrazuje příslušnost poskytovatelů a skutečné přiřazení zařízení, nikoli měřený provoz nebo odhad výkonu.</value></data>
   <data name="NaiRuntimeRefresh" xml:space="preserve"><value>Obnovit snímek</value></data>
   <data name="NaiRuntimeUnavailable" xml:space="preserve"><value>Živý snímek není dostupný. Zobrazený snímek je zastaralý; připojte Kelvin AI Workstation přes NAI Assistant. {0}</value></data>

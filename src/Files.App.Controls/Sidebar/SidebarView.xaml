@@ -100,8 +100,8 @@
 					x:Name="MenuItemHostScrollViewer"
 					Padding="0,8,0,0"
 					ContextRequested="MenuItemHostScrollViewer_ContextRequested"
-					HorizontalScrollBarVisibility="Visible"
-					HorizontalScrollMode="Enabled"
+					HorizontalScrollBarVisibility="Disabled"
+					HorizontalScrollMode="Disabled"
 					VerticalScrollBarVisibility="Auto"
 					XYFocusKeyboardNavigation="Enabled">
 					<ItemsRepeater
