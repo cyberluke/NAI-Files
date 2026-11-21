@@ -207,15 +207,16 @@ namespace Files.App.Helpers
 
 		public Type GetLayoutType(string? path, bool changeLayoutMode = true)
 		{
-			var preferencesItem = GetLayoutPreferencesForPath(path, out var isDefaultLayout);
+			var preferencesItem = GetLayoutPreferencesForPath(path, out _);
 			if (preferencesItem is null)
 				return typeof(DetailsLayoutPage);
 
-			// Predicting the adaptive decision at navigation time avoids a post-enumeration page switch
-			if (IsAdaptiveLayoutEnabled && !preferencesItem.IsAdaptiveLayoutOverridden &&
-				isDefaultLayout is not false &&
-				AdaptiveLayoutHelpers.TryPredictLayout(path, out var resolvedLayout) &&
-				(isDefaultLayout ?? IsPathUsingDefaultLayout(path)))
+			// Predict on every navigation while the folder still follows the adaptive default.
+			// A saved automatic choice keeps IsAdaptiveLayoutOverridden == false and is
+			// re-evaluated from the current contents; a manual choice sets it to true and wins.
+			if (!preferencesItem.IsAdaptiveLayoutOverridden &&
+				!UserSettingsService.LayoutSettingsService.SyncFolderPreferencesAcrossDirectories &&
+				AdaptiveLayoutHelpers.TryPredictLayout(path, out var resolvedLayout))
 			{
 				preferencesItem.LayoutMode = resolvedLayout;
 			}

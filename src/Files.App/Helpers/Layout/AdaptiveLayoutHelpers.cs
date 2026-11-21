@@ -15,12 +15,11 @@ namespace Files.App.Helpers
 		// Folders whose contents are a stream of recent work rather than a hierarchy: Pulse is their natural view
 		private static readonly Lazy<string[]> PulseFolders = new(() =>
 		[
-			Constants.UserEnvironmentPaths.DownloadsPath,
 			Windows.Storage.UserDataPaths.GetDefault().Pictures,
 			Windows.Storage.UserDataPaths.GetDefault().Videos,
 		]);
 
-		/// <summary>True for the Downloads, Pictures and Videos folders (not their subfolders).</summary>
+		/// <summary>True for the Pictures and Videos folders (not their subfolders).</summary>
 		public static bool IsPulseFolder(string? path)
 		{
 			if (string.IsNullOrEmpty(path))
@@ -62,14 +61,20 @@ namespace Files.App.Helpers
 				if (viewStateSection is not null)
 				{
 					var viewMode = viewStateSection.Parameters.FirstOrDefault(x => x.Key == "Mode").Value;
-					layout = viewMode is "Pictures" or "Videos" ? FolderLayoutModes.PulseView : FolderLayoutModes.DetailsView;
-					return true;
+					if (viewMode is "Pictures" or "Videos")
+					{
+						layout = FolderLayoutModes.PulseView;
+						return true;
+					}
+
+					// Other Explorer modes (Documents, General, ...) are not a media signal:
+					// fall through to the content sample so a media folder still opens in Pulse.
 				}
 
 				int total = 0, media = 0;
-				foreach (var entry in SystemIO.Directory.EnumerateFileSystemEntries(path))
+				foreach (var file in SystemIO.Directory.EnumerateFiles(path))
 				{
-					if (IsMediaExtension(SystemIO.Path.GetExtension(entry)))
+					if (IsMediaExtension(SystemIO.Path.GetExtension(file)))
 						media++;
 					if (++total >= 200)
 						break;
@@ -78,7 +83,8 @@ namespace Files.App.Helpers
 				if (total is 0)
 					return false;
 
-				layout = 100f * media / total > 60f ? FolderLayoutModes.PulseView : FolderLayoutModes.DetailsView;
+				// Any image/video/audio makes this a visual folder; a plain directory stays default.
+				layout = media > 0 ? FolderLayoutModes.PulseView : FolderLayoutModes.DetailsView;
 				return true;
 			}
 			catch (Exception ex) when (ex is SystemIO.IOException or UnauthorizedAccessException or ArgumentException)
@@ -133,21 +139,18 @@ namespace Files.App.Helpers
 			{
 				"Pictures" => Layouts.Pulse,
 				"Videos" => Layouts.Pulse,
-				_ => Layouts.Detail,
+				// Another Explorer mode must not suppress the content rule.
+				_ => Layouts.None,
 			};
 		}
 
 		private static Layouts GetContentLayout(IList<ListedItem> filesAndFolders)
 		{
-			int itemCount = filesAndFolders.Count;
 			if (filesAndFolders.Count is 0)
 				return Layouts.None;
 
-			float mediaPercentage = 100f * filesAndFolders.Count(IsMedia) / itemCount;
-
-			if (mediaPercentage > 60f)
-				return Layouts.Pulse;
-			return Layouts.Detail;
+			// Any image/video/audio makes this a visual folder; a plain directory stays default.
+			return filesAndFolders.Any(IsMedia) ? Layouts.Pulse : Layouts.Detail;
 
 			static bool IsMedia(ListedItem item)
 				=> IsMediaExtension(item.FileExtension);
