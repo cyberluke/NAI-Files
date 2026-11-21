@@ -182,7 +182,9 @@ namespace Files.App
 			public const string DocumentationUrl = @"https://github.com/cyberluke/NAI-Files";
 			public const string FeatureRequestUrl = @"https://github.com/cyberluke/NAI-Files/issues/new?labels=enhancement";
 			public const string BugReportUrl = @"https://github.com/cyberluke/NAI-Files/issues/new?labels=bug&template=bug_report.yml";
-			public static readonly string ReleaseNotesUrl = "https://github.com/cyberluke/NAI-Files/releases";
+
+			// Cloudflare R2 public download domain; filled in when the domain is published.
+			public const string ReleaseNotesUrl = "";
 		}
 
 		public static class DocsPath
@@ -262,7 +264,7 @@ namespace Files.App
 		{
 			// These strings are intentionally hardcoded and cannot be moved to resource files.
 			// The Windows App Runtime (which powers the resource loading system) may itself be unavailable at this point
-			public const string MissingRuntimeMessage = "Files failed to start. A required Windows component could not be loaded. Reinstall Files from https://github.com/cyberluke/NAI-Files/releases";
+			public const string MissingRuntimeMessage = "NAI Files failed to start. A required Windows component could not be loaded. Reinstall NAI Files from the official download page.";
 			public const string MissingRuntimeTitle = "Files - Startup Error";
 		}
 	}

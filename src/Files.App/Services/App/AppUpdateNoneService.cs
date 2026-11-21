@@ -33,6 +33,12 @@ namespace Files.App.Services
 
 		public async Task CheckForReleaseNotesAsync()
 		{
+			if (string.IsNullOrEmpty(Constants.ExternalUrl.ReleaseNotesUrl))
+			{
+				AreReleaseNotesAvailable = false;
+				return;
+			}
+
 			using var client = new HttpClient();
 
 			try
