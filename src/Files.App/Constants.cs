@@ -178,15 +178,13 @@ namespace Files.App
 
 		public static class ExternalUrl
 		{
-			public const string GitHubRepoUrl = @"https://github.com/files-community/Files";
-			public const string DocumentationUrl = @"https://files.community/docs";
+			public const string GitHubRepoUrl = @"https://github.com/cyberluke/NAI_Files";
+			public const string DocumentationUrl = @"https://github.com/cyberluke/NAI_Files";
 			public const string DiscordUrl = @"https://discord.gg/files";
-			public const string FeatureRequestUrl = @"https://discord.gg/files";
-			public const string BugReportUrl = @"https://github.com/files-community/Files/issues/new?labels=bug&template=bug_report.yml";
-			public const string PrivacyPolicyUrl = @"https://files.community/privacy";
-			public const string SupportUsUrl = @"https://files.community/sponsor";
+			public const string FeatureRequestUrl = @"https://github.com/cyberluke/NAI_Files/issues/new?labels=enhancement";
+			public const string BugReportUrl = @"https://github.com/cyberluke/NAI_Files/issues/new?labels=bug&template=bug_report.yml";
 			public const string CrowdinUrl = @"https://crowdin.com/project/files-app";
-			public static readonly string ReleaseNotesUrl = $"https://files.community/blog/posts/v{Package.Current.Id.Version.Major}-{Package.Current.Id.Version.Minor}-{Package.Current.Id.Version.Build}?minimal";
+			public static readonly string ReleaseNotesUrl = "https://github.com/cyberluke/NAI_Files/releases";
 		}
 
 		public static class DocsPath
@@ -266,7 +264,7 @@ namespace Files.App
 		{
 			// These strings are intentionally hardcoded and cannot be moved to resource files.
 			// The Windows App Runtime (which powers the resource loading system) may itself be unavailable at this point
-			public const string MissingRuntimeMessage = "Files failed to start. A required Windows component could not be loaded. Try reinstalling Files from the Microsoft Store or from https://files.community/download";
+			public const string MissingRuntimeMessage = "Files failed to start. A required Windows component could not be loaded. Reinstall Files from https://github.com/cyberluke/NAI_Files/releases";
 			public const string MissingRuntimeTitle = "Files - Startup Error";
 		}
 	}

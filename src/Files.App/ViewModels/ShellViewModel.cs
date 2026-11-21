@@ -1233,7 +1233,7 @@ namespace Files.App.ViewModels
 		private Task RequestSelectionAsync(List<ListedItem> itemsToSelect)
 		{
 			// Don't notify if shell page is not the active pane (eg. Dual Pane)
-			// https://github.com/files-community/Files/issues/17427
+			// upstream issue #17427
 			var activeShellViewModel = ContentPageContext.ShellPage?.ShellViewModel
 				?? throw new InvalidOperationException("The active shell page is not available.");
 			if (WorkingDirectory != activeShellViewModel.WorkingDirectory)

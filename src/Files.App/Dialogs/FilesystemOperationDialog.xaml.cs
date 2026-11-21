@@ -67,7 +67,7 @@ namespace Files.App.Dialogs
 			catch (Exception ex)
 			{
 				// Handle exception in case WinUI Windows is closed
-				// (see https://github.com/files-community/Files/issues/15599)
+				// (see upstream issue #15599)
 
 				App.Logger.LogWarning(ex, ex.Message);
 			}

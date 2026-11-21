@@ -283,7 +283,7 @@ namespace Files.App.Views
 			catch (Exception)
 			{
 				// Handle exception in case WinUI Windows is closed
-				// (see https://github.com/files-community/Files/issues/15599)
+				// (see upstream issue #15599)
 
 				_WindowIsCompact = false;
 			}

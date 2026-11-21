@@ -39,7 +39,7 @@ namespace Files.Shared.Helpers
 				return false;
 
 			// Don't check folder paths to avoid issues
-			// https://github.com/files-community/Files/issues/17094
+			// upstream issue #17094
 			if (Directory.Exists(filePathToCheck))
 				return false;
 

@@ -417,15 +417,8 @@ namespace Files.App.ViewModels
 		{
 			get
 			{
-				if (!canShowPrompts || hasShownSponsorPrompt)
-					return false;
-
-				var isTargetEnvironment = AppLifecycleHelper.AppEnvironment is AppEnvironment.Dev or AppEnvironment.SideloadStable or AppEnvironment.SideloadPreview;
-				var hasClickedSponsorPrompt = UserSettingsService.ApplicationSettingsService.HasClickedSponsorPrompt;
-				var launchCountReached = AppLifecycleHelper.TotalLaunchCount % 50 == 0;
-
-				hasShownSponsorPrompt = isTargetEnvironment && !hasClickedSponsorPrompt && launchCountReached;
-				return hasShownSponsorPrompt;
+				// Sponsor prompt removed (NAI_Files fork).
+				return false;
 			}
 		}
 
@@ -667,11 +660,11 @@ namespace Files.App.ViewModels
 			catch (Exception) { }
 		}
 
-		private async void ExecuteSponsorCommand()
+		private void ExecuteSponsorCommand()
 		{
+			// Sponsor link removed (NAI_Files fork).
 			UserSettingsService.ApplicationSettingsService.HasClickedSponsorPrompt = true;
 			OnPropertyChanged(nameof(ShowSponsorPrompt));
-			await Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.SupportUsUrl)).AsTask();
 		}
 
 		private async Task ExecuteOpenNetworkSharingSettingsCommand()

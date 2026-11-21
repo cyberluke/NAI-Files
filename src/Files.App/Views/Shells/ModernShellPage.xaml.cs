@@ -188,7 +188,7 @@ namespace Files.App.Views.Shells
 				FilesystemViewModel_DirectoryInfoUpdated(sender, EventArgs.Empty);
 
 			// Update the ShellViewModel with the current working directory
-			// Fixes https://github.com/files-community/Files/issues/17469
+			// Fixes upstream issue #17469
 			if (parameters.IsSearchResultPage == false)
 				ShellViewModel!.IsSearchResults = false;
 

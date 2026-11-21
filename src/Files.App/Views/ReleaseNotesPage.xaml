@@ -28,18 +28,7 @@
 			Source="{x:Bind ViewModel.BlogPostUrl, Mode=OneWay}" />
 
 		<!--  Footer  -->
-		<Border
-			Grid.Row="1"
-			Padding="12"
-			Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-			BackgroundSizing="OuterBorderEdge"
-			BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-			BorderThickness="0,1,0,0">
-			<HyperlinkButton
-				HorizontalAlignment="Left"
-				Content="{helpers:ResourceString Name=SponsorUsOnGitHub}"
-				NavigateUri="{x:Bind ViewModel.SupportUsUrl, Mode=OneTime}" />
-		</Border>
+<!-- Sponsor link removed (NAI_Files fork). -->
 	</Grid>
 
 </Page>

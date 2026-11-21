@@ -1,4 +1,4 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <UserControl
 	x:Class="Files.App.UserControls.NavigationToolbar"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -152,7 +152,7 @@
 						<MenuFlyout.MenuFlyoutPresenterStyle>
 							<Style TargetType="MenuFlyoutPresenter">
 								<Setter Property="MaxHeight" Value="400" />
-								<!--  Workaround for https://github.com/files-community/Files/issues/13078  -->
+								<!--  Workaround for upstream issue #13078  -->
 								<Setter Target="HighContrastAdjustment" Value="None" />
 							</Style>
 						</MenuFlyout.MenuFlyoutPresenterStyle>
@@ -209,7 +209,7 @@
 						<MenuFlyout.MenuFlyoutPresenterStyle>
 							<Style TargetType="MenuFlyoutPresenter">
 								<Setter Property="MaxHeight" Value="400" />
-								<!--  Workaround for https://github.com/files-community/Files/issues/13078  -->
+								<!--  Workaround for upstream issue #13078  -->
 								<Setter Target="HighContrastAdjustment" Value="None" />
 							</Style>
 						</MenuFlyout.MenuFlyoutPresenterStyle>

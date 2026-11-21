@@ -7,7 +7,7 @@
 # Workflow:
 #  1. Configure manifest, logo and secrets
 #  2. Restore, build and package Files
-#  3. Publish the appinstaller to files.community
+#  3. Publish the appinstaller as a GitHub release asset
 #  4. Sign the package
 #  5. Publish the package to Azure
 
@@ -37,7 +37,7 @@ jobs:
       PACKAGE_MANIFEST_PATH:      'src\Files.App\Package.appxmanifest'
       LAUNCHER_PROJECT_PATH:      'src\Files.App.Launcher\Files.App.Launcher.vcxproj'
       TEST_PROJECT_PATH:          'tests\Files.InteractionTests\Files.InteractionTests.csproj'
-      APP_INSTALLER_SIDELOAD_URL: 'https://cdn.files.community/files/preview/'
+      APP_INSTALLER_SIDELOAD_URL: 'https://github.com/cyberluke/NAI_Files/releases/latest/download/'
 
     steps:
     - name: Checkout the repository

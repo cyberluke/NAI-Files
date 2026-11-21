@@ -8,9 +8,6 @@ namespace Files.App.ViewModels
 		public string BlogPostUrl =>
 			Constants.ExternalUrl.ReleaseNotesUrl;
 
-		public string SupportUsUrl =>
-			Constants.ExternalUrl.SupportUsUrl;
-
 		public ReleaseNotesViewModel()
 		{
 		}

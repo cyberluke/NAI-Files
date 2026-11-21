@@ -38,14 +38,14 @@ namespace Files.App.ViewModels.Settings
 		public ICommand CopyAppVersionCommand { get; }
 		public ICommand CopyWindowsVersionCommand { get; }
 		public ICommand CopyUserIDCommand { get; }
-		public ICommand SupportUsCommand { get; }
+		// Sponsor link removed (NAI_Files fork).
 		public ICommand OpenLogLocationCommand { get; }
 		public ICommand OpenDocumentationCommand { get; }
 		public ICommand OpenDiscordCommand { get; }
 		public ICommand SubmitFeatureRequestCommand { get; }
 		public ICommand SubmitBugReportCommand { get; }
 		public ICommand OpenGitHubRepoCommand { get; }
-		public ICommand OpenPrivacyPolicyCommand { get; }
+		// Privacy link removed (NAI_Files fork).
 		public ICommand OpenCrowdinCommand { get; }
 
 		// Constructor
@@ -82,13 +82,13 @@ namespace Files.App.ViewModels.Settings
 			CopyAppVersionCommand = new RelayCommand(CopyAppVersion);
 			CopyWindowsVersionCommand = new RelayCommand(CopyWindowsVersion);
 			CopyUserIDCommand = new RelayCommand(CopyUserID);
-			SupportUsCommand = new AsyncRelayCommand(SupportUs);
+			// SupportUsCommand removed (NAI_Files fork).
 			OpenDocumentationCommand = new AsyncRelayCommand(DoOpenDocumentation);
 			OpenDiscordCommand = new AsyncRelayCommand(DoOpenDiscord);
 			SubmitFeatureRequestCommand = new AsyncRelayCommand(DoSubmitFeatureRequest);
 			SubmitBugReportCommand = new AsyncRelayCommand(DoSubmitBugReport);
 			OpenGitHubRepoCommand = new AsyncRelayCommand(DoOpenGitHubRepo);
-			OpenPrivacyPolicyCommand = new AsyncRelayCommand(DoOpenPrivacyPolicy);
+			// OpenPrivacyPolicyCommand removed (NAI_Files fork).
 			OpenLogLocationCommand = new AsyncRelayCommand(OpenLogLocation);
 			OpenCrowdinCommand = new AsyncRelayCommand(DoOpenCrowdin);
 		}
@@ -136,10 +136,7 @@ namespace Files.App.ViewModels.Settings
 			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.GitHubRepoUrl)).AsTask();
 		}
 
-		public Task DoOpenPrivacyPolicy()
-		{
-			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.PrivacyPolicyUrl)).AsTask();
-		}
+		// Privacy link removed (NAI_Files fork).
 
 		public Task DoOpenCrowdin()
 		{
@@ -179,10 +176,7 @@ namespace Files.App.ViewModels.Settings
 			});
 		}
 
-		public Task SupportUs()
-		{
-			return Launcher.LaunchUriAsync(new Uri(Constants.ExternalUrl.SupportUsUrl)).AsTask();
-		}
+		// Sponsor link removed (NAI_Files fork).
 
 		public string GetAppVersion()
 		{

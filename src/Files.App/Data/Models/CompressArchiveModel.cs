@@ -1,4 +1,4 @@
-﻿// Copyright (c) Files Community
+// Copyright (c) Files Community
 // Licensed under the MIT License.
 
 using Files.App.Utils.Storage.Operations;
@@ -174,7 +174,7 @@ namespace Files.App.Data.Models
 			// Use UTF-8 encoding. 
 			// References: 7-zip chm --> Command Line Version --> Switches
 			// --> -m --> cu=[off | on].
-			// Don't add "cu" parameter for 7zip files, see https://github.com/files-community/Files/issues/17257
+			// Don't add "cu" parameter for 7zip files, see upstream issue #17257
 			if (FileFormat != ArchiveFormats.SevenZip)
 				compressor.CustomParameters.Add("cu", "on");
 

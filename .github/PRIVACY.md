@@ -1,3 +1,3 @@
 # Privacy Policy
 
-The privacy policy has been moved to here https://files.community/privacy
+This fork (NAI_Files) does not publish a separate privacy policy.

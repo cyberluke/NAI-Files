@@ -3,10 +3,10 @@
 </p>
 
 <p align="center">
-  <a style="text-decoration:none" href="https://files.community/">
+  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI_Files/">
     <img src="https://img.shields.io/badge/Files-Website-F9B81F" alt="Files Website" /></a>
-  <a style="text-decoration:none" href="https://github.com/files-community/Files/actions/workflows/ci.yml">
-    <img src="https://github.com/files-community/Files/actions/workflows/ci.yml/badge.svg" alt="Files CI Status" /></a>
+  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI_Files/actions/workflows/ci.yml">
+    <img src="https://github.com/cyberluke/NAI_Files/actions/workflows/ci.yml/badge.svg" alt="Files CI Status" /></a>
   <a style="text-decoration:none" href="https://crowdin.com/project/files-app">
     <img src="https://badges.crowdin.net/files-app/localized.svg" alt="Files Localization Status" /></a>
   <a style="text-decoration:none" href="https://discord.gg/files">
@@ -29,7 +29,7 @@ You can also use the preview version alongside the stable release to get early a
       <img src="./assets/StoreBadge-light.png" height="80" /></picture></a>
   &ensp;
   <!-- Classic Installer Badge -->
-  <a style="text-decoration:none" href="https://files.community/download">
+  <a style="text-decoration:none" href="https://github.com/cyberluke/NAI_Files/releases">
     <picture>
       <source media="(prefers-color-scheme: light)" srcset="./assets/ClassicInstallerBadge-dark.png" height="80" />
       <img src="./assets/ClassicInstallerBadge-light.png" height="80" /></picture></a>
@@ -37,12 +37,12 @@ You can also use the preview version alongside the stable release to get early a
 
 ## Building from source
 
-Instructions for building the source code can be found on our [documentation site](https://files.community/docs/contributing/building-from-source).
+Instructions for building the source code can be found on our [documentation site](https://github.com/cyberluke/NAI_Files/contributing/building-from-source).
 
 
 ## Contributing to Files
 
-Want to contribute to this project? Let us know with an [issue](https://github.com/files-community/Files/issues) that communicates your intent to create a [pull request](https://github.com/files-community/Files/pulls). Also, view our [contributing guidelines](https://github.com/files-community/Files/blob/main/.github/CONTRIBUTING.md) to make sure you're up to date on the coding conventions.
+Want to contribute to this project? Let us know with an [issue](https://github.com/cyberluke/NAI_Files/issues) that communicates your intent to create a [pull request](https://github.com/cyberluke/NAI_Files/pulls). Also, view our [contributing guidelines](https://github.com/cyberluke/NAI_Files/blob/main/.github/CONTRIBUTING.md) to make sure you're up to date on the coding conventions.
 
 Looking for a place to start? Check out the [task board](https://github.com/orgs/files-community/projects/3/views/2), where you can sort tasks by size and priority.
 

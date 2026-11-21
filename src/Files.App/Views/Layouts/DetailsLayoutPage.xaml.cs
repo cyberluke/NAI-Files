@@ -723,7 +723,7 @@ namespace Files.App.Views.Layouts
 				else
 				{
 					// Clear selection when clicking empty area via touch
-					// https://github.com/files-community/Files/issues/15051
+					// upstream issue #15051
 					if (e.PointerDeviceType == PointerDeviceType.Touch)
 						ItemManipulationModel.ClearSelection();
 				}

@@ -47,19 +47,7 @@
 				</Button>
 			</wctcontrols:SettingsCard>
 
-			<!--  GitHub Sponsor  -->
-			<wctcontrols:SettingsCard
-				Command="{x:Bind ViewModel.SupportUsCommand}"
-				Header="{helpers:ResourceString Name=SponsorUsOnGitHub}"
-				IsClickEnabled="True">
-				<wctcontrols:SettingsCard.HeaderIcon>
-					<FontIcon Glyph="&#xEB51;" />
-				</wctcontrols:SettingsCard.HeaderIcon>
-
-				<wctcontrols:SettingsCard.ActionIcon>
-					<FontIcon Glyph="&#xE8A7;" />
-				</wctcontrols:SettingsCard.ActionIcon>
-			</wctcontrols:SettingsCard>
+			<!--  Sponsor link removed (NAI_Files fork).  -->
 
 
 			<!--  Help and support  -->
@@ -213,20 +201,7 @@
 				</wctcontrols:SettingsCard.ActionIcon>
 			</wctcontrols:SettingsCard>
 
-			<!--  Privacy  -->
-			<wctcontrols:SettingsCard
-				HorizontalAlignment="Stretch"
-				Command="{x:Bind ViewModel.OpenPrivacyPolicyCommand}"
-				Header="{helpers:ResourceString Name=Privacy}"
-				IsClickEnabled="True">
-				<wctcontrols:SettingsCard.HeaderIcon>
-					<FontIcon Glyph="&#xE72E;" />
-				</wctcontrols:SettingsCard.HeaderIcon>
-
-				<wctcontrols:SettingsCard.ActionIcon>
-					<FontIcon Glyph="&#xE8A7;" />
-				</wctcontrols:SettingsCard.ActionIcon>
-			</wctcontrols:SettingsCard>
+			<!--  Privacy link removed (NAI_Files fork).  -->
 		</StackPanel>
 	</Grid>
 </Page>

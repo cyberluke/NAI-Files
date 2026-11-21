@@ -604,7 +604,7 @@ namespace Files.App.Utils.StatusCenter
 			{
 				// Include null check for items that don't have a parent dir
 				// This can happen when dragging an image from the browser
-				// https://github.com/files-community/Files/issues/13590
+				// upstream issue #13590
 				if (card.Source.First() != null)
 				{
 					sourcePath = PathNormalization.GetParentDir(card.Source.First());

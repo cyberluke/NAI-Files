@@ -16,16 +16,9 @@ namespace Files.App.Services
 {
 	public sealed partial class SideloadUpdateService : ObservableObject, IUpdateService, IDisposable
 	{
-		private const string SIDELOAD_STABLE = "https://cdn.files.community/files/stable/Files.Package.appinstaller";
-		private const string SIDELOAD_PREVIEW = "https://cdn.files.community/files/preview/Files.Package.appinstaller";
-
+		// The NAI_Files fork is distributed from GitHub releases; the upstream CDN
+		// self-update feed is not used.
 		private readonly HttpClient _client = new(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(3) });
-
-		private readonly Dictionary<string, string> _sideloadVersion = new()
-		{
-			{ "Files", SIDELOAD_STABLE },
-			{ "FilesPreview", SIDELOAD_PREVIEW }
-		};
 
 		private ILogger? Logger { get; } = Ioc.Default.GetRequiredService<ILogger<App>>();
 
@@ -80,56 +73,13 @@ namespace Files.App.Services
 			return Task.CompletedTask;
 		}
 
-		public async Task CheckForUpdatesAsync()
+		public Task CheckForUpdatesAsync()
 		{
+			// Upstream CDN self-update removed for the NAI_Files fork; install updates from
+			// https://github.com/cyberluke/NAI_Files/releases.
 			IsUpdateAvailable = false;
-			try
-			{
-				Logger?.LogInformation($"SIDELOAD: Checking for updates...");
-
-				await using var stream = await _client.GetStreamAsync(_sideloadVersion[PackageName]);
-
-				var appInstaller = await XDocument.LoadAsync(stream, LoadOptions.None, default);
-				var root = appInstaller.Root;
-				var mainBundle = root?.Element(root.Name.Namespace + "MainBundle");
-				var remotePackageName = mainBundle?.Attribute("Name")?.Value;
-				var remoteVersionText = root?.Attribute("Version")?.Value;
-				if (string.IsNullOrWhiteSpace(remotePackageName) || string.IsNullOrWhiteSpace(remoteVersionText))
-				{
-					throw new InvalidDataException("The app installer manifest does not identify a package and version.");
-				}
-
-				var remoteVersion = new Version(remoteVersionText);
-
-				Logger?.LogInformation($"SIDELOAD: Current Package Name: {PackageName}");
-				Logger?.LogInformation($"SIDELOAD: Remote Package Name: {remotePackageName}");
-				Logger?.LogInformation($"SIDELOAD: Current Version: {PackageVersion}");
-				Logger?.LogInformation($"SIDELOAD: Remote Version: {remoteVersion}");
-
-				// Check details and version number
-				if (remotePackageName.Equals(PackageName) && remoteVersion.CompareTo(PackageVersion) > 0)
-				{
-					Logger?.LogInformation("SIDELOAD: Update found.");
-					MainWindow.Instance.DispatcherQueue.TryEnqueue(() =>
-					{
-						IsUpdateAvailable = true;
-					});
-				}
-				else
-				{
-					Logger?.LogWarning("SIDELOAD: Update not found.");
-				}
-			}
-			catch (HttpRequestException ex)
-			{
-				Logger?.LogDebug(ex, ex.Message);
-			}
-			catch (Exception ex)
-			{
-				Logger?.LogError(ex, ex.Message);
-			}
+			return Task.CompletedTask;
 		}
-
 		public async Task CheckAndUpdateFilesLauncherAsync()
 		{
 			try
@@ -177,75 +127,17 @@ namespace Files.App.Services
 			}
 		}
 
-		public async Task CheckForReleaseNotesAsync()
+		public Task CheckForReleaseNotesAsync()
 		{
-			using var client = new HttpClient();
-
-			try
-			{
-				var response = await client.GetAsync(Constants.ExternalUrl.ReleaseNotesUrl);
-				AreReleaseNotesAvailable = response.IsSuccessStatusCode;
-			}
-			catch
-			{
-				AreReleaseNotesAvailable = false;
-			}
+			// Release notes live on the fork's GitHub releases page; no upstream feed probe.
+			AreReleaseNotesAvailable = false;
+			return Task.CompletedTask;
 		}
-
-		private async Task ApplyPackageUpdateAsync()
+		private Task ApplyPackageUpdateAsync()
 		{
-			if (!IsUpdateAvailable)
-				return;
-
-			IsUpdating = true;
-
-			DeploymentResult? result = null;
-
-			try
-			{
-				PackageManager packageManager = new PackageManager();
-
-				var restartStatus = PInvoke.RegisterApplicationRestart(null, (REGISTER_APPLICATION_RESTART_FLAGS)0);
-				App.AppModel.ForceProcessTermination = true;
-
-				Logger?.LogInformation($"Register for restart: {restartStatus}");
-
-				await Task.Run(async () =>
-				{
-					var appInstallerUri = new Uri(_sideloadVersion[PackageName]);
-
-					var deployment = packageManager.AddPackageByAppInstallerFileAsync(
-						appInstallerUri,
-						AddPackageByAppInstallerOptions.ForceTargetAppShutdown,
-						packageManager.GetDefaultPackageVolume());
-
-					deployment.Progress = (op, progress) =>
-					{
-						MainWindow.Instance.DispatcherQueue.TryEnqueue(() =>
-						{
-							UpdateProgress = (int)progress.percentage;
-						});
-					};
-
-					result = await deployment;
-				});
-			}
-			catch (Exception e)
-			{
-				if (result?.ExtendedErrorCode is not null)
-					Logger?.LogInformation(result.ErrorText);
-
-				Logger?.LogError(e, e.Message);
-			}
-			finally
-			{
-				// Reset fields
-				IsUpdating = false;
-				IsUpdateAvailable = false;
-				UpdateProgress = 0;
-			}
+			// Sideload self-update removed for the NAI_Files fork.
+			return Task.CompletedTask;
 		}
-
 		public void Dispose()
 		{
 			_client?.Dispose();

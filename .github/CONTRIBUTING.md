@@ -2,7 +2,7 @@
 Files thrives off of the contributions and input from users. There are several ways you can get involved.
 
 We are happy to hear your feedback for the future of Files. Check the
-[issues tab](https://github.com/files-community/Files/issues) to see if others have
+[issues tab](https://github.com/cyberluke/NAI_Files/issues) to see if others have
 submitted similar feedback. You can add your feedback to existing issues or you can open a new issue.
 
 We always look at your feedback when we decide what to work on next and we look forward to hearing your ideas. Remember that
@@ -18,7 +18,7 @@ We welcome your contributions to the Files project, especially to fix bugs and t
 improvements which address the top issues reported by Files users. Some general guidelines:
 
 * **DO** create one pull request per Issue, and ensure that the Issue is linked in the pull request.
-* **DO** follow our [Coding and Style](https://files.community/docs/contributing/code-style) guidelines, and keep code changes as small as possible.
+* **DO** follow our [Coding and Style](https://github.com/cyberluke/NAI_Files/contributing/code-style) guidelines, and keep code changes as small as possible.
 * **DO** include corresponding tests whenever possible.
 * **DO** check for additional occurrences of the same problem in other parts of the codebase before submitting your PR.
 * **DO** [link the issue](https://docs.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#manually-linking-a-pull-request-to-an-issue) you are addressing in the 
@@ -64,5 +64,5 @@ participate in the review, but at least one member of the Files team will ultima
 the request.
 
 Often, multiple iterations will be needed to respond to feedback from reviewers. Try looking at
-[past pull requests](https://github.com/files-community/Files/pulls?q=is%3Apr+is%3Aclosed) to see
+[past pull requests](https://github.com/cyberluke/NAI_Files/pulls?q=is%3Apr+is%3Aclosed) to see
 what the experience might be like.

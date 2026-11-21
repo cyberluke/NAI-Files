@@ -1,4 +1,4 @@
-﻿<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
+<!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <ContentDialog
 	x:Class="Files.App.Dialogs.CloneRepoDialog"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -22,7 +22,7 @@
 		<StackPanel Spacing="8">
 			<TextBox
 				Header="{helpers:ResourceString Name=RepositoryURL}"
-				PlaceholderText="https://github.com/files-community/Files"
+				PlaceholderText="https://github.com/cyberluke/NAI_Files"
 				Text="{x:Bind ViewModel.RepoUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 		</StackPanel>
 	</Grid>

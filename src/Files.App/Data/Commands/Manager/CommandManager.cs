@@ -91,7 +91,7 @@ namespace Files.App.Data.Commands
 			catch (ArgumentException ex)
 			{
 				// The keys are not necessarily all different because they can be set manually in text editor
-				// ISSUE: https://github.com/files-community/Files/issues/15331
+				// ISSUE: upstream issue #15331
 
 				var flat = _commands.SelectMany(x => x.HotKeys).Select(x => x.LocalizedLabel);
 				var duplicates = flat.GroupBy(x => x).Where(x => x.Count() > 1).Select(group => group.Key);
