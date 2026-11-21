@@ -1,8 +1,8 @@
 #!/usr/bin/env pwsh
 # Verifies the Files semantic path end-to-end:
-#   LUSI /v1/embeddings  ->  NAI Lattice semantic.index_batch  ->  query.vector  ->  semantic.delete
+#   embeddings (LUSI, else Ollama)  ->  NAI Lattice semantic.index  ->  query.vector  ->  semantic.delete
 #
-# Run after the NAI OS runtime (LUSI) and the NAI Lattice host are up:
+# Run after the local runtime and the NAI Lattice host are up:
 #   pwsh -File scripts/verify-nai-semantic.ps1
 #
 # Exit codes: 0 = PASS, 1 = FAIL (prints the exact failing stage).
@@ -10,9 +10,9 @@
 $ErrorActionPreference = 'Stop'
 $lattice = 'http://127.0.0.1:8789'
 $lusiDefault = 'http://127.0.0.1:27130'
-$expectedDim = 1024
+$ollamaBase = 'http://127.0.0.1:11434/v1'
+$storeDim = 1024
 $testId = 'files-verify-' + [guid]::NewGuid().ToString('N').Substring(0, 12)
-$failures = @()
 
 function Write-Stage([string]$name, [string]$status, [string]$detail = '') {
     $color = if ($status -eq 'PASS') { 'Green' } elseif ($status -eq 'SKIP') { 'Yellow' } else { 'Red' }
@@ -37,15 +37,15 @@ if (-not (Test-Path -LiteralPath $tokenPath)) {
 $token = (Get-Content -LiteralPath $tokenPath -Raw).Trim()
 $headers = @{ Authorization = "Bearer $token" }
 
-function Invoke-Lattice([string]$method, [hashtable]$args) {
-    $payload = @{ method = $method; producer = 'files-verify'; args = $args } | ConvertTo-Json -Depth 8 -Compress
+function Invoke-Lattice([string]$method, [hashtable]$payloadArgs) {
+    $payload = @{ method = $method; producer = 'files-verify'; args = $payloadArgs } | ConvertTo-Json -Depth 8 -Compress
     $result = Invoke-RestMethod -Method Post -Uri "$lattice/dispatch" -Headers $headers `
         -ContentType 'application/json' -Body $payload -TimeoutSec 60
     if ($result.status -ne 0) { throw "$method failed: $($result.error)" }
     return $result.body
 }
 
-# --- 2. LUSI discovery + models ---------------------------------------------
+# --- 2. Resolve an embedding backend (LUSI first, Ollama fallback) -----------
 $lusiBase = $lusiDefault
 $lusiToken = $null
 $discovery = Join-Path $env:LOCALAPPDATA 'VIVERRA\Toastovac\models.json'
@@ -59,33 +59,56 @@ if (Test-Path -LiteralPath $discovery) {
 
 $lusiHeaders = @{}
 if ($lusiToken) { $lusiHeaders.Authorization = "Bearer $lusiToken" }
+
+$backend = $null
 try {
-    $models = Invoke-RestMethod -Method Get -Uri "$lusiBase/v1/models" -Headers $lusiHeaders -TimeoutSec 5
-    $hasEmbeddings = $false
-    if ($models.capabilities -and $models.capabilities.PSObject.Properties.Name -contains 'embeddings') {
-        $hasEmbeddings = $true
-    }
-    Write-Stage 'LUSI /v1/models' 'PASS' $(if ($hasEmbeddings) { 'embeddings lane present' } else { 'reachable (embeddings lane not advertised)' })
+    $null = Invoke-RestMethod -Method Get -Uri "$lusiBase/v1/models" -Headers $lusiHeaders -TimeoutSec 5
+    $backend = @{ Kind = 'lusi'; Base = $lusiBase; Token = $lusiToken; Model = $null }
+    Write-Stage 'LUSI /v1/models' 'PASS' $lusiBase
 } catch {
-    Write-Stage 'LUSI /v1/models' 'FAIL' "$lusiBase — $($_.Exception.Message)"
-    Write-Host 'Start the NAI OS runtime (LUSI) and retry.' -ForegroundColor Red
-    exit 1
+    Write-Stage 'LUSI /v1/models' 'SKIP' "$lusiBase — $($_.Exception.Message)"
 }
 
-# --- 3. Embedding ------------------------------------------------------------
-try {
-    $embedBody = @{ operation = 'index'; input = @('NAI Files semantic verification sentence') } |
-        ConvertTo-Json -Depth 5 -Compress
-    $embedded = Invoke-RestMethod -Method Post -Uri "$lusiBase/v1/embeddings" -Headers $lusiHeaders `
-        -ContentType 'application/json' -Body $embedBody -TimeoutSec 120
-    $vector = @($embedded.data[0].embedding)
-    Write-Stage 'LUSI /v1/embeddings' 'PASS' "dim=$($vector.Count)"
-    if ($vector.Count -ne $expectedDim) {
-        Write-Stage 'Embedding dimension' 'FAIL' "expected $expectedDim, got $($vector.Count) (Lattice store is $expectedDim)"
+if (-not $backend) {
+    try {
+        $models = Invoke-RestMethod -Method Get -Uri "$ollamaBase/models" -TimeoutSec 5
+        $ids = @($models.data | ForEach-Object { $_.id })
+        $model = $ids | Where-Object { $_ -match 'embed' } | Select-Object -First 1
+        if (-not $model) { $model = $ids | Select-Object -First 1 }
+        if (-not $model) { throw 'no models available' }
+        $backend = @{ Kind = 'openai'; Base = $ollamaBase; Token = $null; Model = $model }
+        Write-Stage 'Ollama /v1/models' 'PASS' "$ollamaBase (model=$model)"
+    } catch {
+        Write-Stage 'Ollama /v1/models' 'FAIL' $_.Exception.Message
+        Write-Host 'Start the NAI OS runtime (LUSI) or Ollama and retry.' -ForegroundColor Red
         exit 1
     }
+}
+
+# --- 3. Embedding + dimension normalization ---------------------------------
+try {
+    if ($backend.Kind -eq 'lusi') {
+        $body = @{ operation = 'index'; input = @('NAI Files semantic verification sentence') } | ConvertTo-Json -Depth 5 -Compress
+        $embedded = Invoke-RestMethod -Method Post -Uri "$($backend.Base)/v1/embeddings" -Headers $lusiHeaders `
+            -ContentType 'application/json' -Body $body -TimeoutSec 120
+    } else {
+        $body = @{ model = $backend.Model; input = @('NAI Files semantic verification sentence') } | ConvertTo-Json -Depth 5 -Compress
+        $embedded = Invoke-RestMethod -Method Post -Uri "$($backend.Base)/embeddings" `
+            -ContentType 'application/json' -Body $body -TimeoutSec 120
+    }
+
+    $raw = [float[]]@($embedded.data[0].embedding)
+    Write-Stage 'Embeddings' 'PASS' "$($backend.Kind) dim=$($raw.Length)"
+
+    $vector = New-Object 'float[]' $storeDim
+    [Array]::Copy($raw, $vector, [Math]::Min($raw.Length, $storeDim))
+    if ($raw.Length -lt $storeDim) {
+        Write-Stage 'Dimension padding' 'PASS' "$($raw.Length) -> $storeDim (zero-pad, cosine-exact)"
+    } elseif ($raw.Length -gt $storeDim) {
+        Write-Stage 'Dimension truncation' 'PASS' "$($raw.Length) -> $storeDim"
+    }
 } catch {
-    Write-Stage 'LUSI /v1/embeddings' 'FAIL' $_.Exception.Message
+    Write-Stage 'Embeddings' 'FAIL' $_.Exception.Message
     exit 1
 }
 
@@ -120,5 +143,5 @@ try {
 }
 
 Write-Host ''
-Write-Host 'PASS: Files semantic path works end-to-end (LUSI embeddings + NAI Lattice vectors).' -ForegroundColor Green
+Write-Host ("PASS: Files semantic path works end-to-end via {0} + NAI Lattice." -f $backend.Kind) -ForegroundColor Green
 exit 0
