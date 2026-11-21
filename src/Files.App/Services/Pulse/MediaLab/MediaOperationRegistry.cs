@@ -1,6 +1,8 @@
 // Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using System.Globalization;
+
 namespace Files.App.Services.Pulse.MediaLab
 {
 	/// <summary>
@@ -173,10 +175,35 @@ namespace Files.App.Services.Pulse.MediaLab
 					["setpts"], ["libx264", "aac"],
 					[.. videoHead, "-vf", "setpts=2.0*PTS", "-af", "atempo=0.5", "-c:v", "libx264", "-crf", "20", "-c:a", "aac"]),
 
-				Produce("video.contact", "Contact sheet", "One overview frame every 5 s, tiled 5×4.",
-					MediaKind.Video, MediaLabGroup.Create, "contact", ".png",
-					["tile"], [],
-					[.. videoHead, "-vf", "fps=1/5,scale=320:-1,tile=5x4", "-frames:v", "1"]),
+				new MediaOperation
+				{
+					Id = "video.contact",
+					Title = "Contact sheet",
+					Description = "20 evenly spaced frames on a 5×4 grid (square tiles).",
+					Kind = MediaKind.Video,
+					Group = MediaLabGroup.Create,
+					Suffix = "contact",
+					OutputExtension = ".png",
+					RequiredFilters = ["tile", "scale", "pad"],
+					Execute = async (context, progress, token) =>
+					{
+						// 20 tiles across the clip regardless of length; a fixed 1/5 s interval gave
+						// only 3 frames on a 16 s portrait clip.
+						var duration = await context.Ffmpeg.ProbeDurationAsync(context.InputPath, token);
+						var seconds = duration?.TotalSeconds ?? 0;
+						var interval = seconds > 0 ? Math.Clamp(seconds / 20.0, 0.5, 60.0) : 1.0;
+						var filter = "fps=1/" + interval.ToString("0.###", CultureInfo.InvariantCulture)
+							+ ",scale=320:320:force_original_aspect_ratio=decrease,pad=320:320:(ow-iw)/2:(oh-ih)/2:color=black,tile=5x4";
+						var args = new List<string>
+						{
+							"-y", "-hide_banner", "-nostdin", "-i", context.InputPath,
+							"-vf", filter,
+							"-frames:v", "1",
+						};
+						var succeeded = await context.Ffmpeg.RunCustomAsync(args, context.OutputPath, token, progress);
+						return succeeded ? context.OutputPath : null;
+					},
+				},
 
 				Produce("video.gif", "Animated GIF", "Palette-optimised GIF (15 fps, 480 px).",
 					MediaKind.Video, MediaLabGroup.Create, "gif", ".gif",

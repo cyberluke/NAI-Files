@@ -66,7 +66,7 @@ if (-not (Invoke-Produce 'video.hdr' $video '.mp4' (@($head + @('-vf','format=gb
 if (-not (Invoke-Produce 'video.reverse' $video '.mp4' (@($head + @('-vf','reverse','-af','areverse','-c:v','libx264','-crf','20','-c:a','aac'))))) { $failures++ }
 if (-not (Invoke-Produce 'video.speed2x' $video '.mp4' (@($head + @('-vf','setpts=0.5*PTS','-af','atempo=2.0','-c:v','libx264','-crf','20','-c:a','aac'))))) { $failures++ }
 if (-not (Invoke-Produce 'video.slowmo' $video '.mp4' (@($head + @('-vf','setpts=2.0*PTS','-af','atempo=0.5','-c:v','libx264','-crf','20','-c:a','aac'))))) { $failures++ }
-if (-not (Invoke-Produce 'video.contact' $video '.png' (@($head + @('-vf','fps=1/5,scale=320:-1,tile=5x4','-frames:v','1'))))) { $failures++ }
+if (-not (Invoke-Produce 'video.contact' $video '.png' (@($head + @('-vf','fps=1/0.5,scale=320:320:force_original_aspect_ratio=decrease,pad=320:320:(ow-iw)/2:(oh-ih)/2:color=black,tile=5x4','-frames:v','1'))))) { $failures++ }
 
 # ---- Video / Analyze ----
 if (-not (Invoke-Analyze 'video.freezedetect' $video (@($head + @('-vf','freezedetect=n=-50dB:d=2','-an','-f','null','-'))) 'freezedetect')) { $failures++ }

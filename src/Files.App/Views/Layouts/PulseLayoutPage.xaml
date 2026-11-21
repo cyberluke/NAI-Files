@@ -62,6 +62,8 @@
 			x:Key="ToolsMarginConverter"
 			FalseValue="{StaticResource PulseDurationMargin}"
 			TrueValue="{StaticResource PulseDurationPortraitMargin}" />
+		<!--  Portrait media tools sit at the top, clear of the play glyph and the footer  -->
+		<converters:BoolToVerticalAlignmentConverter x:Key="PortraitAlignmentConverter" />
 
 		<x:Double x:Key="PulseFooterHeight">52</x:Double>
 		<CornerRadius x:Key="PulseCardCornerRadius">10</CornerRadius>
@@ -553,28 +555,30 @@
 											Glyph="&#xE768;" />
 									</Border>
 	
-									<!--  Duration: bottom right; on a portrait box it lifts above the overlaid footer  -->
-									<Border
-										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource DurationMarginConverter}}"
-										Padding="6,2"
-										HorizontalAlignment="Right"
-										VerticalAlignment="Bottom"
-										Background="#B3000000"
-										CornerRadius="4"
-										Visibility="{x:Bind Item.MediaDuration, Mode=OneWay, Converter={StaticResource EmptyObjectToObjectConverter}}">
-										<TextBlock
-											FontFamily="Consolas"
-											FontSize="11"
-											Foreground="White"
-											Text="{x:Bind Item.MediaDuration, Mode=OneWay}" />
-									</Border>
+									<!--  Duration: bottom right; hidden on portrait (the overlaid footer already shows it)  -->
+									<Grid Visibility="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}">
+										<Border
+											Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource DurationMarginConverter}}"
+											Padding="6,2"
+											HorizontalAlignment="Right"
+											VerticalAlignment="Bottom"
+											Background="#B3000000"
+											CornerRadius="4"
+											Visibility="{x:Bind Item.MediaDuration, Mode=OneWay, Converter={StaticResource EmptyObjectToObjectConverter}}">
+											<TextBlock
+												FontFamily="Consolas"
+												FontSize="11"
+												Foreground="White"
+												Text="{x:Bind Item.MediaDuration, Mode=OneWay}" />
+										</Border>
+									</Grid>
 
 									<!--  Media tools: trim + more. Above the poster/play overlay (z-order) so they stay clickable on portrait.  -->
 									<StackPanel
 										Canvas.ZIndex="10"
 										Margin="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource ToolsMarginConverter}}"
 										HorizontalAlignment="Left"
-										VerticalAlignment="Bottom"
+										VerticalAlignment="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource PortraitAlignmentConverter}}"
 										Orientation="Horizontal"
 										Spacing="6">
 										<Button
@@ -594,7 +598,8 @@
 												<TextBlock
 													FontSize="11"
 													Foreground="White"
-													Text="{x:Bind TrimButtonText, Mode=OneWay}" />
+													Text="{x:Bind TrimButtonText, Mode=OneWay}"
+													Visibility="{x:Bind IsPortrait, Mode=OneWay, Converter={StaticResource NegatedBoolToVisibilityConverter}}" />
 											</StackPanel>
 										</Button>
 										
