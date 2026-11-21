@@ -44,7 +44,6 @@ outputs, with cancellable progress.
 - Follows the NAI OS language by default; a per-app override lives in
   Settings → General.
 - NAI theme, SAP 72 font and rainbow folder icons.
-- Local-first: no analytics, no Crowdin, no Discord.
 
 ### The file manager underneath
 
@@ -56,8 +55,8 @@ rename, and the rest of the Files feature set remain available.
 NAI Files is distributed as a signed MSIX and built from source. It is not on
 the Microsoft Store and does not run an automatic updater; updates are manual.
 
-1. Build the package (below) or download one from
-   [Releases](https://github.com/cyberluke/NAI-Files/releases) when available.
+1. Build the package (below), or install a signed MSIX from the NAI Files
+   download domain (Cloudflare R2; the public link will be added here).
 2. Trust the certificate used to sign the package.
 3. Install it:
 
@@ -111,11 +110,6 @@ Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
 - Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security: [SECURITY.md](SECURITY.md)
 - Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-
-## Remotes
-
-- `origin` — `files-community/Files` (upstream, read-only; used for cherry-picks)
-- `fork` — `cyberluke/NAI-Files` (this product; `nai` is the default branch)
 
 ## License
 
