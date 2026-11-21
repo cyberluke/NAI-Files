@@ -4998,4 +4998,5 @@
   <data name="PulseMediaLabCreate" xml:space="preserve"><value>Vytvořit</value></data>
   <data name="PulseMediaLabAnalyze" xml:space="preserve"><value>Analyzovat</value></data>
   <data name="PulseMediaLabEmpty" xml:space="preserve"><value>Pro tento soubor nejsou s aktuálním FFmpeg k dispozici žádné operace.</value></data>
-  <data name="PulseMediaLabReport" xml:space="preserve"><value>Výstup analýzy (lze vybrat):</value></data></root>
+  <data name="PulseMediaLabReport" xml:space="preserve"><value>Výstup analýzy (lze vybrat):</value></data>  <data name="NaiFollowLanguage" xml:space="preserve"><value>Řídit se jazykem NAI OS</value></data>
+  <data name="NaiFollowLanguageDescription" xml:space="preserve"><value>Soubory používají jazyk nastavený v NAI OS. Vypnutím zvolíte jazyk pouze pro Files.</value></data></root>

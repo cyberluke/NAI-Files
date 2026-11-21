@@ -5259,4 +5259,5 @@
   <data name="PulseMediaLabCreate" xml:space="preserve"><value>Create</value></data>
   <data name="PulseMediaLabAnalyze" xml:space="preserve"><value>Analyze</value></data>
   <data name="PulseMediaLabEmpty" xml:space="preserve"><value>No operations are available for this file with the current FFmpeg build.</value></data>
-  <data name="PulseMediaLabReport" xml:space="preserve"><value>Analysis report (selectable):</value></data></root>
+  <data name="PulseMediaLabReport" xml:space="preserve"><value>Analysis report (selectable):</value></data>  <data name="NaiFollowLanguage" xml:space="preserve"><value>Follow NAI OS language</value></data>
+  <data name="NaiFollowLanguageDescription" xml:space="preserve"><value>Files uses the language set in NAI OS. Turn off to choose a language for Files only.</value></data></root>

@@ -29,6 +29,16 @@
 				Style="{StaticResource App.Theme.SubtitleTextBlockStyle}"
 				Text="{helpers:ResourceString Name=General}" />
 
+			<!--  Follow NAI OS language  -->
+			<wctcontrols:SettingsCard
+				Header="{helpers:ResourceString Name=NaiFollowLanguage}"
+				Description="{helpers:ResourceString Name=NaiFollowLanguageDescription}">
+				<wctcontrols:SettingsCard.HeaderIcon>
+					<FontIcon Glyph="&#xF2B7;" />
+				</wctcontrols:SettingsCard.HeaderIcon>
+				<ToggleSwitch IsOn="{x:Bind ViewModel.FollowNaiLanguage, Mode=TwoWay}" />
+			</wctcontrols:SettingsCard>
+
 			<!--  Language settings  -->
 			<wctcontrols:SettingsCard Header="{helpers:ResourceString Name=Language}" Description="{x:Bind ViewModel.NaiLanguageDescription, Mode=OneWay}">
 				<wctcontrols:SettingsCard.HeaderIcon>

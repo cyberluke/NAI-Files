@@ -74,6 +74,10 @@ namespace Files.App.ViewModels.Settings
 					selectedAppLanguageIndex = value;
 					OnPropertyChanged(nameof(SelectedAppLanguageIndex));
 					ShowRestartControl = true;
+
+					// Picking a language is an explicit opt-out of the NAI OS language.
+					if (NaiLanguageBridge.IsFollowingNaiOS)
+						NaiLanguageBridge.StopFollowing(AppLanguageHelper.PreferredLanguage.Code);
 				}
 			}
 		}
@@ -81,6 +85,28 @@ namespace Files.App.ViewModels.Settings
 		public List<DateTimeFormatItem> DateFormats { get; set; } = null!;
 
 		public ObservableCollection<AppLanguageItem> AppLanguages => AppLanguageHelper.SupportedLanguages;
+
+		/// <summary>Follow the NAI OS language. Turn off to choose a language for Files only.</summary>
+		public bool FollowNaiLanguage
+		{
+			get => NaiLanguageBridge.IsFollowingNaiOS;
+			set
+			{
+				if (value == NaiLanguageBridge.IsFollowingNaiOS)
+					return;
+
+				if (value)
+					NaiLanguageBridge.StartFollowing();
+				else
+					NaiLanguageBridge.StopFollowing(AppLanguageHelper.PreferredLanguage.Code);
+
+				ShowRestartControl = true;
+				OnPropertyChanged(nameof(FollowNaiLanguage));
+				OnPropertyChanged(nameof(IsAppLanguageEditable));
+				OnPropertyChanged(nameof(NaiLanguageDescription));
+			}
+		}
+
 		public bool IsAppLanguageEditable => !NaiLanguageBridge.IsFollowingNaiOS;
 		public string NaiLanguageDescription => NaiLanguageBridge.IsFollowingNaiOS ? "NaiLanguageManaged".GetLocalizedResource() : string.Empty;
 
@@ -614,6 +640,7 @@ namespace Files.App.ViewModels.Settings
 				if (disposed) return;
 				selectedAppLanguageIndex = AppLanguageHelper.SupportedLanguages.IndexOf(AppLanguageHelper.PreferredLanguage);
 				OnPropertyChanged(nameof(SelectedAppLanguageIndex));
+				OnPropertyChanged(nameof(FollowNaiLanguage));
 				OnPropertyChanged(nameof(IsAppLanguageEditable));
 				OnPropertyChanged(nameof(NaiLanguageDescription));
 				ShowRestartControl = NaiLanguageBridge.IsRestartRequired;

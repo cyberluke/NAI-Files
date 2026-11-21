@@ -109,5 +109,16 @@ namespace Files.App.Helpers
 				language.Code.Split('-')[0].Equals(code.Split('-')[0], StringComparison.OrdinalIgnoreCase));
 			return find is not null && TryChange(SupportedLanguages.IndexOf(find));
 		}
+
+		/// <summary>
+		/// Re-resolves <see cref="PreferredLanguage"/> after the startup override was applied, so a
+		/// static initialization that ran before NAI OS language resolution cannot leave it stale.
+		/// </summary>
+		internal static void RefreshFromOverride()
+		{
+			var current = new AppLanguageItem(ApplicationLanguages.PrimaryLanguageOverride);
+			var index = SupportedLanguages.IndexOf(SupportedLanguages.FirstOrDefault(language => language.Name == current.Name) ?? SupportedLanguages.First());
+			PreferredLanguage = SupportedLanguages[index];
+		}
 	}
 }
