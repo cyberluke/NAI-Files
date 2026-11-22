@@ -102,6 +102,9 @@
         <Content Include="ffmpeg\ffprobe.exe" Condition="Exists('ffmpeg\ffprobe.exe')">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="..\..\LICENSE-GPLv3" Link="ffmpeg\LICENSE-GPLv3" Condition="Exists('..\..\LICENSE-GPLv3')">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
         <Content Include="demucs\**\*" Condition="Exists('demucs\python\python.exe')">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

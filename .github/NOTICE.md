@@ -119,7 +119,7 @@ This build is configured with `--enable-gpl --enable-version3` and is licensed u
 
 FFmpeg is a trademark of [Fabrice Bellard](http://www.bellard.org), originator of the FFmpeg project.
 
-GPLv3 text: [https://www.gnu.org/licenses/gpl-3.0.txt](https://www.gnu.org/licenses/gpl-3.0.txt)
+The GPLv3 text is bundled as `ffmpeg/LICENSE-GPLv3` and is also available at [https://www.gnu.org/licenses/gpl-3.0.txt](https://www.gnu.org/licenses/gpl-3.0.txt).
 
 ## LiteDB
 
