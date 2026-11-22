@@ -268,6 +268,10 @@ if ($AppInstallerUri -ne "" -and ($BuildMode -eq "Sideload" -or $BuildMode -eq "
 		Uri="$bundleUri" />
 	<Dependencies>$dependencyEntries
 	</Dependencies>
+	<UpdateSettings>
+		<OnLaunch HoursBetweenUpdateChecks="0" />
+		<AutomaticBackgroundTask />
+	</UpdateSettings>
 </AppInstaller>
 "@ | Set-Content -Path $appInstallerPath -Encoding UTF8
 

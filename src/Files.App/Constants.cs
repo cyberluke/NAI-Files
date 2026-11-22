@@ -183,6 +183,9 @@ namespace Files.App
 			public const string FeatureRequestUrl = @"https://github.com/cyberluke/NAI-Files/issues/new?labels=enhancement";
 			public const string BugReportUrl = @"https://github.com/cyberluke/NAI-Files/issues/new?labels=bug&template=bug_report.yml";
 
+			// NAI Files update feed (Cloudflare R2 public domain).
+			public const string UpdateFeedUrl = @"https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller";
+
 			// Cloudflare R2 public download domain; filled in when the domain is published.
 			public const string ReleaseNotesUrl = "";
 		}

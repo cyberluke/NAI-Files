@@ -37,7 +37,7 @@ jobs:
       PACKAGE_MANIFEST_PATH:      'src\Files.App\Package.appxmanifest'
       LAUNCHER_PROJECT_PATH:      'src\Files.App.Launcher\Files.App.Launcher.vcxproj'
       TEST_PROJECT_PATH:          'tests\Files.InteractionTests\Files.InteractionTests.csproj'
-      APP_INSTALLER_SIDELOAD_URL: 'https://github.com/cyberluke/NAI-Files/releases/latest/download/'
+      APP_INSTALLER_SIDELOAD_URL: 'https://updates.nanotrik.ai/NAI-Files/'
 
     steps:
     - name: Checkout the repository
@@ -152,7 +152,7 @@ jobs:
       run: |
         . './.github/scripts/Create-MsixBundle.ps1' `
           -AppxPackageDir "$env:APPX_PACKAGE_DIR" `
-          -BundleName "Files.Package" `
+          -BundleName "NAI-Files" `
           -PackageManifestPath "$env:PACKAGE_MANIFEST_PATH" `
           -AppInstallerUri "$env:APP_INSTALLER_SIDELOAD_URL" `
           -BuildMode "Sideload"

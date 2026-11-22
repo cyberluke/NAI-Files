@@ -16,13 +16,11 @@ namespace Files.App.Services
 {
 	public sealed partial class SideloadUpdateService : ObservableObject, IUpdateService, IDisposable
 	{
-		// The NAI_Files fork is distributed from GitHub releases; the upstream CDN
-		// self-update feed is not used.
+		// NAI Files is distributed from the Cloudflare R2 feed and updates through
+		// Windows App Installer.
 		private readonly HttpClient _client = new(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(3) });
 
 		private ILogger? Logger { get; } = Ioc.Default.GetRequiredService<ILogger<App>>();
-
-		private string PackageName { get; } = Package.Current.Id.Name;
 
 		private Version PackageVersion { get; } = new(
 			Package.Current.Id.Version.Major,
@@ -73,12 +71,29 @@ namespace Files.App.Services
 			return Task.CompletedTask;
 		}
 
-		public Task CheckForUpdatesAsync()
+		public async Task CheckForUpdatesAsync()
 		{
-			// Upstream CDN self-update is disabled for NAI Files. Updates are installed
-			// manually from the NAI Files download domain once it is published.
-			IsUpdateAvailable = false;
-			return Task.CompletedTask;
+			try
+			{
+				using var response = await _client.GetAsync(Constants.ExternalUrl.UpdateFeedUrl);
+				response.EnsureSuccessStatusCode();
+
+				await using var stream = await response.Content.ReadAsStreamAsync();
+				var document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+				if (!Version.TryParse((string?)document.Root?.Attribute("Version"), out var availableVersion))
+				{
+					IsUpdateAvailable = false;
+					return;
+				}
+
+				var updateAvailable = availableVersion > PackageVersion;
+				MainWindow.Instance.DispatcherQueue.TryEnqueue(() => IsUpdateAvailable = updateAvailable);
+			}
+			catch (Exception ex)
+			{
+				Logger?.LogWarning(ex, "Unable to check the NAI Files update feed.");
+				IsUpdateAvailable = false;
+			}
 		}
 		public async Task CheckAndUpdateFilesLauncherAsync()
 		{
@@ -133,10 +148,45 @@ namespace Files.App.Services
 			AreReleaseNotesAvailable = false;
 			return Task.CompletedTask;
 		}
-		private Task ApplyPackageUpdateAsync()
+		private async Task ApplyPackageUpdateAsync()
 		{
-			// Sideload self-update removed for the NAI_Files fork.
-			return Task.CompletedTask;
+			if (!IsUpdateAvailable)
+				return;
+
+			IsUpdating = true;
+			try
+			{
+				AppLifecycleHelper.SaveSessionTabs();
+				PInvoke.RegisterApplicationRestart(null, (REGISTER_APPLICATION_RESTART_FLAGS)0);
+
+				var packageManager = new PackageManager();
+				await Task.Run(async () =>
+				{
+					var deployment = packageManager.AddPackageByAppInstallerFileAsync(
+						new Uri(Constants.ExternalUrl.UpdateFeedUrl),
+						AddPackageByAppInstallerOptions.ForceTargetAppShutdown,
+						packageManager.GetDefaultPackageVolume());
+
+					deployment.Progress = (_, progress) =>
+					{
+						MainWindow.Instance.DispatcherQueue.TryEnqueue(() => UpdateProgress = (int)progress.percentage);
+					};
+
+					var result = await deployment;
+					if (result.ExtendedErrorCode is not null)
+						Logger?.LogError($"Update failed: {result.ErrorText} ({result.ExtendedErrorCode})");
+				});
+			}
+			catch (Exception ex)
+			{
+				Logger?.LogError(ex, "Unable to install the NAI Files update.");
+			}
+			finally
+			{
+				IsUpdating = false;
+				IsUpdateAvailable = false;
+				UpdateProgress = 0;
+			}
 		}
 		public void Dispose()
 		{
