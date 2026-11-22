@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--  Copyright (c) Files Community. Licensed under the MIT License.  -->
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10" xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4" xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3" xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4" xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5" xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10" IgnorableNamespaces="mp rescap desktop desktop4 desktop6 uap uap5 virtualization">
-  <Identity Name="FilesDev" Publisher="CN=NAI OS, O=NANOTRIK.AI" Version="4.3.0.172" />
+  <Identity Name="NAI.Files" Publisher="CN=NAI OS, O=NANOTRIK.AI" Version="4.3.0.172" />
   <Properties>
     <DisplayName>ms-resource:NaiProductName</DisplayName>
     <PublisherDisplayName>NAI OS</PublisherDisplayName>
@@ -69,8 +69,8 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$" desktop4:SupportsMultipleInstances="true">
-      <uap:VisualElements DisplayName="ms-resource:NaiProductName" Description="Organize your files and folders easily. Robust multitasking experiences, helpful tags, and deep integrations add to an intuitive design, made by the community." Square150x150Logo="Assets\AppTiles\Dev\Square150x150Logo.png" Square44x44Logo="Assets\AppTiles\Dev\Square44x44Logo.png" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\AppTiles\Dev\Wide310x150Logo.png" Square71x71Logo="Assets\AppTiles\Dev\Small71x71Logo.png" Square310x310Logo="Assets\AppTiles\Dev\Large310x310Logo.png" ShortName="Files - Dev">
+      <uap:VisualElements DisplayName="ms-resource:NaiProductName" Description="NAI Files is a personal WinUI 3 file manager for NAI OS." Square150x150Logo="Assets\AppTiles\Dev\Square150x150Logo.png" Square44x44Logo="Assets\AppTiles\Dev\Square44x44Logo.png" BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\AppTiles\Dev\Wide310x150Logo.png" Square71x71Logo="Assets\AppTiles\Dev\Small71x71Logo.png" Square310x310Logo="Assets\AppTiles\Dev\Large310x310Logo.png" ShortName="NAI Files">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo" />
             <uap:ShowOn Tile="wide310x150Logo" />

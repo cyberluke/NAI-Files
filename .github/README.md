@@ -8,6 +8,7 @@ integration.
 
 <p align="center">
   <a href="https://github.com/cyberluke/NAI-Files">Source</a> ·
+  <a href="https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller">Download</a> ·
   <a href="https://revolut.me/lukalita">Donate</a> ·
   <a href="#license">License</a>
 </p>
@@ -102,15 +103,19 @@ rename, and the rest of the file manager feature set remain available.
 ## Install
 
 NAI Files is distributed as a signed MSIX and built from source. It is not on
-the Microsoft Store and does not run an automatic updater; updates are manual.
+the Microsoft Store. Updates come from the signed NAI Files feed through
+Windows App Installer and the in-app updater.
 
-1. Build the package (below), or install a signed MSIX from the NAI Files
-   download domain (Cloudflare R2; the public link will be added here).
+[<img src="./assets/download.svg" alt="Download NAI Files">](https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller)
+
+1. Install the signed package from
+   [updates.nanotrik.ai](https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller),
+   or build it below.
 2. Trust the certificate used to sign the package.
-3. Install it:
+3. Install a built package:
 
 ```powershell
-Add-AppxPackage -Path .\Files.App_<version>_x64_Debug.msix
+Add-AppxPackage -Path .\NAI-Files_<version>_x64.msixbundle
 ```
 
 ## Build from source
