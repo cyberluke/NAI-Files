@@ -103,6 +103,24 @@ In the event that we accidentally failed to list a required notice, please bring
   Igor Pavlov
 ```
 
+## FFmpeg
+
+**Version**: FFmpeg 9.0.2-essentials_build (gyan.dev)
+**Source**: [https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz](https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz)
+**Build**: [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/)
+
+NAI Files bundles this FFmpeg executable for local media operations in the NAI Media Lab. FFmpeg runs as a separate process and is not linked into the NAI Files assemblies.
+
+Copyright (c) 2000-2026 the FFmpeg developers.
+
+### License
+
+This build is configured with `--enable-gpl --enable-version3` and is licensed under the **GNU General Public License version 3 (GPLv3)**. It includes GPL components such as x264 and x265. The GPL applies to the bundled FFmpeg executable; the NAI Files source remains under its own MIT and MPL licenses.
+
+FFmpeg is a trademark of [Fabrice Bellard](http://www.bellard.org), originator of the FFmpeg project.
+
+GPLv3 text: [https://www.gnu.org/licenses/gpl-3.0.txt](https://www.gnu.org/licenses/gpl-3.0.txt)
+
 ## LiteDB
 
 **Source**: [https://github.com/mbdavid/LiteDB](https://github.com/mbdavid/LiteDB)
