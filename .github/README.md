@@ -7,6 +7,12 @@ integration.
 > NAI Files is a personal project. It is not affiliated with Microsoft.
 
 <p align="center">
+  <a href="https://github.com/cyberluke/NAI-Files">Source</a> ·
+  <a href="https://revolut.me/lukalita">Donate</a> ·
+  <a href="#license">License</a>
+</p>
+
+<p align="center">
   <img alt="NAI Files Pulse view" src="./assets/pulse.webp" />
 </p>
 
@@ -154,6 +160,22 @@ Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
 - Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security: [SECURITY.md](SECURITY.md)
 - Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+## ❤️ Support Independent Development
+
+NAI Files is independently developed and open source.
+
+If you enjoy my projects and would like to support their continued development, voluntary donations are always appreciated.
+
+[☕ Donate via Revolut](https://revolut.me/lukalita)
+
+<a href="https://revolut.me/lukalita">
+  <img src="../assets/revolut-qr.png" width="160" alt="Scan to donate via Revolut">
+</a>
+
+Scan the QR code or use the link above to make a one-time donation.
+
+Every contribution helps. Thank you for your support! 🧪
 
 ## License
 
