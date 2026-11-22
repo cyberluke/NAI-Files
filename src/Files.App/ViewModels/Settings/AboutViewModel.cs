@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Win32;
+using System.ComponentModel;
 using System.Windows.Input;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
@@ -18,6 +19,7 @@ namespace Files.App.ViewModels.Settings
 		// Dependency injections
 
 		private IGeneralSettingsService GeneralSettingsService { get; } = Ioc.Default.GetRequiredService<IGeneralSettingsService>();
+		private IUpdateService UpdateService { get; } = Ioc.Default.GetRequiredService<IUpdateService>();
 
 
 		// Properties
@@ -33,11 +35,32 @@ namespace Files.App.ViewModels.Settings
 
 		public ObservableCollection<OpenSourceLibraryItem> OpenSourceLibraries { get; }
 
+		public bool IsUpdateAvailable => UpdateService.IsUpdateAvailable;
+
+		public bool IsUpdating => UpdateService.IsUpdating;
+
+		public string UpdateHeader
+			=> IsUpdateAvailable ? Strings.UpdateNow.GetLocalizedResource() : Strings.CheckForUpdates.GetLocalizedResource();
+
+		public string UpdateStatus
+		{
+			get
+			{
+				if (IsUpdating)
+					return string.Format("{0} {1}%", Strings.Updating.GetLocalizedResource(), UpdateService.UpdateProgress);
+
+				return IsUpdateAvailable
+					? Strings.UpdateAvailable.GetLocalizedResource()
+					: Strings.UpToDate.GetLocalizedResource();
+			}
+		}
+
 		// Commands
 
 		public ICommand CopyAppVersionCommand { get; }
 		public ICommand CopyWindowsVersionCommand { get; }
 		public ICommand CopyUserIDCommand { get; }
+		public ICommand UpdateCommand { get; }
 		// Sponsor link removed (NAI_Files fork).
 		public ICommand OpenLogLocationCommand { get; }
 		public ICommand OpenDocumentationCommand { get; }
@@ -80,6 +103,8 @@ namespace Files.App.ViewModels.Settings
 			CopyAppVersionCommand = new RelayCommand(CopyAppVersion);
 			CopyWindowsVersionCommand = new RelayCommand(CopyWindowsVersion);
 			CopyUserIDCommand = new RelayCommand(CopyUserID);
+			UpdateCommand = new AsyncRelayCommand(UpdateAsync);
+			UpdateService.PropertyChanged += UpdateService_PropertyChanged;
 			// SupportUsCommand removed (NAI_Files fork).
 			OpenDocumentationCommand = new AsyncRelayCommand(DoOpenDocumentation);
 			SubmitFeatureRequestCommand = new AsyncRelayCommand(DoSubmitFeatureRequest);
@@ -90,6 +115,25 @@ namespace Files.App.ViewModels.Settings
 		}
 
 		// Methods
+
+		private async Task UpdateAsync()
+		{
+			if (UpdateService.IsUpdating)
+				return;
+
+			if (UpdateService.IsUpdateAvailable)
+				await UpdateService.DownloadUpdatesAsync();
+			else
+				await UpdateService.CheckForUpdatesAsync();
+		}
+
+		private void UpdateService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			OnPropertyChanged(nameof(IsUpdateAvailable));
+			OnPropertyChanged(nameof(IsUpdating));
+			OnPropertyChanged(nameof(UpdateHeader));
+			OnPropertyChanged(nameof(UpdateStatus));
+		}
 
 		private async Task<bool> OpenLogLocation()
 		{

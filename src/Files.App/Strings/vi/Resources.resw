@@ -4911,4 +4911,9 @@
   <data name="NaiSemanticResults" xml:space="preserve"><value>Theo độ liên quan NPU: {0} kết quả · {1} tài liệu hiện hành · loại {2} tài liệu cũ/không khả dụng</value></data>
   <data name="NaiSemanticEvidence" xml:space="preserve"><value>Điểm rerank {0:F4} · lập chỉ mục {1} · đoạn đã lưu, không phải đọc mới tài liệu</value></data>
   <data name="NaiSemanticFullResults" xml:space="preserve"><value>Mở kết quả trong Files</value></data>
+  <data name="CheckForUpdates" xml:space="preserve"><value>Kiểm tra cập nhật</value></data>
+  <data name="UpdateNow" xml:space="preserve"><value>Cập nhật ngay</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Có bản cập nhật.</value></data>
+  <data name="UpToDate" xml:space="preserve"><value>Bạn đang dùng bản mới nhất.</value></data>
+  <data name="Updating" xml:space="preserve"><value>Đang cập nhật</value></data>
 </root>

@@ -47,6 +47,23 @@
 				</Button>
 			</wctcontrols:SettingsCard>
 
+			<!--  Updates  -->
+			<wctcontrols:SettingsCard
+				HorizontalAlignment="Stretch"
+				Command="{x:Bind ViewModel.UpdateCommand}"
+				Description="{x:Bind ViewModel.UpdateStatus, Mode=OneWay}"
+				Header="{x:Bind ViewModel.UpdateHeader, Mode=OneWay}"
+				IsClickEnabled="True"
+				IsEnabled="{x:Bind ViewModel.IsUpdating, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+				<wctcontrols:SettingsCard.HeaderIcon>
+					<FontIcon Glyph="&#xE895;" />
+				</wctcontrols:SettingsCard.HeaderIcon>
+
+				<wctcontrols:SettingsCard.ActionIcon>
+					<FontIcon Glyph="&#xE896;" />
+				</wctcontrols:SettingsCard.ActionIcon>
+			</wctcontrols:SettingsCard>
+
 			<!--  Sponsor link removed (NAI_Files fork).  -->
 
 

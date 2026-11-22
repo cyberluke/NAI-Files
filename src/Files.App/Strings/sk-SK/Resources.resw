@@ -4930,4 +4930,9 @@
   <data name="DialogFolderMissing" xml:space="preserve"><value>Priečinok nie je dostupný: {0}</value></data>
   <data name="DialogAccessDenied" xml:space="preserve"><value>Prístup odmietnutý: {0}</value></data>
   <data name="DialogTypeMismatch" xml:space="preserve"><value>Súbor nezodpovedá vybranému typu: {0}</value></data>
+  <data name="CheckForUpdates" xml:space="preserve"><value>Skontrolovať aktualizácie</value></data>
+  <data name="UpdateNow" xml:space="preserve"><value>Aktualizovať</value></data>
+  <data name="UpdateAvailable" xml:space="preserve"><value>Je dostupná aktualizácia.</value></data>
+  <data name="UpToDate" xml:space="preserve"><value>Máte najnovšiu verziu.</value></data>
+  <data name="Updating" xml:space="preserve"><value>Aktualizuje sa</value></data>
 </root>
