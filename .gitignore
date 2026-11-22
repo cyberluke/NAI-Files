@@ -414,3 +414,6 @@ src/Files.App/Assets/FilesOpenDialog/Files.App.Launcher.exe.sha256
 src/Files.App/ffmpeg/
 # Bundled Demucs 4 runtime: staged from the NAI OS checkout by build-files-app.ps1, never committed
 src/Files.App/demucs/
+
+# Local Cloudflare R2 upload script (credentials / machine-specific settings)
+scripts/Upload-R2.ps1
