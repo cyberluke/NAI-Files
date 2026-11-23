@@ -259,7 +259,7 @@ namespace Files.App
 				"FilesStable", // sideload stable
 				"FilesPreview", // sideload preview
 				"49306atecsolution.FilesPreview", // store preview
-				"FilesDev", // dev
+				"NAI.Files", // NAI production identity
 			};
 		}
 

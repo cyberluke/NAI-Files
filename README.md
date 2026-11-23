@@ -102,21 +102,14 @@ rename, and the rest of the file manager feature set remain available.
 
 ## Install
 
-NAI Files is distributed as a signed MSIX and built from source. It is not on
-the Microsoft Store. Updates come from the signed NAI Files feed through
+NAI Files is distributed as a signed MSIX and built from source. Updates come from the signed NAI Files feed through
 Windows App Installer and the in-app updater.
 
-[<img src="./assets/download.svg" alt="Download NAI Files">](https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller)
+[<img src="./assets/download.svg" alt="Download NAI Files">](https://updates.nanotrik.ai/NAI-Files/NAI-Files-Setup-4.3.0.172.exe)
 
 1. Install the signed package from
-   [updates.nanotrik.ai](https://updates.nanotrik.ai/NAI-Files/NAI-Files.appinstaller),
+   [NANOTRIK.AI](https://updates.nanotrik.ai/NAI-Files/NAI-Files-Setup-4.3.0.172.exe),
    or build it below.
-2. Trust the certificate used to sign the package.
-3. Install a built package:
-
-```powershell
-Add-AppxPackage -Path .\NAI-Files_<version>_x64.msixbundle
-```
 
 ## Build from source
 
@@ -158,13 +151,29 @@ Sign the produced `.msix` with your certificate, then `Add-AppxPackage` it.
 - `.github/` — workflows and community documents.
 - `AGENTS.md` — development and agent guidelines.
 
+## Part of NAI OS
+
+<p align="center">
+  <a href="https://github.com/cyberluke/NAI-OS">
+    <img src="./assets/nai-os-logo.png" alt="NAI OS" width="420">
+  </a>
+</p>
+
+NAI Files is part of **[NAI OS](https://github.com/cyberluke/NAI-OS)** — the NANOTRIK.AI desktop environment — and ships as its file manager.
+
+<p align="center">
+  <a href="https://updates.nanotrik.ai/NAI-Files/NAI-Files-Setup-4.3.0.172.exe">
+    <img src="./assets/download.svg" alt="Download NAI Files" height="28">
+  </a>
+</p>
+
 ## Contributing
 
 - Bugs and feature requests:
   [issues](https://github.com/cyberluke/NAI-Files/issues)
-- Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Security: [SECURITY.md](SECURITY.md)
-- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Guidelines: [CONTRIBUTING.md](.github/CONTRIBUTING.md)
+- Security: [SECURITY.md](.github/SECURITY.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md)
 
 ## ❤️ Support Independent Development
 
@@ -175,7 +184,7 @@ If you enjoy my projects and would like to support their continued development, 
 [☕ Donate via Revolut](https://revolut.me/lukalita)
 
 <a href="https://revolut.me/lukalita">
-  <img src="../assets/revolut-qr.png" width="160" alt="Scan to donate via Revolut">
+  <img src="./assets/revolut-qr.png" width="160" alt="Scan to donate via Revolut">
 </a>
 
 Scan the QR code or use the link above to make a one-time donation.
@@ -186,4 +195,4 @@ Every contribution helps. Thank you for your support! 🧪
 
 NAI Files is distributed under the MIT license (`LICENSE-MIT`); some components
 are under the MPL (`LICENSE-MPL`). Third-party notices are in
-[NOTICE.md](NOTICE.md).
+[NOTICE.md](.github/NOTICE.md).

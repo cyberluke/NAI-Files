@@ -119,10 +119,15 @@ namespace Files.App.Services.Pulse.MediaLab
 					["bwdif"], h264,
 					[.. videoHead, "-vf", "bwdif", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
 
-				Produce("video.hdr", "Tone map", "HDR roll-off / tone mapping (hable).",
+				Produce("video.hdr", "Tone map HDR → SDR", "HDR (PQ/HLG) → BT.709 with a hable roll-off.",
 					MediaKind.Video, MediaLabGroup.Enhance, "tonemapped", ".mp4",
-					["tonemap"], h264,
-					[.. videoHead, "-vf", "format=gbrpf32le,tonemap=hable:desat=0,format=yuv420p", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
+					["zscale", "tonemap"], h264,
+					[.. videoHead, "-vf", "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p", "-c:v", "libx264", "-crf", "20", "-c:a", "copy"]),
+
+				Produce("video.hdr10", "HDR10 upconvert", "BT.709 SDR → BT.2020/PQ HDR10 container (100-nit white; no invented highlights).",
+					MediaKind.Video, MediaLabGroup.Enhance, "hdr10", ".mp4",
+					["zscale"], ["libx265"],
+					[.. videoHead, "-vf", "zscale=pin=bt709:tin=bt709:min=bt709:rin=tv:p=bt2020:t=smpte2084:m=bt2020nc:r=limited:npl=100,format=yuv420p10le", "-c:v", "libx265", "-crf", "20", "-x265-params", "hdr-opt=1:repeat-headers=1:colorprim=bt2020:transfer=smpte2084:colormatrix=bt2020nc:master-display=G(13250,34500)B(7500,3000)R(34000,16000)WP(15635,16450)L(10000000,1):max-cll=100,100", "-color_primaries", "bt2020", "-color_trc", "smpte2084", "-colorspace", "bt2020nc", "-color_range", "tv", "-c:a", "copy"]),
 
 				Produce("video.deband", "Deband", "Remove banding in gradients (deband).",
 					MediaKind.Video, MediaLabGroup.Enhance, "debanded", ".mp4",

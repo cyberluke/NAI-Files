@@ -1,10 +1,10 @@
 param([string]$ExpectedVersion, [ValidateSet("open", "save", "cancel")][string]$Mode = "open", [string]$InitialDirectory, [switch]$AllowDesktopUI)
 $ErrorActionPreference = "Stop"
 if (-not $AllowDesktopUI) { throw "This tracer opens desktop windows. Run only in an isolated desktop or with explicit approval and -AllowDesktopUI." }
-$package = Get-AppxPackage -Name FilesDev
-if (-not $package) { throw "FilesDev is not registered." }
+$package = Get-AppxPackage -Name NAI.Files
+if (-not $package) { throw "NAI Files is not registered." }
 if ($ExpectedVersion -and [string]$package.Version -ne $ExpectedVersion) {
-    throw "Expected Files $ExpectedVersion, registered package is $($package.Version)."
+    throw "Expected NAI Files $ExpectedVersion, registered package is $($package.Version)."
 }
 
 $request = Join-Path ([IO.Path]::GetTempPath()) ("nai-dialog-" + [guid]::NewGuid().ToString("N") + ".txt")
