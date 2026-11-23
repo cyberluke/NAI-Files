@@ -12,6 +12,10 @@ param(
     [Parameter(Mandatory)]
     [string]$BundleName,
 
+    # Appended to the published version folder, e.g. "_test" for a pre-release feed.
+    # Leave empty for public releases so the folder is just {Version}.
+    [string]$FolderSuffix = "",
+
     [string]$Version = "",
 
     [string]$PackageManifestPath = "",
@@ -87,22 +91,23 @@ if ($LASTEXITCODE -ne 0) {
 Remove-Item $mappingDir -Recurse -Force
 Write-Host "Successfully created: $bundlePath"
 
-# --- Reorganize into WAP-compatible folder structure for CDN upload ---
-# Target layout: {BundleName}_{Version}_Test/{BundleName}_{Version}_{platforms}.msixbundle
-#                {BundleName}_{Version}_Test/Dependencies/{arch}/...
+# --- Reorganize into WAP-compatible publish layout for CDN upload ---
+# Target layout: {AppInstallerUri}{Version}{FolderSuffix}/{BundleName}.{platforms}.msixbundle
+#                {AppInstallerUri}Dependencies/{arch}/...
+# Versioned files are write-once; shared dependencies live outside the version folder.
 
-$bundleFolder = "${BundleName}_${Version}_Test"
+$bundleFolder = "${Version}${FolderSuffix}"
 $bundleFolderPath = Join-Path $AppxPackageDir $bundleFolder
 Ensure-Directory $bundleFolderPath
 
-$organizedBundleName = "${BundleName}_${Version}_${platforms}.msixbundle"
+$organizedBundleName = "${BundleName}.msixbundle"
 $organizedBundlePath = Join-Path $bundleFolderPath $organizedBundleName
 Move-Item $bundlePath $organizedBundlePath -Force
 Write-Host "Moved bundle to: $organizedBundlePath"
 
 # --- Merge dependency folders from each per-platform build ---
 
-$organizedDepsDir = Join-Path $bundleFolderPath "Dependencies"
+$organizedDepsDir = Join-Path $AppxPackageDir "Dependencies"
 foreach ($msix in $msixFiles) {
     $perPlatDepsDir = Join-Path $msix.DirectoryName "Dependencies"
     if (-not (Test-Path $perPlatDepsDir)) { continue }
@@ -236,7 +241,7 @@ if ($AppInstallerUri -ne "" -and ($BuildMode -eq "Sideload" -or $BuildMode -eq "
 
             $arch = $id.GetAttribute("ProcessorArchitecture")
             if ([string]::IsNullOrEmpty($arch)) { $arch = $depArch }
-            $depUri = "${AppInstallerUri}${bundleFolder}/Dependencies/$depArch/$($_.Name)"
+            $depUri = "${AppInstallerUri}Dependencies/$depArch/$($_.Name)"
 
             $dependencyEntries += @"
 
